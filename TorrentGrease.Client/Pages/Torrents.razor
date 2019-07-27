@@ -1,0 +1,39 @@
+﻿@page "/torrents"
+@using TorrentGrease.Shared.TorrentClient
+@inject HttpClient Http
+
+<h1>Torrents</h1>
+
+@if (torrents == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var torrent in torrents)
+            {
+                <tr>
+                    <td>@torrent.Name</td>
+                    <td>@torrent.SizeInGB.ToString("N2") GB</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@functions {
+    IEnumerable<Torrent> torrents;
+
+    protected override async Task OnInitAsync()
+    {
+        torrents = await Http.GetJsonAsync<IEnumerable<Torrent>>("api/Torrent/All");
+    }
+}

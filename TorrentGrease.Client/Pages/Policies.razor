@@ -1,0 +1,37 @@
+﻿@page "/"
+@using TorrentGrease.Shared
+@inject HttpClient Http
+
+<h1>Policies</h1>
+
+@if (policies == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table" id="policies-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var policy in policies)
+            {
+                <tr>
+                    <td>@policy.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@functions {
+    IEnumerable<Policy> policies;
+
+    protected override async Task OnInitAsync()
+    {
+        policies = await Http.GetJsonAsync<IEnumerable<Policy>>("api/Policy/All");
+    }
+}

@@ -1,0 +1,39 @@
+version: '3.4'
+
+services:
+  torrentgrease.server:
+    image: ${DOCKER_REGISTRY-}torrentgreaseserver
+    build:
+      context: ..
+      dockerfile: TorrentGrease.Server/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - TORRENTCLIENT__USERNAME=usr
+      - TORRENTCLIENT__PASSWORD=pwd
+    volumes:
+      - torrent-grease-data:/app/data
+    ports:
+      - 5656:5656
+      
+  transmission: #username = usr, password = pwd
+    image: linuxserver/transmission:2.94-r1-ls14
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - transmission-data:/config
+      - ./transmission/settings.json:/config/settings.json
+    ports:
+      - 9091:9091
+
+  #for ui testing. see also https://github.com/SeleniumHQ/docker-selenium#debugging
+  selenium-firefox-standalone:
+    image: selenium/standalone-firefox:3.141.59-palladium
+    shm_size: '2gb'
+    ports:
+      - 4444:4444
+
+volumes:
+  torrent-grease-data:
+  transmission-data:

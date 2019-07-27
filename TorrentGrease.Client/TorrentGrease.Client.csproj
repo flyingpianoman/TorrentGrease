@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RestoreAdditionalProjectSources>
+      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
+      https://dotnet.myget.org/F/blazor-dev/api/v3/index.json;
+    </RestoreAdditionalProjectSources>
+    <LangVersion>7.3</LangVersion>
+    <RazorLangVersion>3.0</RazorLangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.0.0-preview6.19307.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="3.0.0-preview6.19307.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TorrentGrease.Shared\TorrentGrease.Shared.csproj" />
+  </ItemGroup>
+
+  <!--Fix for https://github.com/aspnet/AspNetCore/issues/9704 -->
+  <Target Name="FixBlazorConfigForDockerDebug" AfterTargets="GenerateBlazorMetadataFile" Condition="'$(Configuration)' == 'Debug'">
+    <WriteLinesToFile File="$(BlazorMetadataFilePath)" Lines="/TorrentGrease.Client/TorrentGrease.Client.csproj" Overwrite="true" Encoding="Unicode" />
+    <WriteLinesToFile File="$(BlazorMetadataFilePath)" Lines="/TorrentGrease.Client/bin/Debug/netstandard2.0/$(AssemblyName).dll" Overwrite="false" Encoding="Unicode" />
+    <WriteLinesToFile File="$(BlazorMetadataFilePath)" Condition="'$(BlazorRebuildOnFileChange)'=='true'" Lines="autorebuild:true" Overwrite="false" Encoding="Unicode" />
+    <WriteLinesToFile File="$(BlazorMetadataFilePath)" Condition="'$(BlazorEnableDebugging)'=='true'" Lines="debug:true" Overwrite="false" Encoding="Unicode" />
+  </Target>
+
+</Project>

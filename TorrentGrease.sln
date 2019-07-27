@@ -1,0 +1,80 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28902.138
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.Server", "TorrentGrease.Server\TorrentGrease.Server.csproj", "{10148FE4-898D-480B-9518-D89CEE68FE77}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.Client", "TorrentGrease.Client\TorrentGrease.Client.csproj", "{85AADD96-5758-4963-9927-2B7B858B5349}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.Shared", "TorrentGrease.Shared\TorrentGrease.Shared.csproj", "{018DF2E5-8CD8-4D54-BFA3-E031D7E5CCFB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTest", "IntegrationTest\IntegrationTest.csproj", "{7C78F899-4FDE-46F8-A6C6-C84BE532BF84}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3801D652-94FE-4BE9-BA0F-D13494447775}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		CONTRIBUTING.md = CONTRIBUTING.md
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.Data", "TorrentGrease.Data\TorrentGrease.Data.csproj", "{004A81A0-C48B-49B0-8B51-CF78530FFB9D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{F310946E-72DB-4B3A-88E1-8890681D2702}"
+	ProjectSection(SolutionItems) = preProject
+		.config\dotnet-tools.json = .config\dotnet-tools.json
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecificationTest", "SpecificationTest\SpecificationTest.csproj", "{ABF44A26-15BA-44B3-83E4-0AC252E68DD5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.TorrentClient", "TorrentGrease.TorrentClient\TorrentGrease.TorrentClient.csproj", "{FB6973EC-C02F-48F3-AAEB-382CB45AA81F}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose\docker-compose.dcproj", "{22A80331-CC3D-48FF-8837-B1AE8EC8C34B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{10148FE4-898D-480B-9518-D89CEE68FE77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10148FE4-898D-480B-9518-D89CEE68FE77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10148FE4-898D-480B-9518-D89CEE68FE77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10148FE4-898D-480B-9518-D89CEE68FE77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85AADD96-5758-4963-9927-2B7B858B5349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85AADD96-5758-4963-9927-2B7B858B5349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85AADD96-5758-4963-9927-2B7B858B5349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85AADD96-5758-4963-9927-2B7B858B5349}.Release|Any CPU.Build.0 = Release|Any CPU
+		{018DF2E5-8CD8-4D54-BFA3-E031D7E5CCFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{018DF2E5-8CD8-4D54-BFA3-E031D7E5CCFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{018DF2E5-8CD8-4D54-BFA3-E031D7E5CCFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{018DF2E5-8CD8-4D54-BFA3-E031D7E5CCFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C78F899-4FDE-46F8-A6C6-C84BE532BF84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C78F899-4FDE-46F8-A6C6-C84BE532BF84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C78F899-4FDE-46F8-A6C6-C84BE532BF84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C78F899-4FDE-46F8-A6C6-C84BE532BF84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{004A81A0-C48B-49B0-8B51-CF78530FFB9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{004A81A0-C48B-49B0-8B51-CF78530FFB9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{004A81A0-C48B-49B0-8B51-CF78530FFB9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{004A81A0-C48B-49B0-8B51-CF78530FFB9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABF44A26-15BA-44B3-83E4-0AC252E68DD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABF44A26-15BA-44B3-83E4-0AC252E68DD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABF44A26-15BA-44B3-83E4-0AC252E68DD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABF44A26-15BA-44B3-83E4-0AC252E68DD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB6973EC-C02F-48F3-AAEB-382CB45AA81F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB6973EC-C02F-48F3-AAEB-382CB45AA81F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB6973EC-C02F-48F3-AAEB-382CB45AA81F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB6973EC-C02F-48F3-AAEB-382CB45AA81F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22A80331-CC3D-48FF-8837-B1AE8EC8C34B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22A80331-CC3D-48FF-8837-B1AE8EC8C34B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22A80331-CC3D-48FF-8837-B1AE8EC8C34B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22A80331-CC3D-48FF-8837-B1AE8EC8C34B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {38501AB9-3526-48FC-A277-94BD822238E4}
+	EndGlobalSection
+EndGlobal

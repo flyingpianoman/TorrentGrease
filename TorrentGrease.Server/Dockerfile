@@ -19,7 +19,7 @@ WORKDIR "/src/TorrentGrease.Server"
 RUN dotnet build "TorrentGrease.Server.csproj" -c Release -o /app -p:Version=${VERSION}
 
 FROM build AS publish
-RUN dotnet publish "TorrentGrease.Server.csproj" -c Release -o /app
+RUN dotnet publish "TorrentGrease.Server.csproj" -c Release -o /app -p:Version=${VERSION}
 
 #Temp fix for https://github.com/aspnet/Blazor/issues/376
 RUN cp -rf /src/TorrentGrease.Client/dist_wwwroot/* /app/dist

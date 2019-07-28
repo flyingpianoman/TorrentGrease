@@ -12,7 +12,7 @@ steps:
   displayName: Docker build
   inputs:
     containerRegistry: 'Dockerhub'
-    repository: 'TorrentGrease'
+    repository: 'torrent-grease'
     command: 'build'
     Dockerfile: 'TorrentGrease.Server/Dockerfile'
     buildContext: '.'
@@ -24,7 +24,7 @@ steps:
   displayName: Docker push
   inputs:
     containerRegistry: 'Dockerhub'
-    repository: 'TorrentGrease'
+    repository: 'torrent-grease'
     command: 'push'
     tags: |
       $(GitVersion.NugetVersion)

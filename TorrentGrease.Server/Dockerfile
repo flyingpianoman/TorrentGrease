@@ -19,6 +19,7 @@ WORKDIR "/src/TorrentGrease.Server"
 RUN dotnet build "TorrentGrease.Server.csproj" -c Release -o /app -p:Version=${VERSION}
 
 FROM build AS publish
+ARG VERSION=0.1.0-devbuild
 RUN dotnet publish "TorrentGrease.Server.csproj" -c Release -o /app -p:Version=${VERSION}
 
 #Temp fix for https://github.com/aspnet/Blazor/issues/376

@@ -18,7 +18,7 @@ steps:
     command: 'build'
     Dockerfile: 'TorrentGrease.Server/Dockerfile'
     buildContext: '.'
-    arguments: --build-arg VERSION=$(GitVersion.NugetVersion)
+    arguments: '--build-arg VERSION=$(GitVersion.NugetVersion)'
     tags: |
       $(GitVersion.NugetVersion)
       latest

@@ -23,6 +23,13 @@ steps:
       $(GitVersion.NugetVersion)
       latest
 
+- task: BuildQualityChecks@6
+  inputs:
+    checkWarnings: true
+    warningFailOption: 'fixed'
+    warningThreshold: '0'
+    warningFilters: '[wW]arning'
+
 - task: Docker@2
   displayName: Docker push
   inputs:

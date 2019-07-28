@@ -9,17 +9,19 @@ steps:
   displayName: GitVersion
 
 - task: Docker@2
+  displayName: Docker build
   inputs:
     containerRegistry: 'Dockerhub'
     repository: 'TorrentGrease'
     command: 'build'
     Dockerfile: 'TorrentGrease.Server/Dockerfile'
-    buildContext: 'TorrentGrease.Server'
+    buildContext: '.'
     tags: |
       $(GitVersion.NugetVersion)
       latest
 
 - task: Docker@2
+  displayName: Docker push
   inputs:
     containerRegistry: 'Dockerhub'
     repository: 'TorrentGrease'

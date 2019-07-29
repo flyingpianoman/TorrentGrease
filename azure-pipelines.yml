@@ -10,6 +10,13 @@ steps:
     runtime: 'core'
     configFilePath: './GitVersion.yml'
 
+- task: UseDotNet@2
+  displayName: Install dotnet 3.0 preview 7 sdk
+  inputs:
+    packageType: 'sdk'
+    version: '3.0.100-preview7-012821'
+    includePreviewVersions: true
+
 - task: Docker@2
   displayName: Docker build
   inputs:

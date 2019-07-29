@@ -10,14 +10,15 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using TechTalk.SpecFlow;
 using TorrentGrease.TorrentClient;
 using TorrentGrease.TorrentClient.Hosting;
 using TorrentGrease.TorrentClient.Transmission;
 
-namespace SpecificationTest
+namespace SpecificationTest.Hooks
 {
-    [TestClass]
-    public class AssemblyInitialize
+    [Binding]
+    public class WaitForServicesHooks
     {
         private readonly static AsyncPolicyWrap _WaitForHealthyPolicy = Policy
             .Handle<HttpRequestException>()
@@ -26,15 +27,13 @@ namespace SpecificationTest
                 retryDelay: TimeSpan.FromMilliseconds(100),
                 timeout: TimeSpan.FromSeconds(10));
 
-        [AssemblyInitialize]
-#pragma warning disable IDE0060 // Remove unused parameter
-        public static async Task AssemblyInitAsync(TestContext testContext)
+        [BeforeTestRun(Order = 1)]
+        public static async Task WaitForServices()
         {
             await Task.WhenAll(WaitForTransmissionAsync(),
                                WaitForTorrentGreaseAsync(),
                                WaitForSeleniumHubAsync());
         }
-#pragma warning restore IDE0060 // Remove unused parameter
 
         private static async Task WaitForTransmissionAsync()
         {
@@ -67,37 +66,45 @@ namespace SpecificationTest
 
         private static async Task WaitForTorrentGreaseAsync()
         {
-            using var httpClient = new HttpClient();
-            try
+            using (var httpClient = new HttpClient())
             {
-                await _WaitForHealthyPolicy.ExecuteAsync(async () =>
-                    {
-                        using var resp = await httpClient.GetAsync(TestSettings.TorrentGreaseExposedAddress + "/health").ConfigureAwait(false);
-                        resp.StatusCode.Should().Be(HttpStatusCode.OK);
-                    }).ConfigureAwait(false);
-            }
-            catch (Polly.Timeout.TimeoutRejectedException e)
-            {
-                throw new ApplicationException("Timed out while waiting on TorrentGrease", e);
+                try
+                {
+                    await _WaitForHealthyPolicy.ExecuteAsync(async () =>
+                        {
+                            using (var resp = await httpClient.GetAsync(TestSettings.TorrentGreaseExposedAddress + "/health").ConfigureAwait(false))
+                            {
+                                resp.StatusCode.Should().Be(HttpStatusCode.OK);
+                            }
+                        }).ConfigureAwait(false);
+                }
+                catch (Polly.Timeout.TimeoutRejectedException e)
+                {
+                    throw new ApplicationException("Timed out while waiting on TorrentGrease", e);
+                }
             }
         }
 
         private static async Task WaitForSeleniumHubAsync()
         {
-            using var httpClient = new HttpClient();
-            try
+            using (var httpClient = new HttpClient())
             {
-                await _WaitForHealthyPolicy.ExecuteAsync(async () =>
-                    {
-                        using var resp = await httpClient.GetAsync(TestSettings.SeleniumHubAddress + "/status").ConfigureAwait(false);
-                        resp.StatusCode.Should().Be(HttpStatusCode.OK);
-                        var statusJson = JObject.Parse(await resp.Content.ReadAsStringAsync());
-                        statusJson["value"]["ready"].Value<bool>().Should().BeTrue();
-                    }).ConfigureAwait(false);
-            }
-            catch (Polly.Timeout.TimeoutRejectedException e)
-            {
-                throw new ApplicationException("Timed out while waiting on SeleniumHub", e);
+                try
+                {
+                    await _WaitForHealthyPolicy.ExecuteAsync(async () =>
+                        {
+                            using (var resp = await httpClient.GetAsync(TestSettings.SeleniumHubAddress + "/status").ConfigureAwait(false))
+                            {
+                                resp.StatusCode.Should().Be(HttpStatusCode.OK);
+                                var statusJson = JObject.Parse(await resp.Content.ReadAsStringAsync());
+                                statusJson["value"]["ready"].Value<bool>().Should().BeTrue();
+                            }
+                        }).ConfigureAwait(false);
+                }
+                catch (Polly.Timeout.TimeoutRejectedException e)
+                {
+                    throw new ApplicationException("Timed out while waiting on SeleniumHub", e);
+                }
             }
         }
     }

@@ -21,12 +21,16 @@ namespace SpecificationTest.Pages.Components
         public Task InitializeAsync()
         {
             var href = _webElement.GetAttribute("href").Split('/').Last();
-            Target = href switch
+
+            switch (href)
             {
-                "" => NavMenuItemTarget.Policies,
-                "torrents" => NavMenuItemTarget.Policies,
-                _ => throw new InvalidOperationException($"Unknown nav item target href '{href}'"),
-            };
+                case "":
+                case "torrents":
+                    Target = NavMenuItemTarget.Policies;
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unknown nav item target href '{href}'");
+            }
 
             return Task.CompletedTask;
         }

@@ -14,7 +14,7 @@ namespace SpecificationTest.Hooks
     {
         private const string _ScreenShotDir = "screenshots";
 
-        [BeforeTestRun]
+        [BeforeTestRun(Order = 100)]
         public static void SetupWebDriver()
         {
             var capabilities = new OpenQA.Selenium.Firefox.FirefoxOptions().ToCapabilities();

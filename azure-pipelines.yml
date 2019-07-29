@@ -36,12 +36,13 @@ steps:
     containerregistrytype: 'Container Registry'
     dockerRegistryEndpoint: 'Dockerhub'
     dockerComposeFile: 'docker-compose/docker-compose.yml'
-    additionalDockerComposeFiles: 'docker-compose/docker-compose.ci.yml'
+    additionalDockerComposeFiles: 'docker-compose.ci.yml'
     dockerComposeFileArgs: 'VERSION=$(GitVersion.NugetVersion)'
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'up -d'
 
 - task: DotNetCoreCLI@2
+  displayName: dotnet test specification
   inputs:
     command: 'test'
     projects: 'Specification/Specification.csproj'
@@ -53,7 +54,7 @@ steps:
     containerregistrytype: 'Container Registry'
     dockerRegistryEndpoint: 'Dockerhub'
     dockerComposeFile: 'docker-compose/docker-compose.yml'
-    additionalDockerComposeFiles: 'docker-compose/docker-compose.ci.yml'
+    additionalDockerComposeFiles: 'docker-compose.ci.yml'
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'logs'
 

@@ -30,6 +30,33 @@ steps:
     warningThreshold: '0'
     warningFilters: '[wW]arning'
 
+- task: DockerCompose@0
+  displayName: Docker-compose up
+  inputs:
+    containerregistrytype: 'Container Registry'
+    dockerRegistryEndpoint: 'Dockerhub'
+    dockerComposeFile: 'docker-compose/docker-compose.yml'
+    additionalDockerComposeFiles: 'docker-compose/docker-compose.ci.yml'
+    dockerComposeFileArgs: 'VERSION=$(GitVersion.NugetVersion)'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'up -d'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    projects: 'Specification/Specification.csproj'
+    testRunTitle: 'Specification'
+
+- task: DockerCompose@0
+  displayName: Docker-compose logs
+  inputs:
+    containerregistrytype: 'Container Registry'
+    dockerRegistryEndpoint: 'Dockerhub'
+    dockerComposeFile: 'docker-compose/docker-compose.yml'
+    additionalDockerComposeFiles: 'docker-compose/docker-compose.ci.yml'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'logs'
+
 - task: Docker@2
   displayName: Docker push
   inputs:

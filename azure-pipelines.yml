@@ -42,11 +42,11 @@ steps:
     dockerComposeCommand: 'up -d'
 
 - task: DotNetCoreCLI@2
-  displayName: dotnet test specification
+  displayName: dotnet test SpecificationTest
   inputs:
     command: 'test'
-    projects: 'Specification/Specification.csproj'
-    testRunTitle: 'Specification'
+    projects: 'SpecificationTest/SpecificationTest.csproj'
+    testRunTitle: 'SpecificationTest'
 
 - task: DockerCompose@0
   displayName: Docker-compose logs

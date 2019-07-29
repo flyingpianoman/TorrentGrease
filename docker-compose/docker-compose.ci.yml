@@ -1,0 +1,5 @@
+version: '3.4'
+
+services:
+  torrentgrease.server:
+    image: flyingpianoman/torrent-grease:${VERSION:-version-not-supplied}

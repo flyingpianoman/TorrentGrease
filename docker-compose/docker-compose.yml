@@ -2,7 +2,6 @@ version: '3.4'
 
 services:
   torrentgrease.server:
-    image: ${DOCKER_REGISTRY-}torrentgreaseserver
     build:
       context: ..
       dockerfile: TorrentGrease.Server/Dockerfile

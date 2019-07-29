@@ -14,7 +14,7 @@ steps:
   displayName: Install dotnet 2.2 sdk
   inputs:
     packageType: 'sdk'
-    version: '2.2.401'
+    version: '2.2.301'
     includePreviewVersions: true
 
 - task: Docker@2

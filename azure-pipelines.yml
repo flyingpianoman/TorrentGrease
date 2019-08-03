@@ -30,13 +30,6 @@ steps:
       $(GitVersion.NugetVersion)
       latest
 
-- task: BuildQualityChecks@6
-  inputs:
-    checkWarnings: true
-    warningFailOption: 'fixed'
-    warningThreshold: '0'
-    warningFilters: '[wW]arning'
-
 - task: DockerCompose@0
   displayName: Docker-compose up
   inputs:

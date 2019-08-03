@@ -16,7 +16,7 @@ COPY ["TorrentGrease.Client/TorrentGrease.Client.csproj", "TorrentGrease.Client/
 RUN dotnet restore "TorrentGrease.Server/TorrentGrease.Server.csproj"
 COPY . .
 WORKDIR "/src/TorrentGrease.Server"
-RUN dotnet build "TorrentGrease.Server.csproj" -c Release -o /app -p:Version=${VERSION}
+RUN dotnet build "TorrentGrease.Server.csproj" -c Release -o /app -p:Version=${VERSION} /p:warnaserror=true /p:TreatWarningsAsErrors=true
 
 FROM build AS publish
 ARG VERSION=0.1.0-devbuild

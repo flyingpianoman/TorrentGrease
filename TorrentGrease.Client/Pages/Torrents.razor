@@ -29,10 +29,10 @@ else
     </table>
 }
 
-@functions {
+@code {
     IEnumerable<Torrent> torrents;
 
-    protected override async Task OnInitAsync()
+    protected override async Task OnInitializedAsync()
     {
         torrents = await Http.GetJsonAsync<IEnumerable<Torrent>>("api/Torrent/All");
     }

@@ -27,10 +27,10 @@ else
     </table>
 }
 
-@functions {
+@code {
     IEnumerable<Policy> policies;
 
-    protected override async Task OnInitAsync()
+    protected override async Task OnInitializedAsync()
     {
         policies = await Http.GetJsonAsync<IEnumerable<Policy>>("api/Policy/All");
     }

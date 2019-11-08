@@ -5,7 +5,7 @@ EXPOSE 5656
 ENV ASPNETCORE_URLS=http://+:5656
 HEALTHCHECK --interval=5s --timeout=10s --retries=3 CMD curl --fail http://localhost:5656/health || exit 1
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0.100-preview9-buster AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0.100-buster AS build
 ARG VERSION=0.1.0-devbuild
 WORKDIR /src
 COPY ["TorrentGrease.Server/TorrentGrease.Server.csproj", "TorrentGrease.Server/"]

@@ -6,10 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="protobuf-net.Core" Version="3.0.0-alpha.122" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.7">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="System.ServiceModel.Primitives" Version="4.6.0" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
   </ItemGroup>
 
 </Project>

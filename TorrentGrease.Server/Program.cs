@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System.IO;
 using System.Threading.Tasks;
 using TorrentGrease.Data.Hosting;
@@ -29,7 +31,7 @@ namespace TorrentGrease.Server
         private static void MoveWwwrootToDistDir()
         {
             var wwwRootDir = new DirectoryInfo("/TorrentGrease.Client/dist_wwwroot");
-            var distDir = new DirectoryInfo("/TorrentGrease.Client/bin/Debug/netstandard2.0/dist");
+            var distDir = new DirectoryInfo("/TorrentGrease.Client/bin/Debug/netstandard2.1/dist");
             CopyAll(wwwRootDir, distDir);
         }
 
@@ -52,13 +54,28 @@ namespace TorrentGrease.Server
             }
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseConfiguration(new ConfigurationBuilder()
-                    .AddCommandLine(args)
-                    .AddEnvironmentVariables()
-                    .Build())
-                .UseStartup<Startup>()
+        public static IHost BuildWebHost(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webHostBuilder =>
+                {
+                    webHostBuilder
+                        .UseConfiguration(new ConfigurationBuilder()
+                            .AddCommandLine(args)
+                            .AddEnvironmentVariables()
+                            .Build())
+                        .UseStartup<Startup>()
+                        .ConfigureKestrel(options =>
+                        {
+                            options.ListenAnyIP(port: 5656, listenOptions =>
+                            {
+                                listenOptions.Protocols = HttpProtocols.Http1;
+                            });
+                            options.ListenAnyIP(port: 5657, listenOptions =>
+                            {
+                                listenOptions.Protocols = HttpProtocols.Http2;
+                            });
+                        });
+                })
                 .Build();
     }
 }

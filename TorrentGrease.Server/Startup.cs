@@ -11,6 +11,8 @@ using System;
 using System.Linq;
 using TorrentGrease.TorrentClient.Hosting;
 using System.IO;
+using ProtoBuf.Grpc.Server;
+using TorrentGrease.Server.Services;
 
 namespace TorrentGrease.Server
 {
@@ -27,6 +29,7 @@ namespace TorrentGrease.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCodeFirstGrpc();
             services.AddTorrentGreaseData(_config.GetConnectionString("DefaultConnection"));
             services.AddTorrentClient(_config.GetSection("torrentClient"));
 
@@ -59,6 +62,9 @@ namespace TorrentGrease.Server
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGrpcService<TorrentService>();
+                endpoints.MapGrpcService<PolicyService>();
+
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapFallbackToClientSideBlazor<Client.Startup>("index.html");
             });

@@ -14,6 +14,7 @@ services:
       - torrent-grease-data:/app/data
     ports:
       - 5656:5656
+      - 5657:5657
       
   transmission: #username = usr, password = pwd
     image: linuxserver/transmission:2.94-r1-ls14

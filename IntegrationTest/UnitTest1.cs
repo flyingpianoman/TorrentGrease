@@ -1,4 +1,10 @@
+using Grpc.Core;
+using Grpc.Net.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ProtoBuf.Grpc.Client;
+using System;
+using System.Threading.Tasks;
+using TorrentGrease.Shared.ServiceContracts;
 
 namespace IntegrationTest
 {
@@ -6,8 +12,15 @@ namespace IntegrationTest
     public class UnitTest1
     {
         [TestMethod]
-        public void TestMethod1()
+        public async Task TestGrpcEndpoint()
         {
+            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            GrpcClientFactory.AllowUnencryptedHttp2 = true;
+            using (var channel = GrpcChannel.ForAddress("http://localhost:5657"))
+            {
+                var policyService = channel.CreateGrpcService<IPolicyService>();
+                await policyService.Test();
+            }
         }
     }
 }

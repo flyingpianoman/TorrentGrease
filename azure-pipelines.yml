@@ -11,10 +11,10 @@ steps:
     configFilePath: './GitVersion.yml'
 
 - task: UseDotNet@2
-  displayName: Install dotnet 2.2 sdk
+  displayName: Install dotnet 3.0 sdk
   inputs:
     packageType: 'sdk'
-    version: '2.2.301'
+    version: '3.0.100'
     includePreviewVersions: true
 
 - task: Docker@2
@@ -67,5 +67,3 @@ steps:
     tags: |
       $(GitVersion.NugetVersion)
       latest
-
-  

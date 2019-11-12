@@ -1,6 +1,6 @@
 ﻿@page "/torrents"
 @using TorrentGrease.Shared.TorrentClient
-@inject HttpClient Http
+@inject ITorrentService TorrentService
 
 <h1>Torrents</h1>
 
@@ -34,6 +34,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        torrents = await Http.GetJsonAsync<IEnumerable<Torrent>>("api/Torrent/All");
+        torrents = await TorrentService.GetAllTorrentsAsync();
     }
 }

@@ -10,7 +10,6 @@ namespace TorrentGrease.Client
 {
     public class Startup
     {
-
         public void ConfigureServices(IServiceCollection services)
         {
             GrpcClientFactory.AllowUnencryptedHttp2 = true;

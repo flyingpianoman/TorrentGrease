@@ -17,7 +17,7 @@ namespace TorrentGrease.Server.Services
             _policyRepository = policyRepository ?? throw new ArgumentNullException(nameof(policyRepository));
         }
 
-        public async ValueTask<IEnumerable<Policy>> GetAllPolicies()
+        public async ValueTask<IEnumerable<Policy>> GetAllPoliciesAsync()
         {
             return await _policyRepository.GetAllAsync().ConfigureAwait(false);
         }

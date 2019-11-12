@@ -14,6 +14,7 @@ using System.IO;
 using ProtoBuf.Grpc.Server;
 using TorrentGrease.Server.Services;
 using Knowit.Grpc.Web;
+using TorrentGrease.Server.Grpc;
 
 namespace TorrentGrease.Server
 {
@@ -66,8 +67,7 @@ namespace TorrentGrease.Server
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<TorrentService>();
-                endpoints.MapGrpcService<PolicyService>();
+                endpoints.MapGrpcServices();
 
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapFallbackToClientSideBlazor<Client.Startup>("index.html");

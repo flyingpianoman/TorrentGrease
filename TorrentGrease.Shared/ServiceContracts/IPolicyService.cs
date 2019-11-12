@@ -10,8 +10,6 @@ namespace TorrentGrease.Shared.ServiceContracts
     [ServiceContract(Name = nameof(IPolicyService))]
     public interface IPolicyService
     {
-        ValueTask<IEnumerable<Shared.Policy>> GetAllPolicies();
-
-        ValueTask Test();
+        ValueTask<IEnumerable<Shared.Policy>> GetAllPoliciesAsync();
     }
 }

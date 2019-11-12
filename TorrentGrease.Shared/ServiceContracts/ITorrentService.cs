@@ -10,6 +10,6 @@ namespace TorrentGrease.Shared.ServiceContracts
     [ServiceContract]
     public interface ITorrentService
     {
-        ValueTask<IEnumerable<Shared.TorrentClient.Torrent>> GetAllTorrents();
+        ValueTask<IEnumerable<Shared.TorrentClient.Torrent>> GetAllTorrentsAsync();
     }
 }

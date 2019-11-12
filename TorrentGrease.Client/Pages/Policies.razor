@@ -1,7 +1,4 @@
 ﻿@page "/"
-@using TorrentGrease.Shared
-@using TorrentGrease.Shared.ServiceContracts
-@using ProtoBuf.Grpc.Client
 @inject IPolicyService PolicyService
 
 <h1>Policies</h1>
@@ -34,8 +31,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        policies = await PolicyService.GetAllPolicies();
-
-        //policies = await Http.GetJsonAsync<IEnumerable<Policy>>("api/Policy/All");
+        policies = await PolicyService.GetAllPoliciesAsync();
     }
 }

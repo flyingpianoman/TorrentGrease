@@ -7,7 +7,7 @@ using TorrentGrease.Shared.ServiceContracts;
 
 namespace TorrentGrease.Client.Grpc
 {
-    public static class GrpcServiceCollectionExtensions
+    public static class ServiceCollectionGrpcExtensions
     {
         public const string BackendUrl = "http://localhost:5656";
 
@@ -25,7 +25,7 @@ namespace TorrentGrease.Client.Grpc
 
         public static IServiceCollection AddGrpcClient(this IServiceCollection services, Type grpcServiceType)
         {
-            var method = typeof(GrpcServiceCollectionExtensions)
+            var method = typeof(ServiceCollectionGrpcExtensions)
                 .GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static)
                 .Single(m => m.Name == nameof(AddGrpcClient) && m.ContainsGenericParameters)
                 .MakeGenericMethod(grpcServiceType);

@@ -17,7 +17,7 @@ namespace TorrentGrease.Server.Services
             _torrentClient = torrentClient ?? throw new ArgumentNullException(nameof(torrentClient));
         }
 
-        public async ValueTask<IEnumerable<Torrent>> GetAllTorrents()
+        public async ValueTask<IEnumerable<Torrent>> GetAllTorrentsAsync()
         {
             return await _torrentClient.GetAllTorrentsAsync().ConfigureAwait(false);
         }

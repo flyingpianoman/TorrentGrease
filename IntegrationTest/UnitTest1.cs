@@ -16,11 +16,9 @@ namespace IntegrationTest
         {
             //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             GrpcClientFactory.AllowUnencryptedHttp2 = true;
-            using (var channel = GrpcChannel.ForAddress("http://localhost:5657"))
-            {
-                var policyService = channel.CreateGrpcService<IPolicyService>();
-                await policyService.Test();
-            }
+            using var channel = GrpcChannel.ForAddress("http://localhost:5657");
+            var policyService = channel.CreateGrpcService<IPolicyService>();
+            await policyService.Test();
         }
     }
 }

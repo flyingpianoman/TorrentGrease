@@ -21,7 +21,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.13" />
-
+    <PackageReference Include="Knowit.Grpc.Web" Version="0.9.37" />
   </ItemGroup>
 
   <ItemGroup>

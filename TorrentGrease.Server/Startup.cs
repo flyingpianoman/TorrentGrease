@@ -13,6 +13,7 @@ using TorrentGrease.TorrentClient.Hosting;
 using System.IO;
 using ProtoBuf.Grpc.Server;
 using TorrentGrease.Server.Services;
+using Knowit.Grpc.Web;
 
 namespace TorrentGrease.Server
 {
@@ -30,6 +31,8 @@ namespace TorrentGrease.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCodeFirstGrpc();
+            services.AddGrpcWeb();
+
             services.AddTorrentGreaseData(_config.GetConnectionString("DefaultConnection"));
             services.AddTorrentClient(_config.GetSection("torrentClient"));
 
@@ -56,6 +59,7 @@ namespace TorrentGrease.Server
             }
 
             UseClientSideBlazorFiles(app);
+            app.UseGrpcWeb();
             app.UseRouting();
 
             app.UseHealthChecks("/health");

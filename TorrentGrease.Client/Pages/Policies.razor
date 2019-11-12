@@ -2,8 +2,7 @@
 @using TorrentGrease.Shared
 @using TorrentGrease.Shared.ServiceContracts
 @using ProtoBuf.Grpc.Client
-@using Grpc.Net.Client
-@inject HttpClient Http
+@inject IPolicyService PolicyService
 
 <h1>Policies</h1>
 
@@ -35,12 +34,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        GrpcClientFactory.AllowUnencryptedHttp2 = true;
-        using (var channel = GrpcChannel.ForAddress("http://localhost:5657"))
-        {
-            var policyService = channel.CreateGrpcService<IPolicyService>();
-            policies = await policyService.GetAllPolicies();
-        }
+        policies = await PolicyService.GetAllPolicies();
 
         //policies = await Http.GetJsonAsync<IEnumerable<Policy>>("api/Policy/All");
     }

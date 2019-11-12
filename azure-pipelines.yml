@@ -73,7 +73,7 @@ steps:
       sleep 1
     done
 
-    DOCKER_COMMAND="buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=TorrentGrease.Server/Dockerfile --opt build-arg:VERSION=$(GitVersion.NugetVersion) --local tag flyingpianoman/torrent-grease/torrent-grease:$(GitVersion.NugetVersion) --local tag flyingpianoman/torrent-grease/torrent-grease:latest"
+    DOCKER_COMMAND="buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=TorrentGrease.Server/Dockerfile --opt build-arg:VERSION=$(GitVersion.NugetVersion)  --exporter-opt=name=flyingpianoman/torrent-grease/torrent-grease:$(GitVersion.NugetVersion),flyingpianoman/torrent-grease/torrent-grease:latest"
 
     if [ -d "$(BUILD_KIT_CACHE)" ]; then
       echo "Will use cached layers from $(BUILD_KIT_CACHE)"

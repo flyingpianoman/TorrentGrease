@@ -66,11 +66,11 @@ namespace TorrentGrease.Server
                         .UseStartup<Startup>()
                         .ConfigureKestrel(options =>
                         {
-                            options.ListenAnyIP(port: 5656, listenOptions =>
+                            options.ListenAnyIP(port: 5656, listenOptions => //For Blazor, health endpoint & gRPC-web
                             {
                                 listenOptions.Protocols = HttpProtocols.Http1;
                             });
-                            options.ListenAnyIP(port: 5657, listenOptions =>
+                            options.ListenAnyIP(port: 5657, listenOptions => //For gRPC
                             {
                                 listenOptions.Protocols = HttpProtocols.Http2;
                             });

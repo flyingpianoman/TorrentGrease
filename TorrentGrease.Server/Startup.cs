@@ -15,6 +15,7 @@ using ProtoBuf.Grpc.Server;
 using TorrentGrease.Server.Services;
 using Knowit.Grpc.Web;
 using TorrentGrease.Server.Grpc;
+using TorrentGrease.Server.Blazor;
 
 namespace TorrentGrease.Server
 {
@@ -37,7 +38,6 @@ namespace TorrentGrease.Server
             services.AddTorrentGreaseData(_config.GetConnectionString("DefaultConnection"));
             services.AddTorrentClient(_config.GetSection("torrentClient"));
 
-            services.AddMvc().AddNewtonsoftJson();
             services.AddHealthChecks()
                 .AddTorrentGreaseDataCheck();
 
@@ -59,7 +59,7 @@ namespace TorrentGrease.Server
                 app.UseBlazorDebugging();
             }
 
-            UseClientSideBlazorFiles(app);
+            app.UseClientSideBlazorFiles(_config);
             app.UseGrpcWeb();
             app.UseRouting();
 
@@ -68,23 +68,8 @@ namespace TorrentGrease.Server
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcServices();
-
-                endpoints.MapDefaultControllerRoute();
                 endpoints.MapFallbackToClientSideBlazor<Client.Startup>("index.html");
             });
-        }
-
-        private void UseClientSideBlazorFiles(IApplicationBuilder app)
-        {
-            var clientAssemblyPathOverride = _config.GetValue<string>("CLIENT_APP_ASSEMBLY_PATH_OVERRIDE");
-            if (!string.IsNullOrEmpty(clientAssemblyPathOverride))
-            {
-                app.UseClientSideBlazorFiles(clientAssemblyPathOverride);
-            }
-            else
-            {
-                app.UseClientSideBlazorFiles<Client.Startup>();
-            }
         }
     }
 }

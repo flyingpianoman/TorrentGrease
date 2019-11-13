@@ -24,6 +24,13 @@ steps:
     configFilePath: './GitVersion.yml'
 
 - task: UseDotNet@2
+  displayName: Install dotnet 3.0 sdk
+  inputs:
+    packageType: 'sdk'
+    version: '3.0.100'
+    includePreviewVersions: true
+
+- task: UseDotNet@2
   displayName: Install dotnet 2.2 sdk for specflow tests
   inputs:
     packageType: 'sdk'
@@ -73,7 +80,7 @@ steps:
       sleep 1
     done
 
-    DOCKER_COMMAND="buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=TorrentGrease.Server/ --opt build-arg:VERSION=$(GitVersion.NugetVersion) --output type=docker,name=myimage --exporter-opt=name=flyingpianoman/torrent-grease:$(GitVersion.NugetVersion),flyingpianoman/torrent-grease:latest"
+    DOCKER_COMMAND="buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=TorrentGrease.Server/ --opt build-arg:VERSION=$(GitVersion.NugetVersion) --output type=docker,name=flyingpianoman/torrent-grease:$(GitVersion.NugetVersion) --exporter-opt=name=flyingpianoman/torrent-grease:$(GitVersion.NugetVersion),flyingpianoman/torrent-grease:latest"
 
     if [ -d "$(BUILD_KIT_CACHE)" ]; then
       echo "Will use cached layers from $(BUILD_KIT_CACHE)"
@@ -116,7 +123,7 @@ steps:
     additionalDockerComposeFiles: 'docker-compose.ci.yml'
     dockerComposeFileArgs: 'VERSION=$(GitVersion.NugetVersion)'
     action: 'Run a Docker Compose command'
-    dockerComposeCommand: 'up -d'
+    dockerComposeCommand: 'up -d --no-build'
 
 - task: DotNetCoreCLI@2
   displayName: dotnet test SpecificationTest

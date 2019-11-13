@@ -1,6 +1,19 @@
 trigger:
 - master
 
+variables:
+  # buildkit tool itself
+  DOCKER_BUILDKIT: 1
+  BUILD_KIT_CACHE: '$(Pipeline.Workspace)/buildkitcache'
+  BUILDKIT_COMMIT: 10cef0c6e178bcaca1ad02b041a96b1091f52071
+  BUILDKIT_CACHE_KEY: GOOFS=0 | buildkit | $(BUILDKIT_COMMIT)
+
+  CACHE_KEY_SALT: 2
+  CACHE_KEY_BUILDKIT: '"DOCKER_BUILDKIT=$(DOCKER_BUILDKIT)" | "BUILDKIT_COMMIT=$(BUILDKIT_COMMIT)"'
+  CACHE_KEY_FALLBACK: '"CACHE_KEY_SALT=$(CACHE_KEY_SALT)" | "$(Agent.OS) $(Agent.JobName)" | $(CACHE_KEY_BUILDKIT)'
+  #todo add packages.lock.json instead of csproj
+  CACHE_KEY_EXACT: '$(CACHE_KEY_FALLBACK) | $(System.DefaultWorkingDirectory)/TorrentGrease.Server/Dockerfile,$(System.DefaultWorkingDirectory)/docker-compose/docker-compose.**,$(System.DefaultWorkingDirectory)/**/*.csproj' 
+
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -17,18 +30,89 @@ steps:
     version: '3.0.100'
     includePreviewVersions: true
 
-- task: Docker@2
-  displayName: Docker build
+- task: UseDotNet@2
+  displayName: Install dotnet 2.2 sdk for specflow tests
   inputs:
-    containerRegistry: 'Dockerhub'
-    repository: 'flyingpianoman/torrent-grease'
-    command: 'build'
-    Dockerfile: 'TorrentGrease.Server/Dockerfile'
-    buildContext: '.'
-    arguments: '--build-arg VERSION=$(GitVersion.NugetVersion)'
-    tags: |
-      $(GitVersion.NugetVersion)
-      latest
+    packageType: 'sdk'
+    version: '2.2.301'
+    includePreviewVersions: true
+
+# Build/restore the BuildKit tool, for some reason this is way faster than using docker load
+# we need this to use caching see https://dev.azure.com/codesharing-SU0/cachesandbox/_git/Scripts?path=%2Fdocker.yml&version=GBmaster&_a=contents & https://github.com/microsoft/azure-pipelines-tasks/issues/11034 
+- task: CacheBeta@0
+  inputs:
+    key: $(BUILDKIT_CACHE_KEY)
+    path: '$(System.DefaultWorkingDirectory)/buildkit'
+    cacheHitVar: 'BuildKitToolHit'
+  displayName: 'cache buildkit tool'
+
+- script: |
+    git clone https://github.com/moby/buildkit.git
+    cd buildkit
+    git checkout $(BUILDKIT_COMMIT)
+    make
+  displayName: "Build BuildKit on cache miss"
+  condition: and(succeeded(), ne(variables['BuildKitToolHit'], 'true'))
+
+- script: |
+    cd buildkit
+    sudo make install
+    which buildctl
+    which buildkitd
+
+# restore the BuildKit cache based on the Dockerfile
+- task: CacheBeta@0
+  inputs:
+    key: $(CACHE_KEY_EXACT)
+    path: '$(BUILD_KIT_CACHE)'
+    cacheHitVar: 'BuildKitLayersHit'
+    restoreKeys: |
+      $(CACHE_KEY_FALLBACK)
+  displayName: 'cache docker layers'
+
+- script: |
+    set -e -x
+    sudo buildkitd --debug --root /var/lib/buildkit &
+    
+    until sudo buildctl du -v
+    do
+      echo "Waiting for daemon to load"
+      sleep 1
+    done
+
+    DOCKER_COMMAND="buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=TorrentGrease.Server/ --opt build-arg:VERSION=$(GitVersion.NugetVersion) --output type=docker,name=flyingpianoman/torrent-grease:$(GitVersion.NugetVersion) --exporter-opt=name=flyingpianoman/torrent-grease:$(GitVersion.NugetVersion),flyingpianoman/torrent-grease:latest"
+
+    if [ -d "$(BUILD_KIT_CACHE)" ]; then
+      echo "Will use cached layers from $(BUILD_KIT_CACHE)"
+      find $(BUILD_KIT_CACHE)
+      DOCKER_COMMAND="$DOCKER_COMMAND --import-cache type=local,src=$(BUILD_KIT_CACHE)"
+    fi
+
+    if [ "$(BuildKitLayersHit)" != "true" ]; then
+      echo "Will store cached layers to $(BUILD_KIT_CACHE)"
+      DOCKER_COMMAND="$DOCKER_COMMAND --export-cache mode=max,type=local,dest=$(BUILD_KIT_CACHE)"
+    fi
+
+    sudo $DOCKER_COMMAND | docker load
+    sudo docker tag flyingpianoman/torrent-grease:$(GitVersion.NugetVersion) flyingpianoman/torrent-grease:latest
+
+    find $(BUILD_KIT_CACHE)
+
+    sudo kill -9 $(jobs -p)
+  displayName: 'docker build'
+
+# - task: Docker@2
+#   displayName: Docker build
+#   inputs:
+#     containerRegistry: 'Dockerhub'
+#     repository: 'flyingpianoman/torrent-grease'
+#     command: 'build'
+#     Dockerfile: 'TorrentGrease.Server/Dockerfile'
+#     buildContext: '.'
+#     arguments: '--build-arg VERSION=$(GitVersion.NugetVersion)'
+#     tags: |
+#       $(GitVersion.NugetVersion)
+#       latest
 
 - task: DockerCompose@0
   displayName: Docker-compose up
@@ -39,7 +123,7 @@ steps:
     additionalDockerComposeFiles: 'docker-compose.ci.yml'
     dockerComposeFileArgs: 'VERSION=$(GitVersion.NugetVersion)'
     action: 'Run a Docker Compose command'
-    dockerComposeCommand: 'up -d'
+    dockerComposeCommand: 'up -d --no-build'
 
 - task: DotNetCoreCLI@2
   displayName: dotnet test SpecificationTest
@@ -50,6 +134,7 @@ steps:
 
 - task: DockerCompose@0
   displayName: Docker-compose logs
+  condition: succeededOrFailed()
   inputs:
     containerregistrytype: 'Container Registry'
     dockerRegistryEndpoint: 'Dockerhub'

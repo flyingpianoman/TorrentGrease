@@ -30,7 +30,6 @@ namespace SpecificationTest.Hooks
             var ss = ((ITakesScreenshot)TestRunContext.WebDriver).GetScreenshot();
             ss.SaveAsFile(Path.Combine(_ScreenShotDir, $"{scenarioContext.ScenarioInfo.Title}.png"),
                 ScreenshotImageFormat.Png);
-            
         }
     }
 }

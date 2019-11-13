@@ -53,93 +53,93 @@ steps:
     which buildctl
     which buildkitd
 
-# # restore the BuildKit cache based on the Dockerfile
-# - task: CacheBeta@0
-#   inputs:
-#     key: $(CACHE_KEY_EXACT)
-#     path: '$(BUILD_KIT_CACHE)'
-#     cacheHitVar: 'BuildKitLayersHit'
-#     restoreKeys: |
-#       $(CACHE_KEY_FALLBACK)
-#   displayName: 'cache docker layers'
+# restore the BuildKit cache based on the Dockerfile
+- task: CacheBeta@0
+  inputs:
+    key: $(CACHE_KEY_EXACT)
+    path: '$(BUILD_KIT_CACHE)'
+    cacheHitVar: 'BuildKitLayersHit'
+    restoreKeys: |
+      $(CACHE_KEY_FALLBACK)
+  displayName: 'cache docker layers'
 
-# - script: |
-#     set -e -x
-#     sudo buildkitd --debug --root /var/lib/buildkit &
+- script: |
+    set -e -x
+    sudo buildkitd --debug --root /var/lib/buildkit &
     
-#     until sudo buildctl du -v
-#     do
-#       echo "Waiting for daemon to load"
-#       sleep 1
-#     done
+    until sudo buildctl du -v
+    do
+      echo "Waiting for daemon to load"
+      sleep 1
+    done
 
-#     DOCKER_COMMAND="buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=TorrentGrease.Server/ --opt build-arg:VERSION=$(GitVersion.NugetVersion)  --exporter-opt=name=flyingpianoman/torrent-grease/torrent-grease:$(GitVersion.NugetVersion),flyingpianoman/torrent-grease/torrent-grease:latest"
+    DOCKER_COMMAND="buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=TorrentGrease.Server/ --opt build-arg:VERSION=$(GitVersion.NugetVersion)  --exporter-opt=name=flyingpianoman/torrent-grease/torrent-grease:$(GitVersion.NugetVersion),flyingpianoman/torrent-grease/torrent-grease:latest"
 
-#     if [ -d "$(BUILD_KIT_CACHE)" ]; then
-#       echo "Will use cached layers from $(BUILD_KIT_CACHE)"
-#       find $(BUILD_KIT_CACHE)
-#       DOCKER_COMMAND="$DOCKER_COMMAND --import-cache type=local,src=$(BUILD_KIT_CACHE)"
-#     fi
+    if [ -d "$(BUILD_KIT_CACHE)" ]; then
+      echo "Will use cached layers from $(BUILD_KIT_CACHE)"
+      find $(BUILD_KIT_CACHE)
+      DOCKER_COMMAND="$DOCKER_COMMAND --import-cache type=local,src=$(BUILD_KIT_CACHE)"
+    fi
 
-#     if [ "$(BuildKitLayersHit)" != "true" ]; then
-#       echo "Will store cached layers to $(BUILD_KIT_CACHE)"
-#       DOCKER_COMMAND="$DOCKER_COMMAND --export-cache mode=max,type=local,dest=$(BUILD_KIT_CACHE)"
-#     fi
+    if [ "$(BuildKitLayersHit)" != "true" ]; then
+      echo "Will store cached layers to $(BUILD_KIT_CACHE)"
+      DOCKER_COMMAND="$DOCKER_COMMAND --export-cache mode=max,type=local,dest=$(BUILD_KIT_CACHE)"
+    fi
 
-#     sudo $DOCKER_COMMAND
+    sudo $DOCKER_COMMAND
 
-#     find $(BUILD_KIT_CACHE)
+    find $(BUILD_KIT_CACHE)
 
-#     sudo kill -9 $(jobs -p)
-#   displayName: 'docker build'
+    sudo kill -9 $(jobs -p)
+  displayName: 'docker build'
 
-# - task: Docker@2
-#   displayName: Docker build
-#   inputs:
-#     containerRegistry: 'Dockerhub'
-#     repository: 'flyingpianoman/torrent-grease'
-#     command: 'build'
-#     Dockerfile: 'TorrentGrease.Server/Dockerfile'
-#     buildContext: '.'
-#     arguments: '--build-arg VERSION=$(GitVersion.NugetVersion)'
-#     tags: |
-#       $(GitVersion.NugetVersion)
-#       latest
+- task: Docker@2
+  displayName: Docker build
+  inputs:
+    containerRegistry: 'Dockerhub'
+    repository: 'flyingpianoman/torrent-grease'
+    command: 'build'
+    Dockerfile: 'TorrentGrease.Server/Dockerfile'
+    buildContext: '.'
+    arguments: '--build-arg VERSION=$(GitVersion.NugetVersion)'
+    tags: |
+      $(GitVersion.NugetVersion)
+      latest
 
-# - task: DockerCompose@0
-#   displayName: Docker-compose up
-#   inputs:
-#     containerregistrytype: 'Container Registry'
-#     dockerRegistryEndpoint: 'Dockerhub'
-#     dockerComposeFile: 'docker-compose/docker-compose.yml'
-#     additionalDockerComposeFiles: 'docker-compose.ci.yml'
-#     dockerComposeFileArgs: 'VERSION=$(GitVersion.NugetVersion)'
-#     action: 'Run a Docker Compose command'
-#     dockerComposeCommand: 'up -d'
+- task: DockerCompose@0
+  displayName: Docker-compose up
+  inputs:
+    containerregistrytype: 'Container Registry'
+    dockerRegistryEndpoint: 'Dockerhub'
+    dockerComposeFile: 'docker-compose/docker-compose.yml'
+    additionalDockerComposeFiles: 'docker-compose.ci.yml'
+    dockerComposeFileArgs: 'VERSION=$(GitVersion.NugetVersion)'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'up -d'
 
-# - task: DotNetCoreCLI@2
-#   displayName: dotnet test SpecificationTest
-#   inputs:
-#     command: 'test'
-#     projects: 'SpecificationTest/SpecificationTest.csproj'
-#     testRunTitle: 'SpecificationTest'
+- task: DotNetCoreCLI@2
+  displayName: dotnet test SpecificationTest
+  inputs:
+    command: 'test'
+    projects: 'SpecificationTest/SpecificationTest.csproj'
+    testRunTitle: 'SpecificationTest'
 
-# - task: DockerCompose@0
-#   displayName: Docker-compose logs
-#   inputs:
-#     containerregistrytype: 'Container Registry'
-#     dockerRegistryEndpoint: 'Dockerhub'
-#     dockerComposeFile: 'docker-compose/docker-compose.yml'
-#     additionalDockerComposeFiles: 'docker-compose.ci.yml'
-#     action: 'Run a Docker Compose command'
-#     dockerComposeCommand: 'logs'
+- task: DockerCompose@0
+  displayName: Docker-compose logs
+  inputs:
+    containerregistrytype: 'Container Registry'
+    dockerRegistryEndpoint: 'Dockerhub'
+    dockerComposeFile: 'docker-compose/docker-compose.yml'
+    additionalDockerComposeFiles: 'docker-compose.ci.yml'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'logs'
 
-# - task: Docker@2
-#   displayName: Docker push
-#   inputs:
-#     containerRegistry: 'Dockerhub'
-#     repository: 'flyingpianoman/torrent-grease'
-#     command: 'push'
-#     tags: |
-#       $(GitVersion.NugetVersion)
-#       latest
+- task: Docker@2
+  displayName: Docker push
+  inputs:
+    containerRegistry: 'Dockerhub'
+    repository: 'flyingpianoman/torrent-grease'
+    command: 'push'
+    tags: |
+      $(GitVersion.NugetVersion)
+      latest

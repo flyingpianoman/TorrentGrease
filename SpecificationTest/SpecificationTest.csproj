@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework> <!-- 3.0 not yet supported by specflow -->
-
+    <TargetFramework>netcoreapp3.0</TargetFramework> <!-- 3.0 not yet supported by specflow -->
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -14,9 +13,9 @@
     <PackageReference Include="Polly" Version="7.1.1" />
     <PackageReference Include="Selenium.Firefox.WebDriver" Version="0.26.0" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-    <PackageReference Include="SpecFlow" Version="3.0.225" />
-    <PackageReference Include="SpecFlow.MsTest" Version="3.0.225" />
-    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.0.225" />
+    <PackageReference Include="SpecFlow" Version="3.1.62" />
+    <PackageReference Include="SpecFlow.MsTest" Version="3.1.62" />
+    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.1.62" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.7">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

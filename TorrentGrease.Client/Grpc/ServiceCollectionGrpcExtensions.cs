@@ -9,7 +9,7 @@ namespace TorrentGrease.Client.Grpc
 {
     public static class ServiceCollectionGrpcExtensions
     {
-        public const string BackendUrl = "http://localhost:5656";
+        public const string BackendUrl = "/";
 
         public static IServiceCollection AddGrpcClients(this IServiceCollection services)
         {
@@ -40,7 +40,7 @@ namespace TorrentGrease.Client.Grpc
         {
             services.AddScoped(serviceProvider =>
             {
-                var httpClient = new HttpClient { BaseAddress = new Uri(BackendUrl) };
+                var httpClient = serviceProvider.GetRequiredService<HttpClient>();
                 var grpcWebCallInvoker = new GrpcWebCallInvoker(httpClient);
                 return ProtoBuf.Grpc.Configuration.ClientFactory.Default.CreateClient<TGrpcClient>(grpcWebCallInvoker);
             });

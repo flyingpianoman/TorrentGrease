@@ -94,7 +94,7 @@ steps:
     fi
 
     sudo $DOCKER_COMMAND | docker load
-    sudo docker image ls
+    sudo docker tag flyingpianoman/torrent-grease:$(GitVersion.NugetVersion) flyingpianoman/torrent-grease:latest
 
     find $(BUILD_KIT_CACHE)
 

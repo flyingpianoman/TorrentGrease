@@ -134,6 +134,7 @@ steps:
 
 - task: DockerCompose@0
   displayName: Docker-compose logs
+  condition: succeededOrFailed()
   inputs:
     containerregistrytype: 'Container Registry'
     dockerRegistryEndpoint: 'Dockerhub'

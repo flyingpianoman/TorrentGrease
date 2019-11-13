@@ -24,10 +24,10 @@ steps:
     configFilePath: './GitVersion.yml'
 
 - task: UseDotNet@2
-  displayName: Install dotnet 3.0 sdk
+  displayName: Install dotnet 2.2 sdk for specflow tests
   inputs:
     packageType: 'sdk'
-    version: '3.0.100'
+    version: '2.2.301'
     includePreviewVersions: true
 
 # Build/restore the BuildKit tool, for some reason this is way faster than using docker load
@@ -93,18 +93,18 @@ steps:
     sudo kill -9 $(jobs -p)
   displayName: 'docker build'
 
-- task: Docker@2
-  displayName: Docker build
-  inputs:
-    containerRegistry: 'Dockerhub'
-    repository: 'flyingpianoman/torrent-grease'
-    command: 'build'
-    Dockerfile: 'TorrentGrease.Server/Dockerfile'
-    buildContext: '.'
-    arguments: '--build-arg VERSION=$(GitVersion.NugetVersion)'
-    tags: |
-      $(GitVersion.NugetVersion)
-      latest
+# - task: Docker@2
+#   displayName: Docker build
+#   inputs:
+#     containerRegistry: 'Dockerhub'
+#     repository: 'flyingpianoman/torrent-grease'
+#     command: 'build'
+#     Dockerfile: 'TorrentGrease.Server/Dockerfile'
+#     buildContext: '.'
+#     arguments: '--build-arg VERSION=$(GitVersion.NugetVersion)'
+#     tags: |
+#       $(GitVersion.NugetVersion)
+#       latest
 
 - task: DockerCompose@0
   displayName: Docker-compose up

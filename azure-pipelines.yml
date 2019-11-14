@@ -109,9 +109,9 @@ steps:
     set -e
     echo "Waiting torrent-grease to become healthy"
     try=1
-    maxTries=120 #each try takes around 0.5s
+    maxTries=600
 
-    until [ "`docker inspect -f {{.State.Health.Status}} torrent-grease`" == "2healthy" ]; 
+    until [ "`docker inspect -f {{.State.Health.Status}} torrent-grease`" == "healthy" ]; 
     do
         if [ $try == $maxTries ]; 
         then

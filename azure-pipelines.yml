@@ -30,13 +30,6 @@ steps:
     version: '3.0.100'
     includePreviewVersions: true
 
-- task: UseDotNet@2
-  displayName: Install dotnet 2.2 sdk for specflow tests
-  inputs:
-    packageType: 'sdk'
-    version: '2.2.301'
-    includePreviewVersions: true
-
 # Build/restore the BuildKit tool, for some reason this is way faster than using docker load
 # we need this to use caching see https://dev.azure.com/codesharing-SU0/cachesandbox/_git/Scripts?path=%2Fdocker.yml&version=GBmaster&_a=contents & https://github.com/microsoft/azure-pipelines-tasks/issues/11034 
 - task: CacheBeta@0
@@ -124,7 +117,14 @@ steps:
     dockerComposeFileArgs: 'VERSION=$(GitVersion.NugetVersion)'
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'up -d --no-build'
-
+    
+- task: DotNetCoreCLI@2
+  displayName: dotnet test IntegrationTest
+  inputs:
+    command: 'test'
+    projects: 'IntegrationTest/IntegrationTest.csproj'
+    testRunTitle: 'IntegrationTest'
+    
 - task: DotNetCoreCLI@2
   displayName: dotnet test SpecificationTest
   inputs:

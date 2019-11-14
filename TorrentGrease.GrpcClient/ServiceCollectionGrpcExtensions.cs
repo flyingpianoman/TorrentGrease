@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using ProtoBuf.Grpc.Configuration;
 using System;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using TorrentGrease.Shared.ServiceContracts;
 
-namespace TorrentGrease.Client.Grpc
+namespace TorrentGrease.GrpcClient
 {
     public static class ServiceCollectionGrpcExtensions
     {
@@ -41,8 +42,7 @@ namespace TorrentGrease.Client.Grpc
             services.AddScoped(serviceProvider =>
             {
                 var httpClient = serviceProvider.GetRequiredService<HttpClient>();
-                var grpcWebCallInvoker = new GrpcWebCallInvoker(httpClient);
-                return ProtoBuf.Grpc.Configuration.ClientFactory.Default.CreateClient<TGrpcClient>(grpcWebCallInvoker);
+                return GrpcWebClientFactory.CreateClient<TGrpcClient>(httpClient);
             });
 
             return services;

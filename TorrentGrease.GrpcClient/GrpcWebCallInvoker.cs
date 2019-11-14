@@ -7,7 +7,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Grpc.Core;
 
-namespace TorrentGrease.Client.Grpc
+namespace TorrentGrease.GrpcClient
 {
     // DISCLAIMER: BASED ON https://github.com/SteveSandersonMS/presentation-2019-10-NDCSydney/blob/master/demo/BlazorMart/BlazorMart.Client/GrpcWebCallInvoker.cs
 

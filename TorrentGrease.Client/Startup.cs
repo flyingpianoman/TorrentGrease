@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ProtoBuf.Grpc.Client;
 using System;
 using System.Net.Http;
-using TorrentGrease.Client.Grpc;
+using TorrentGrease.GrpcClient;
 using TorrentGrease.Shared.ServiceContracts;
 
 namespace TorrentGrease.Client

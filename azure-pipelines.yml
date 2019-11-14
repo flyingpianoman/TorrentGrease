@@ -127,7 +127,7 @@ steps:
     echo "torrent-grease is healthy"
   failOnStderr: true
   timeoutInMinutes: 5
-  displayName: 'docker build'
+  displayName: 'Waiti for torrent-grease to become healthy'
 
 - task: DotNetCoreCLI@2
   displayName: dotnet test IntegrationTest

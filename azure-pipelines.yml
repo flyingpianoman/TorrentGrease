@@ -94,19 +94,6 @@ steps:
     sudo kill -9 $(jobs -p)
   displayName: 'docker build'
 
-# - task: Docker@2
-#   displayName: Docker build
-#   inputs:
-#     containerRegistry: 'Dockerhub'
-#     repository: 'flyingpianoman/torrent-grease'
-#     command: 'build'
-#     Dockerfile: 'TorrentGrease.Server/Dockerfile'
-#     buildContext: '.'
-#     arguments: '--build-arg VERSION=$(GitVersion.NugetVersion)'
-#     tags: |
-#       $(GitVersion.NugetVersion)
-#       latest
-
 - task: DockerCompose@0
   displayName: Docker-compose up
   inputs:
@@ -118,6 +105,30 @@ steps:
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'up -d --no-build'
     
+- script: |
+    set -e
+    echo "Waiting torrent-grease to become healthy"
+    try=1
+    maxTries=120 #each try takes around 0.5s
+
+    until [ "`docker inspect -f {{.State.Health.Status}} torrent-grease`" == "2healthy" ]; 
+    do
+        if [ $try == $maxTries ]; 
+        then
+            echo "Maxtries reached, failing"
+            exit 1
+        fi
+
+        try=`expr $try + 1`
+        
+        sleep 0.1;
+    done;
+
+    echo "torrent-grease is healthy"
+  failOnStderr: true
+  timeoutInMinutes: 5
+  displayName: 'docker build'
+
 - task: DotNetCoreCLI@2
   displayName: dotnet test IntegrationTest
   inputs:

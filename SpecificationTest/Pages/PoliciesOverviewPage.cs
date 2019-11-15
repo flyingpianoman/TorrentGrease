@@ -1,7 +1,9 @@
 ﻿using FluentAssertions;
 using OpenQA.Selenium;
+using SpecificationTest.Steps.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,11 +33,18 @@ namespace SpecificationTest.Pages
                 });
         }
 
-        public IEnumerable<TorrentGrease.Shared.Policy> Policies
+        public IList<PolicyOverviewRowDto> Policies
         {
             get
             {
-                return new List<TorrentGrease.Shared.Policy>(); //Todo impl when we can add policies
+                var trs = _tableElement.FindElements(By.CssSelector("tbody > tr"));
+
+                return trs
+                    .Select(tr => new PolicyOverviewRowDto
+                    {
+                        Name = tr.FindElement(By.CssSelector("td")).Text
+                    })
+                    .ToList();
             }
         }
     }

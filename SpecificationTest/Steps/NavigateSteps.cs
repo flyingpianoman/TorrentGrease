@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using OpenQA.Selenium;
 using SpecificationTest.Crosscutting;
 using SpecificationTest.Pages;
 using System;
@@ -11,19 +12,20 @@ using TechTalk.SpecFlow;
 namespace SpecificationTest.Steps
 {
     [Binding]
-    public class NavigateSteps
+    public class NavigateSteps : StepsBase
     {
         [When(@"I navigate to the root url")]
-        public async Task WhenINavigateToTheRootUrl()
+        [When(@"I navigate to the policy overview")]
+        public async Task NavigateToTheRootUrl()
         {
-            await TestRunContext.WebDriver
+            await WebDriver
                 .NavigateToPageAsync<PoliciesOverviewPage>(TestSettings.TorrentGreaseDockerAddress);
         }
 
         [Then(@"I can see the navigation menu")]
         public void ThenICanSeeTheNavigationMenu()
         {
-            TestRunContext.WebDriver
+            WebDriver
                 .CurrentPageAs<PageBase>()
                 .NavigationMenu
                 .NavMenuLinks

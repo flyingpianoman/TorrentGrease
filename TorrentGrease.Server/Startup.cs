@@ -16,6 +16,7 @@ using TorrentGrease.Server.Services;
 using Knowit.Grpc.Web;
 using TorrentGrease.Server.Grpc;
 using TorrentGrease.Server.Blazor;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace TorrentGrease.Server
 {

@@ -21,7 +21,7 @@ namespace TorrentGrease.Shared
         public int Order { get; set; }
         [Required]
         [ProtoMember(4)]
-        public bool Enabled { get; set; }
+        public bool Enabled { get; set; } //TODO move this TrackerPolicy
         [ProtoMember(5)]
         public ICollection<Condition> Conditions { get; set; }
         [ProtoMember(6)]

@@ -17,9 +17,6 @@ namespace SpecificationTest.Hooks
         [BeforeTestRun(Order = 100)]
         public static void SetupWebDriver()
         {
-            var capabilities = new OpenQA.Selenium.Firefox.FirefoxOptions().ToCapabilities();
-            TestRunContext.WebDriver = new RemoteWebDriver(new Uri(TestSettings.SeleniumHubAddress), capabilities);
-
             //Create dir for screenshots
             Directory.CreateDirectory(_ScreenShotDir);
         }
@@ -27,7 +24,7 @@ namespace SpecificationTest.Hooks
         [AfterScenario]
         public static void SaveScenarioScreenShot(ScenarioContext scenarioContext)
         {
-            var ss = ((ITakesScreenshot)TestRunContext.WebDriver).GetScreenshot();
+            var ss = ((ITakesScreenshot) DIContainer.Default.Get<IWebDriver>()).GetScreenshot();
             ss.SaveAsFile(Path.Combine(_ScreenShotDir, $"{scenarioContext.ScenarioInfo.Title}.png"),
                 ScreenshotImageFormat.Png);
         }

@@ -12,6 +12,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.0.100-buster AS build
 ARG VERSION=0.1.0-devbuild
 WORKDIR /src
 COPY ["TorrentGrease.Server/TorrentGrease.Server.csproj", "TorrentGrease.Server/"]
+COPY ["TorrentGrease.GrpcClient/TorrentGrease.GrpcClient.csproj", "TorrentGrease.GrpcClient/"]
 COPY ["TorrentGrease.Data/TorrentGrease.Data.csproj", "TorrentGrease.Data/"]
 COPY ["TorrentGrease.Shared/TorrentGrease.Shared.csproj", "TorrentGrease.Shared/"]
 COPY ["TorrentGrease.TorrentClient/TorrentGrease.TorrentClient.csproj", "TorrentGrease.TorrentClient/"]

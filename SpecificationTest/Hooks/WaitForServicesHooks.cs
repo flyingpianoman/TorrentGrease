@@ -27,7 +27,7 @@ namespace SpecificationTest.Hooks
                 retryDelay: TimeSpan.FromMilliseconds(100),
                 timeout: TimeSpan.FromSeconds(10));
 
-        [BeforeTestRun(Order = 1)]
+        [BeforeTestRun(Order = 2)]
         public static async Task WaitForServices()
         {
             await Task.WhenAll(WaitForTransmissionAsync(),

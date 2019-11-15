@@ -1,4 +1,5 @@
 ﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Remote;
 using SpecificationTest.Pages;
 using System;
 using System.Collections.Generic;
@@ -9,12 +10,21 @@ namespace SpecificationTest.Crosscutting
 {
     internal static class IWebDriverExtensions
     {
+        private static IPage _currentPage;
+
+        public static void RegisterWebDriver(this DIContainer diContainer)
+        {
+            var capabilities = new OpenQA.Selenium.Firefox.FirefoxOptions().ToCapabilities();
+            var driver = new RemoteWebDriver(new Uri(TestSettings.SeleniumHubAddress), capabilities);
+            diContainer.Register<IWebDriver>(driver);
+        }
+
         public static async Task<TPage> NavigateToPageAsync<TPage>(this IWebDriver webDriver, string url)
             where TPage : IPage
         {
             webDriver.Navigate().GoToUrl(url);
             var page = await CreateAndInitPageAsync<TPage>(webDriver).ConfigureAwait(false);
-            TestRunContext.CurrentPage = page;
+            _currentPage = page;
             return page;
         }
 
@@ -22,7 +32,7 @@ namespace SpecificationTest.Crosscutting
         public static TPage CurrentPageAs<TPage>(this IWebDriver webDriver)
             where TPage : IPage
         {
-            return (TPage) TestRunContext.CurrentPage;
+            return (TPage)_currentPage;
         }
 #pragma warning restore IDE0060 // Remove unused parameter
 

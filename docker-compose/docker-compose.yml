@@ -12,6 +12,7 @@ services:
       - TORRENTCLIENT__PASSWORD=pwd
     volumes:
       - torrent-grease-data:/app/data
+      - torrent-grease-data-protection-keys:/root/.aspnet/DataProtection-Keys
     ports:
       - 5656:5656
       - 5657:5657
@@ -37,4 +38,5 @@ services:
 
 volumes:
   torrent-grease-data:
+  torrent-grease-data-protection-keys:
   transmission-data:

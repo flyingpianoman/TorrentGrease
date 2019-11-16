@@ -13,13 +13,13 @@ namespace SpecificationTest.Pages
         internal readonly static PolicyWrap WaitForWebElementPolicy = Policy
             .Handle<AssertFailedException>()
             .WaitAndRetryUntilTimeout(
-                retryDelay: TimeSpan.FromMilliseconds(100),
+                retryDelay: TimeSpan.FromMilliseconds(10),
                 timeout: TimeSpan.FromSeconds(10));
 
         internal readonly static AsyncPolicyWrap WaitForWebElementPolicyAsync = Policy
             .Handle<AssertFailedException>()
             .WaitAndRetryUntilTimeoutAsync(
-                retryDelay: TimeSpan.FromMilliseconds(100),
+                retryDelay: TimeSpan.FromMilliseconds(10),
                 timeout: TimeSpan.FromSeconds(10));
     }
 }

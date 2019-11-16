@@ -6,12 +6,13 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using TorrentGrease.Data;
+using TorrentGrease.Data.Hosting;
 
 namespace SpecificationTest.Crosscutting
 {
     public sealed class TorrentGreaseDBService : IAsyncDisposable
     {
-        private static readonly string _PrepDBPath = Path.Combine(Path.GetTempPath(), "torrent-grease", "clean.db");
+        private static readonly string _PrepDBPath = Path.Combine(Path.GetTempPath(), "torrent-grease", "prep.db");
         public const string ContainerDBDirPath = "/app/data";
         public const string ContainerDBFileName = "TorrentGrease.db";
         public const string ContainerDBPath = ContainerDBDirPath + "/" + ContainerDBFileName;
@@ -38,15 +39,21 @@ namespace SpecificationTest.Crosscutting
             }
             set => _dbContext = value;
         }
-        public async Task DownloadCleanDBFromContainerAsync()
+        public async Task CreateCleanDBAsync()
         {
-            var archiveData = await _dockerClient.Containers.GetArchiveFromContainerByNameAsync(ContainerDBPath, TestSettings.TorrentGreaseContainerName);
-
-            using (archiveData.Stream)
+            if(File.Exists(_PrepDBPath))
             {
-                _CleanDBTarMemoryStream = new MemoryStream();
-                await archiveData.Stream.CopyToAsync(_CleanDBTarMemoryStream);
+                File.Delete(_PrepDBPath);
             }
+
+            var dbContext = CreateDBContext();
+
+            var dbInitializer = new DbInitializer(dbContext);
+            await dbInitializer.InitializeAsync();
+
+            await dbContext.DisposeAsync(); //make sure that everything is written to disk
+
+            _CleanDBTarMemoryStream = ArchiveHelper.CreateTarStream(_PrepDBPath, ContainerDBFileName);
         }
 
         public async Task UploadCleanDBToContainerAsync()
@@ -60,6 +67,11 @@ namespace SpecificationTest.Crosscutting
             _CleanDBTarMemoryStream.Position = 0;
             ArchiveHelper.ExtractSingleFileFromTar(_CleanDBTarMemoryStream, _PrepDBPath);
 
+            return CreateDBContext();
+        }
+
+        private static TorrentGreaseDbContext CreateDBContext()
+        {
             var optionsBuilder = new DbContextOptionsBuilder<TorrentGreaseDbContext>();
             optionsBuilder.UseSqlite("Data Source=" + _PrepDBPath);
             return new TorrentGreaseDbContext(optionsBuilder.Options);
@@ -78,10 +90,11 @@ namespace SpecificationTest.Crosscutting
         {
             await DbContext.SaveChangesAsync();
             await DbContext.DisposeAsync();
-            DbContext = null;
 
             using var tarStream = ArchiveHelper.CreateTarStream(_PrepDBPath, ContainerDBFileName);
             await _dockerClient.Containers.UploadTarredFileToContainerAsync(tarStream, TestSettings.TorrentGreaseContainerName, ContainerDBDirPath);
+
+            DbContext = CreateDBContext();
         }
 
         public async ValueTask DisposeAsync()

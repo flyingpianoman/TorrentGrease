@@ -21,15 +21,5 @@ namespace TorrentGrease.Server.Services
         {
             return await _policyRepository.GetAllAsync().ConfigureAwait(false);
         }
-
-        public ValueTask Test()
-        {
-            Console.WriteLine("============================================== test ==================================");
-            Console.WriteLine("============================================== test ==================================");
-            Console.WriteLine("============================================== test ==================================");
-            Console.WriteLine("============================================== test ==================================");
-            Console.WriteLine("============================================== test ==================================");
-            return new ValueTask(Task.CompletedTask);
-        }
     }
 }

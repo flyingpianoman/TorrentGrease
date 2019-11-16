@@ -17,13 +17,15 @@ namespace SpecificationTest.Hooks
         [BeforeTestRun(Order = 200)]
         public static async Task DownloadCleanDBFromContainerAsync()
         {
-            await DIContainer.Default.Get<TorrentGreaseDBService>().DownloadCleanDBFromContainerAsync();
+            await DIContainer.Default.Get<TorrentGreaseDBService>().CreateCleanDBAsync();
         }
 
         [BeforeScenario]
         public static async Task UploadCleanDBToContainerAsync()
         {
-            await DIContainer.Default.Get<TorrentGreaseDBService>().UploadCleanDBToContainerAsync();
+            var torrentGreaseDBService = DIContainer.Default.Get<TorrentGreaseDBService>();
+            await torrentGreaseDBService.UploadCleanDBToContainerAsync();
+            torrentGreaseDBService.DbContext = null; //ensures that a clean prep dbcontext is created each test
         }
     }
 }

@@ -4,6 +4,12 @@
 	I want to see all policies I have defined
 
 Background:
+    
+Scenario: View empty policies page
+	When I navigate to the policy overview
+	Then I see a no policies created message
+        
+Scenario: View filled policies page
 	Given the following trackers are staged
 		| Name                 | TrackerUrl1                  | TrackerUrl2                 |
 		| LinuxTracker         | http://linuxtracker.org:2710 |                             |
@@ -18,8 +24,6 @@ Background:
 		| Longterm  | TorrentGreaseTracker |
 		| Shortterm | LinuxTracker         |
 	And the staged data is uploaded to torrent grease
-
-Scenario: View policies
 	When I navigate to the policy overview
 	Then I see an overview of the following policies
 		| Name      | Description             | Tracker1     | Tracker2             |

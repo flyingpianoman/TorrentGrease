@@ -8,5 +8,5 @@
 
 Scenario: Open the application
 	When I navigate to the root url
-	Then I see an overview of all policies
+	Then I see a no policies created message
 	And I can see the navigation menu

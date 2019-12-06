@@ -44,16 +44,13 @@ namespace TorrentGrease.Data
                 .Entity<Shared.Tracker>()
                 .ToTable(nameof(Shared.Tracker));
 
-            trackerBuilder.Property(e => e.TrackerUrls)
-                .HasConversion(
-                    value => JsonConvert.SerializeObject(value),
-                    serializedValue => JsonConvert.DeserializeObject<IEnumerable<string>>(serializedValue).ToList());
         }
 
         private static void ConfigurePolicyModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .Entity<Shared.Policy>()
+                .Ignore(p => p.Trackers)
                 .ToTable(nameof(Shared.Policy));
         }
 

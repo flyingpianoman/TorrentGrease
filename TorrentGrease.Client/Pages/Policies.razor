@@ -5,25 +5,55 @@
 
 @if (policies == null)
 {
-    <p><em>Loading...</em></p>
+    <div class="sk-wave">
+        <div class="sk-wave-rect"></div>
+        <div class="sk-wave-rect"></div>
+        <div class="sk-wave-rect"></div>
+        <div class="sk-wave-rect"></div>
+        <div class="sk-wave-rect"></div>
+    </div>
+}
+else if (!policies.Any())
+{
+    <p data-content="policy-card-container">
+        <em data-content="no-policies-message">No policies have been created yet.</em>
+    </p>
 }
 else
 {
-    <table class="table" id="policies-table">
-        <thead>
-            <tr>
-                <th>Name</th>
-            </tr>
-        </thead>
-        <tbody>
+    <hr />
+    <div class="container-fluid">
+        <div class="row" data-content="policy-card-container">
             @foreach (var policy in policies)
             {
-                <tr>
-                    <td>@policy.Name</td>
-                </tr>
+                <div data-content="policy" class="col-auto mb-3" style="width: 18rem;">
+                    <Card Class="h-100">
+                        <CardBody>
+                            <h4 class="card-title" data-content="title">@policy.Name</h4>
+                            <span data-content="description">@policy.Description</span>
+                        </CardBody>
+                        <CardBody>
+                            @foreach (var tracker in policy.Trackers)
+                            {
+                                <span data-content="tracker" class="badge badge-light">@tracker.Name</span>
+                            }
+                        </CardBody>
+                    </Card>
+                </div>
             }
-        </tbody>
-    </table>
+
+            <div class="col-auto mb-3" style="width: 18rem;">
+                <Card Class="h-100 border-secondary bg-transparent text-center">
+                    <div class="card-body text-center">
+                        <div class="d-table w-100 h-100">
+                            <i class="far fa-plus-square d-table-cell align-middle" style="font-size: 4rem;"></i>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+        </div>
+    </div>
+
 }
 
 @code {

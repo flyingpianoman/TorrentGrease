@@ -10,22 +10,24 @@ using TechTalk.SpecFlow;
 namespace SpecificationTest.Hooks
 {
     [Binding]
-    public class SeleniumHooks
+    public static class SeleniumHooks
     {
-        private const string _ScreenShotDir = "screenshots";
+        private const string ScreenShotDir = "screenshots";
 
         [BeforeTestRun(Order = 100)]
         public static void SetupWebDriver()
         {
             //Create dir for screenshots
-            Directory.CreateDirectory(_ScreenShotDir);
+            Directory.CreateDirectory(ScreenShotDir);
         }
 
         [AfterScenario]
         public static void SaveScenarioScreenShot(ScenarioContext scenarioContext)
         {
+            if(scenarioContext == null) throw new ArgumentNullException(nameof(scenarioContext));
+
             var ss = ((ITakesScreenshot) DIContainer.Default.Get<IWebDriver>()).GetScreenshot();
-            ss.SaveAsFile(Path.Combine(_ScreenShotDir, $"{scenarioContext.ScenarioInfo.Title}.png"),
+            ss.SaveAsFile(Path.Combine(ScreenShotDir, $"{scenarioContext.ScenarioInfo.Title}.png"),
                 ScreenshotImageFormat.Png);
         }
     }

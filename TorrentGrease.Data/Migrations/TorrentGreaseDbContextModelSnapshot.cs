@@ -14,23 +14,32 @@ namespace TorrentGrease.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0-preview5.19227.1");
+                .HasAnnotation("ProductVersion", "3.0.0");
 
-            modelBuilder.Entity("TorrentGrease.Data.Models.Action", b =>
+            modelBuilder.Entity("TorrentGrease.Shared.Action", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ActionType")
-                        .IsRequired();
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<string>("Configuration");
+                    b.Property<string>("Configuration")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(50);
 
-                    b.Property<int>("Order");
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int?>("PolicyId");
+                    b.Property<int?>("PolicyId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -42,21 +51,28 @@ namespace TorrentGrease.Data.Migrations
                     b.ToTable("Action");
                 });
 
-            modelBuilder.Entity("TorrentGrease.Data.Models.Condition", b =>
+            modelBuilder.Entity("TorrentGrease.Shared.Condition", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ConditionType")
-                        .IsRequired();
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<string>("Configuration");
+                    b.Property<string>("Configuration")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("LogicalOperator");
+                    b.Property<int>("LogicalOperator")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int>("Order");
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int>("PolicyId");
+                    b.Property<int>("PolicyId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -68,41 +84,55 @@ namespace TorrentGrease.Data.Migrations
                     b.ToTable("Condition");
                 });
 
-            modelBuilder.Entity("TorrentGrease.Data.Models.Policy", b =>
+            modelBuilder.Entity("TorrentGrease.Shared.Policy", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
-                    b.Property<bool>("Enabled");
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(300);
 
-                    b.Property<string>("Name");
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int>("Order");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(50);
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.ToTable("Policy");
                 });
 
-            modelBuilder.Entity("TorrentGrease.Data.Models.Tracker", b =>
+            modelBuilder.Entity("TorrentGrease.Shared.Tracker", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name");
-
-                    b.Property<string>("TrackerUrls");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(50) ;
 
                     b.HasKey("Id");
 
                     b.ToTable("Tracker");
                 });
 
-            modelBuilder.Entity("TorrentGrease.Data.Models.TrackerPolicy", b =>
+            modelBuilder.Entity("TorrentGrease.Shared.TrackerPolicy", b =>
                 {
-                    b.Property<int>("TrackerId");
+                    b.Property<int>("TrackerId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int>("PolicyId");
+                    b.Property<int>("PolicyId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("TrackerId", "PolicyId");
 
@@ -111,31 +141,31 @@ namespace TorrentGrease.Data.Migrations
                     b.ToTable("TrackerPolicy");
                 });
 
-            modelBuilder.Entity("TorrentGrease.Data.Models.Action", b =>
+            modelBuilder.Entity("TorrentGrease.Shared.Action", b =>
                 {
-                    b.HasOne("TorrentGrease.Data.Models.Policy", null)
+                    b.HasOne("TorrentGrease.Shared.Policy", null)
                         .WithMany("Actions")
                         .HasForeignKey("PolicyId");
                 });
 
-            modelBuilder.Entity("TorrentGrease.Data.Models.Condition", b =>
+            modelBuilder.Entity("TorrentGrease.Shared.Condition", b =>
                 {
-                    b.HasOne("TorrentGrease.Data.Models.Policy", null)
+                    b.HasOne("TorrentGrease.Shared.Policy", null)
                         .WithMany("Conditions")
                         .HasForeignKey("PolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TorrentGrease.Data.Models.TrackerPolicy", b =>
+            modelBuilder.Entity("TorrentGrease.Shared.TrackerPolicy", b =>
                 {
-                    b.HasOne("TorrentGrease.Data.Models.Policy", "Policy")
+                    b.HasOne("TorrentGrease.Shared.Policy", "Policy")
                         .WithMany("TrackerPolicies")
                         .HasForeignKey("PolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TorrentGrease.Data.Models.Tracker", "Tracker")
+                    b.HasOne("TorrentGrease.Shared.Tracker", "Tracker")
                         .WithMany("TrackerPolicies")
                         .HasForeignKey("TrackerId")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -19,7 +19,7 @@ namespace SpecificationTest.Steps
         public async Task NavigateToTheRootUrl()
         {
             await WebDriver
-                .NavigateToPageAsync<PoliciesOverviewPage>(TestSettings.TorrentGreaseDockerAddress);
+                .NavigateToPageAsync<PoliciesOverviewPage>(TestSettings.TorrentGreaseDockerAddress).ConfigureAwait(false);
         }
 
         [Then(@"I can see the navigation menu")]

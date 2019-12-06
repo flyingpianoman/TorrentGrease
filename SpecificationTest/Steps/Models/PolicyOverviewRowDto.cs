@@ -9,5 +9,6 @@ namespace SpecificationTest.Steps.Models
         public string Name { get; set; }
         public string Tracker1 { get; set; }
         public string Tracker2 { get; set; }
+        public string Description { get; set; }
     }
 }

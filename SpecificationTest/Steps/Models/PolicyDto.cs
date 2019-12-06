@@ -7,5 +7,6 @@ namespace SpecificationTest.Steps.Models
     public class PolicyDto
     {
         public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

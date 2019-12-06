@@ -10,7 +10,7 @@ namespace SpecificationTest.Pages.Components
 {
     class NavMenuComponent : IComponent
     {
-        private const string _NavMenuLinkSelector = "#navMenu > ul.nav > li > a";
+        private const string NavMenuLinkSelector = "#navMenu > ul.nav > li > a";
         private readonly IWebDriver _webDriver;
         public List<NavMenuLinkComponent> NavMenuLinks { get; private set; }
 
@@ -25,19 +25,19 @@ namespace SpecificationTest.Pages.Components
             NavMenuLinks = await PageHelper.WaitForWebElementPolicyAsync
                 .ExecuteAsync(async () =>
                 {
-                    var elements = _webDriver.FindElements(By.CssSelector(_NavMenuLinkSelector));
+                    var elements = _webDriver.FindElements(By.CssSelector(NavMenuLinkSelector));
                     elements.Should().NotBeEmpty();
                     var links = new List<NavMenuLinkComponent>(elements.Count);
 
                     foreach (var element in elements)
                     {
                         var link = new NavMenuLinkComponent(element);
-                        await link.InitializeAsync();
+                        await link.InitializeAsync().ConfigureAwait(false);
                         links.Add(link);
                     }
 
                     return links;
-                });
+                }).ConfigureAwait(false);
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SpecificationTest.Pages
 {
-    abstract class PageBase : IPage
+    internal abstract class PageBase : IPage
     {
         protected readonly IWebDriver _webDriver;
         public NavMenuComponent NavigationMenu { get; private set; }

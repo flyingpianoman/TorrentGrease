@@ -24,10 +24,10 @@ steps:
     configFilePath: './GitVersion.yml'
 
 - task: UseDotNet@2
-  displayName: Install dotnet 3.0 sdk
+  displayName: Install dotnet 3.1 sdk
   inputs:
     packageType: 'sdk'
-    version: '3.0.100'
+    version: '3.1.100-preview3-014645'
     includePreviewVersions: true
 
 # Build/restore the BuildKit tool, for some reason this is way faster than using docker load

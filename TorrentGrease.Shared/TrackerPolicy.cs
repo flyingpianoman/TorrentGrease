@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TorrentGrease.Shared
 {
-    [ProtoContract]
+    [ProtoContract] //AsReferenceDefault isn't supported yet so null out Policy or Tracker to prevent circular references
     public class TrackerPolicy
     {
         [ProtoMember(1)]

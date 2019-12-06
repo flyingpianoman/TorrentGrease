@@ -18,9 +18,9 @@ using TorrentGrease.TorrentClient.Transmission;
 namespace SpecificationTest.Hooks
 {
     [Binding]
-    public class WaitForServicesHooks
+    public static class WaitForServicesHooks
     {
-        private readonly static AsyncPolicyWrap _WaitForHealthyPolicy = Policy
+        private static readonly AsyncPolicyWrap _WaitForHealthyPolicy = Policy
             .Handle<HttpRequestException>()
             .Or<AssertFailedException>()
             .WaitAndRetryUntilTimeoutAsync(
@@ -32,7 +32,7 @@ namespace SpecificationTest.Hooks
         {
             await Task.WhenAll(WaitForTransmissionAsync(),
                                WaitForTorrentGreaseAsync(),
-                               WaitForSeleniumHubAsync());
+                               WaitForSeleniumHubAsync()).ConfigureAwait(false);
         }
 
         private static async Task WaitForTransmissionAsync()
@@ -43,7 +43,7 @@ namespace SpecificationTest.Hooks
             {
                 await _WaitForHealthyPolicy.ExecuteAsync(async () =>
                     {
-                        await transmissionClient.GetAllTorrentsAsync();
+                        await transmissionClient.GetAllTorrentsAsync().ConfigureAwait(false);
                     }).ConfigureAwait(false);
             }
             catch (Polly.Timeout.TimeoutRejectedException e)
@@ -71,7 +71,8 @@ namespace SpecificationTest.Hooks
             {
                 await _WaitForHealthyPolicy.ExecuteAsync(async () =>
                     {
-                        using var resp = await httpClient.GetAsync(TestSettings.TorrentGreaseExposedAddress + "/health").ConfigureAwait(false);
+                        var healthUri = new Uri(TestSettings.TorrentGreaseExposedAddress + "/health");
+                        using var resp = await httpClient.GetAsync(healthUri).ConfigureAwait(false);
                         resp.StatusCode.Should().Be(HttpStatusCode.OK);
                     }).ConfigureAwait(false);
             }
@@ -88,9 +89,10 @@ namespace SpecificationTest.Hooks
             {
                 await _WaitForHealthyPolicy.ExecuteAsync(async () =>
                     {
-                        using var resp = await httpClient.GetAsync(TestSettings.SeleniumHubAddress + "/status").ConfigureAwait(false);
+                        var healthUri = new Uri(TestSettings.SeleniumHubAddress + "/status");
+                        using var resp = await httpClient.GetAsync(healthUri).ConfigureAwait(false);
                         resp.StatusCode.Should().Be(HttpStatusCode.OK);
-                        var statusJson = JObject.Parse(await resp.Content.ReadAsStringAsync());
+                        var statusJson = JObject.Parse(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
                         statusJson["value"]["ready"].Value<bool>().Should().BeTrue();
                     }).ConfigureAwait(false);
             }

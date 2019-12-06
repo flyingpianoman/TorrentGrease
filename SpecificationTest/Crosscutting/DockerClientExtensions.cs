@@ -12,50 +12,49 @@ namespace SpecificationTest.Crosscutting
 {
     public static class DockerClientExtensions
     {
-#pragma warning disable IDE0067 // Dispose objects before losing scope -> disposed by DI container
-        public static void RegisterDockerClient(this DIContainer diContainer)
+        internal static void RegisterDockerClient(this DIContainer diContainer)
         {
             var dockerAddress = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
                                 ? "unix:///var/run/docker.sock"
                                 : "npipe://./pipe/docker_engine"; //windows addr
-            var dockerClient = new DockerClientConfiguration(new Uri(dockerAddress)).CreateClient();
+            using var dockerClientConfiguration = new DockerClientConfiguration(new Uri(dockerAddress));
+            var dockerClient = dockerClientConfiguration.CreateClient();
             diContainer.Register(dockerClient);
         }
-#pragma warning restore IDE0067 // Dispose objects before losing scope
 
-        public static async Task<string> GetContainerIdByNameAsync(this IContainerOperations containerOperations, 
+        internal static async Task<string> GetContainerIdByNameAsync(this IContainerOperations containerOperations, 
             string containerName)
         {
-            var containers = await containerOperations.ListContainersAsync(new ContainersListParameters());
+            var containers = await containerOperations.ListContainersAsync(new ContainersListParameters()).ConfigureAwait(false);
             return containers.Single(c => c.State == "running" && c.Names.Contains("/" + containerName)).ID;
         }
 
-        public static async Task<GetArchiveFromContainerResponse> GetArchiveFromContainerAsync(this IContainerOperations containerOperations, 
+        internal static async Task<GetArchiveFromContainerResponse> GetArchiveFromContainerAsync(this IContainerOperations containerOperations, 
             string sourcePath, string containerId)
         {
             return await containerOperations.GetArchiveFromContainerAsync(containerId, new GetArchiveFromContainerParameters
             {
                 Path = sourcePath
-            }, false);
+            }, false).ConfigureAwait(false);
         }
 
-        public static async Task<GetArchiveFromContainerResponse> GetArchiveFromContainerByNameAsync(this IContainerOperations containerOperations,
+        internal static async Task<GetArchiveFromContainerResponse> GetArchiveFromContainerByNameAsync(this IContainerOperations containerOperations,
             string sourcePath, string containerName)
         {
-            string containerId = await containerOperations.GetContainerIdByNameAsync(containerName);
-            var archiveData = await containerOperations.GetArchiveFromContainerAsync(sourcePath, containerId);
+            string containerId = await containerOperations.GetContainerIdByNameAsync(containerName).ConfigureAwait(false);
+            var archiveData = await containerOperations.GetArchiveFromContainerAsync(sourcePath, containerId).ConfigureAwait(false);
             return archiveData;
         }
 
-        public static async Task UploadTarredFileToContainerAsync(this IContainerOperations containerOperations, 
+        internal static async Task UploadTarredFileToContainerAsync(this IContainerOperations containerOperations, 
             MemoryStream tarredFileStream, string containerName, string destinationPath)
         {
-            var id = await containerOperations.GetContainerIdByNameAsync(containerName);
+            var id = await containerOperations.GetContainerIdByNameAsync(containerName).ConfigureAwait(false);
             tarredFileStream.Position = 0;
             await containerOperations.ExtractArchiveToContainerAsync(
                 id,
                 new ContainerPathStatParameters { AllowOverwriteDirWithFile = true, Path = destinationPath },
-                tarredFileStream);
+                tarredFileStream).ConfigureAwait(false);
         }
     }
 }

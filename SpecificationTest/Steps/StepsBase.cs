@@ -8,7 +8,7 @@ namespace SpecificationTest.Steps
 {
     public abstract class StepsBase
     {
-        public DIContainer DI => DIContainer.Default;
-        protected IWebDriver WebDriver => this.DI.Get<IWebDriver>();
+        public static DIContainer DI => DIContainer.Default;
+        protected IWebDriver WebDriver => DI.Get<IWebDriver>();
     }
 }

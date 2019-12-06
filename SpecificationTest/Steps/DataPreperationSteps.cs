@@ -16,7 +16,7 @@ namespace SpecificationTest.Steps
     [Binding]
     public class DataPreperationSteps : StepsBase
     {
-        private TorrentGreaseDBService TorrentGreaseDBService => this.DI.Get<TorrentGreaseDBService>();
+        private TorrentGreaseDBService TorrentGreaseDBService => DI.Get<TorrentGreaseDBService>();
         private TorrentGreaseDbContext DbContext => TorrentGreaseDBService.DbContext;
 
         [Given(@"the following trackers are staged")]
@@ -27,13 +27,13 @@ namespace SpecificationTest.Steps
                 DbContext.Trackers.Add(new Tracker
                 {
                     Name = trackerDto.Name,
-                    TrackerUrls = String.IsNullOrWhiteSpace(trackerDto.TrackerUrl2)
-                        ? new List<string> { trackerDto.TrackerUrl1 }
-                        : new List<string> { trackerDto.TrackerUrl1, trackerDto.TrackerUrl2 }
+                    //TrackerUrls = String.IsNullOrWhiteSpace(trackerDto.TrackerUrl2)
+                    //    ? new List<string> { trackerDto.TrackerUrl1 }
+                    //    : new List<string> { trackerDto.TrackerUrl1, trackerDto.TrackerUrl2 }
                 });
             }
 
-            await DbContext.SaveChangesAsync();
+            await DbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         [Given(@"the following policies are staged")]
@@ -43,11 +43,12 @@ namespace SpecificationTest.Steps
             {
                 DbContext.Policies.Add(new Policy
                 {
-                    Name = policyDto.Name
+                    Name = policyDto.Name,
+                    Description = policyDto.Description ?? $"{policyDto.Name} description"
                 });
             }
 
-            await DbContext.SaveChangesAsync();
+            await DbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         [Given(@"the following tracker policies are staged")]
@@ -66,13 +67,13 @@ namespace SpecificationTest.Steps
                 });
             }
 
-            await DbContext.SaveChangesAsync();
+            await DbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         [Given(@"the staged data is uploaded to torrent grease")]
         public async ValueTask GivenTheStagedDataIsUploadedToTorrentGrease()
         {
-            await TorrentGreaseDBService.UploadDBContextToContainerAsync();
+            await TorrentGreaseDBService.UploadDBContextToContainerAsync().ConfigureAwait(false);
         }
 
     }

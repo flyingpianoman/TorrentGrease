@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using OpenQA.Selenium;
 using SpecificationTest.Steps.Models;
+using SpecificationTest.Pages.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,8 @@ using System.Threading.Tasks;
 
 namespace SpecificationTest.Pages
 {
-    class PoliciesOverviewPage : PageBase
+    internal sealed class PoliciesOverviewPage : PageBase
     {
-        private const string _PoliciesTableId = "policies-table";
-        private IWebElement _tableElement;
-
         public PoliciesOverviewPage(IWebDriver webDriver)
             : base(webDriver)
         {
@@ -21,31 +19,32 @@ namespace SpecificationTest.Pages
 
         public override async Task InitializeAsync()
         {
-            await base.InitializeAsync();
+            await base.InitializeAsync().ConfigureAwait(false);
 
-            _tableElement = PageHelper.WaitForWebElementPolicy
+            var policiesCardContainer = PageHelper.WaitForWebElementPolicy
                 .Execute(() =>
                 {
-                    var elements = _webDriver.FindElements(By.Id(_PoliciesTableId));
+                    var elements = _webDriver.FindElements(By.CssSelector("*[data-content='policy-card-container']"));
                     elements.Count.Should().Be(1);
 
                     return elements[0];
                 });
+
+            var noPoliciesFoundMessageElement = policiesCardContainer
+                .FindElements(By.CssSelector("*[data-content='no-policies-message']"))
+                .SingleOrDefault();
+            NoPoliciesFoundMessage = noPoliciesFoundMessageElement?.Text;
+
+            var policyCards = policiesCardContainer.FindElements(By.CssSelector("*[data-content='policy']"));
+
+            Policies = policyCards
+                .Select(card => new Components.PolicyOverview.PolicyComponent(card))
+                .ToList();
+
+            await Policies.InitializeAsync();
         }
 
-        public IList<PolicyOverviewRowDto> Policies
-        {
-            get
-            {
-                var trs = _tableElement.FindElements(By.CssSelector("tbody > tr"));
-
-                return trs
-                    .Select(tr => new PolicyOverviewRowDto
-                    {
-                        Name = tr.FindElement(By.CssSelector("td")).Text
-                    })
-                    .ToList();
-            }
-        }
+        public IList<Components.PolicyOverview.PolicyComponent> Policies { get; private set; }
+        public string NoPoliciesFoundMessage { get; private set; }
     }
 }

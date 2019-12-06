@@ -7,7 +7,7 @@ namespace TorrentGrease.TorrentClient
 {
     public class TorrentClientSettings
     {
-        public string Url { get; set; } = string.Empty;
+        public Uri Url { get; set; } = null;
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Client { get; set; } = string.Empty;

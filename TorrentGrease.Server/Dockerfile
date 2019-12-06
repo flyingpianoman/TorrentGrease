@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.0.0-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.0-preview3-buster-slim AS base
 WORKDIR /app
 
 EXPOSE 5656
@@ -8,7 +8,7 @@ ENV ASPNETCORE_URLS=
 
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --fail http://localhost:5656/health || exit 1
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0.100-buster AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1.0-preview3-buster AS build
 ARG VERSION=0.1.0-devbuild
 WORKDIR /src
 COPY ["TorrentGrease.Server/TorrentGrease.Server.csproj", "TorrentGrease.Server/"]

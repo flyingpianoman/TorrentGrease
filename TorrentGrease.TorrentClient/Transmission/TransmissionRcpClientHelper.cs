@@ -9,7 +9,7 @@ namespace TorrentGrease.TorrentClient.Hosting
     {
         public static RpcClient.Client CreateTransmissionRpcClient(TorrentClientSettings settings)
         {
-            var rpcUrl = settings.Url.TrimEnd('/') + "/transmission/rpc";
+            var rpcUrl = settings.Url.AbsoluteUri.TrimEnd('/') + "/transmission/rpc";
             return new RpcClient.Client(rpcUrl, login: settings.Username, password: settings.Password);
         }
     }

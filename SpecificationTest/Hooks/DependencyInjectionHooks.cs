@@ -9,7 +9,7 @@ using TechTalk.SpecFlow;
 namespace SpecificationTest.Hooks
 {
     [Binding]
-    public class DependencyInjectionHooks
+    public sealed class DependencyInjectionHooks
     {
         [BeforeTestRun(Order = 1)]
         public static void InitDIContainer()

@@ -12,14 +12,15 @@ namespace SpecificationTest.Crosscutting
     {
         private static IPage _currentPage;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Driver is disposed by DI container")]
         public static void RegisterWebDriver(this DIContainer diContainer)
         {
             var capabilities = new OpenQA.Selenium.Firefox.FirefoxOptions().ToCapabilities();
-            var driver = new RemoteWebDriver(new Uri(TestSettings.SeleniumHubAddress), capabilities);
+            var driver = new RemoteWebDriver(TestSettings.SeleniumHubAddress, capabilities);
             diContainer.Register<IWebDriver>(driver);
         }
 
-        public static async Task<TPage> NavigateToPageAsync<TPage>(this IWebDriver webDriver, string url)
+        public static async Task<TPage> NavigateToPageAsync<TPage>(this IWebDriver webDriver, Uri url)
             where TPage : IPage
         {
             webDriver.Navigate().GoToUrl(url);

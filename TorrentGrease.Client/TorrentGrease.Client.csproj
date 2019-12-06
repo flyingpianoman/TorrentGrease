@@ -9,20 +9,29 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.0.0-preview9.19424.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="3.0.0-preview9.19424.4" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.0.0-preview9.19424.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="3.0.0-preview9.19424.4" />
+    <PackageReference Include="Blazorise.Bootstrap" Version="0.8.6.4" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.8.6.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.1.0-preview3.19555.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="3.1.0-preview3.19555.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.1.0-preview3.19555.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="3.1.0-preview3.19555.2" />
     <PackageReference Include="Grpc.Net.Client" Version="2.25.0" />
     <PackageReference Include="protobuf-net.Grpc" Version="1.0.13" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.7">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="System.Private.ServiceModel" Version="4.6.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TorrentGrease.GrpcClient\TorrentGrease.GrpcClient.csproj" />
     <ProjectReference Include="..\TorrentGrease.Shared\TorrentGrease.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="dist_wwwroot\js\jquery\" />
+    <Folder Include="dist_wwwroot\js\bootstrap\" />
+    <Folder Include="dist_wwwroot\js\popper\" />
   </ItemGroup>
 
   <!--Fix for https://github.com/aspnet/AspNetCore/issues/9704 -->

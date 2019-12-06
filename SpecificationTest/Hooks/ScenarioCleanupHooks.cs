@@ -12,19 +12,19 @@ using TorrentGrease.Shared;
 namespace SpecificationTest.Hooks
 {
     [Binding]
-    public class ScenarioCleanupHooks
+    public static class ScenarioCleanupHooks
     {
         [BeforeTestRun(Order = 200)]
-        public static async Task DownloadCleanDBFromContainerAsync()
+        public static async Task CreateCleanDBAsync()
         {
-            await DIContainer.Default.Get<TorrentGreaseDBService>().CreateCleanDBAsync();
+            await TorrentGreaseDBService.CreateCleanDBAsync().ConfigureAwait(false);
         }
 
         [BeforeScenario]
         public static async Task UploadCleanDBToContainerAsync()
         {
             var torrentGreaseDBService = DIContainer.Default.Get<TorrentGreaseDBService>();
-            await torrentGreaseDBService.UploadCleanDBToContainerAsync();
+            await torrentGreaseDBService.UploadCleanDBToContainerAsync().ConfigureAwait(false);
             torrentGreaseDBService.DbContext = null; //ensures that a clean prep dbcontext is created each test
         }
     }

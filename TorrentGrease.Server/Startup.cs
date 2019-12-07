@@ -15,7 +15,6 @@ using ProtoBuf.Grpc.Server;
 using TorrentGrease.Server.Services;
 using Knowit.Grpc.Web;
 using TorrentGrease.Server.Grpc;
-using TorrentGrease.Server.Blazor;
 using Microsoft.AspNetCore.DataProtection;
 
 namespace TorrentGrease.Server
@@ -60,7 +59,8 @@ namespace TorrentGrease.Server
                 app.UseBlazorDebugging();
             }
 
-            app.UseClientSideBlazorFiles(_config);
+            app.UseStaticFiles();
+            app.UseClientSideBlazorFiles<Client.Startup>();
             app.UseGrpcWeb();
             app.UseRouting();
 

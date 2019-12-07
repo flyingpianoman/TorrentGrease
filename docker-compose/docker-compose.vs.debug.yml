@@ -2,7 +2,5 @@ version: '3.4'
 
 services:
   torrentgrease.server:
-    environment:
-      - CLIENT_APP_ASSEMBLY_PATH_OVERRIDE=/TorrentGrease.Client/bin/Debug/netstandard2.1/TorrentGrease.Client.dll
     volumes:
       - ../TorrentGrease.Client:/TorrentGrease.Client

@@ -20,19 +20,14 @@ COPY ["TorrentGrease.Client/TorrentGrease.Client.csproj", "TorrentGrease.Client/
 RUN dotnet restore "TorrentGrease.Server/TorrentGrease.Server.csproj"
 COPY . .
 WORKDIR "/src/TorrentGrease.Server"
-RUN dotnet build "TorrentGrease.Server.csproj" -c Release -o /app -p:Version=${VERSION} /p:warnaserror=true /p:TreatWarningsAsErrors=true
+RUN dotnet build "TorrentGrease.Server.csproj" -c Release -o /app/build -p:Version=${VERSION} /p:warnaserror=true /p:TreatWarningsAsErrors=true
 
 FROM build AS publish
 ARG VERSION=0.1.0-devbuild
-RUN dotnet publish "TorrentGrease.Server.csproj" -c Release -o /app -p:Version=${VERSION}
-
-#Temp fix for https://github.com/aspnet/Blazor/issues/376
-RUN cp -rf /src/TorrentGrease.Client/dist_wwwroot/* /app/dist
-#Temp fix for https://github.com/aspnet/AspNetCore/issues/9704
-RUN rm -f /app/TorrentGrease.Client.blazor.config
-RUN echo "/app\n/app/TorrentGrease.Client.dll" > /app/TorrentGrease.Client.blazor.config
+RUN dotnet publish "TorrentGrease.Server.csproj" -c Release -o /app/publish -p:Version=${VERSION}
 
 FROM base AS final
+
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TorrentGrease.Server.dll"]

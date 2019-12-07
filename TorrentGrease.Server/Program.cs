@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TorrentGrease.Data.Hosting;
 
@@ -14,9 +15,8 @@ namespace TorrentGrease.Server
     {
         public static async Task Main(string[] args)
         {
-            //Temp fix for https://github.com/aspnet/Blazor/issues/376
 #if DEBUG
-            MoveWwwrootToDistDir();
+            CorrectBlazorConfigPaths();
 #endif
             var host = BuildWebHost(args);
             using (var scope = host.Services.CreateScope())
@@ -28,30 +28,13 @@ namespace TorrentGrease.Server
             await host.RunAsync();
         }
 
-        private static void MoveWwwrootToDistDir()
+        private static void CorrectBlazorConfigPaths()
         {
-            var wwwRootDir = new DirectoryInfo("/TorrentGrease.Client/dist_wwwroot");
-            var distDir = new DirectoryInfo("/TorrentGrease.Client/bin/Debug/netstandard2.1/dist");
-            CopyAll(wwwRootDir, distDir);
-        }
-
-        public static void CopyAll(DirectoryInfo source, DirectoryInfo target)
-        {
-            Directory.CreateDirectory(target.FullName);
-
-            // Copy each file into the new directory.
-            foreach (var fi in source.GetFiles())
-            {
-                fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
-            }
-
-            // Copy each subdirectory using recursion.
-            foreach (var diSourceSubDir in source.GetDirectories())
-            {
-                var nextTargetSubDir =
-                    target.CreateSubdirectory(diSourceSubDir.Name);
-                CopyAll(diSourceSubDir, nextTargetSubDir);
-            }
+            const string blazorConfigPath = @"/app/bin/Debug/netcoreapp3.1/TorrentGrease.Client.blazor.config";
+            var blazorConfig = File.ReadAllText(blazorConfigPath);
+            blazorConfig = Regex.Replace(blazorConfig, @"[a-zA-Z]:[\/\\].+?[\/\\]TorrentGrease.Client[\/\\]", "/TorrentGrease.Client/")
+                .Replace('\\', '/');
+            File.WriteAllText(blazorConfigPath, blazorConfig);
         }
 
         public static IHost BuildWebHost(string[] args) =>

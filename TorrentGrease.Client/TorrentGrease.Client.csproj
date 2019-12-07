@@ -26,30 +26,4 @@
     <ProjectReference Include="..\TorrentGrease.Shared\TorrentGrease.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="wwwroot\css\bootstrap\bootstrap.4.3.1.min.css" />
-    <None Include="wwwroot\css\fontawesome\css\all.5.4.1.css" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-brands-400.eot" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-brands-400.svg" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-brands-400.ttf" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-brands-400.woff" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-brands-400.woff2" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-regular-400.eot" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-regular-400.svg" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-regular-400.ttf" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-regular-400.woff" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-regular-400.woff2" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-solid-900.eot" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-solid-900.svg" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-solid-900.ttf" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-solid-900.woff" />
-    <None Include="wwwroot\css\fontawesome\webfonts\fa-solid-900.woff2" />
-    <None Include="wwwroot\css\site.css" />
-    <None Include="wwwroot\css\spinkit\spinkit.css" />
-    <None Include="wwwroot\index.html" />
-    <None Include="wwwroot\js\bootstrap\bootstrap.4.3.1.min.js" />
-    <None Include="wwwroot\js\jquery\jquery-3.3.1.slim.min.js" />
-    <None Include="wwwroot\js\popper\popper.1.14.7.min.js" />
-  </ItemGroup>
-
 </Project>

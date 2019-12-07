@@ -1,4 +1,6 @@
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.0-alpine3.10 AS base
+RUN apk add curl
+
 WORKDIR /app
 
 EXPOSE 5656

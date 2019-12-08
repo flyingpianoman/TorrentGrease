@@ -1,6 +1,17 @@
 #Architecture decision record
 In this document we'll record all architecture decisions and the rationale behind them. Decisions are sorted by date (oldest a lowest).
 
+## CQRS and background jobs
+Background jobs will be implemented by Hangfire with an inmemory db (not support for sqlite yet, and presistance isn't required).
+
+For a quick and responsive user experience, user actions should not block and wait but rather send a command and get notified on completion (or failure). 
+In software architecture with multiple services a messagebroker is often used to fulfill this need. 
+Since TorrentGrease should be easy to setup this isn't prefered. I've looked into MediatR to implement this design, but decided not to use it since it has a lot of overlap with HangFire.
+Since HangFire already offers resillient background job capabilities we can utilize this and add a small abstraction on top.
+This abstraction will serve as a 'messagebus' interface allowing us to send commands and notifications and have it find the matching background job to start by using conventions.
+This allows us to switch to a real messagebroker setup in the future or swap out hangfire with relative ease.
+
+In the past I've used NServiceBus for similar setups and it's a nice solution that does it's job. However Particular has becoma a bit too hungry for money in the past few years so I like to try different solutions. 
 
 ## Testing strategy: UnitTests, IntegrationTests, SpecificationTests
 TorrentGrease wil be covered by the following types of tests:

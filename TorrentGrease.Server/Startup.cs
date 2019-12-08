@@ -16,6 +16,11 @@ using TorrentGrease.Server.Services;
 using Knowit.Grpc.Web;
 using TorrentGrease.Server.Grpc;
 using Microsoft.AspNetCore.DataProtection;
+using Hangfire;
+using Hangfire.MemoryStorage;
+using System.Collections.Generic;
+using Hangfire.Dashboard;
+using TorrentGrease.Server.Hangfire;
 
 namespace TorrentGrease.Server
 {
@@ -37,6 +42,8 @@ namespace TorrentGrease.Server
 
             services.AddTorrentGreaseData(_config.GetConnectionString("DefaultConnection"));
             services.AddTorrentClient(_config.GetSection("torrentClient"));
+
+            services.AddHangfire(c => c.UseMemoryStorage());
 
             services.AddHealthChecks()
                 .AddTorrentGreaseDataCheck();
@@ -63,6 +70,9 @@ namespace TorrentGrease.Server
             app.UseClientSideBlazorFiles<Client.Startup>();
             app.UseGrpcWeb();
             app.UseRouting();
+
+            app.UseHangfireServer();
+            app.UseHangfireDashboard(options: new DashboardOptions { Authorization = new List<IDashboardAuthorizationFilter> { new AnonymousAuthFilter() } });
 
             app.UseHealthChecks("/health");
 

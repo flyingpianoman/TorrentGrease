@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Hangfire" Version="1.7.8" />
-    <PackageReference Include="Hangfire.MemoryStorage" Version="1.6.3" />
+    <PackageReference Include="Hangfire.Storage.SQLite" Version="0.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.1.0-preview4.19579.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.3" />
@@ -26,8 +26,10 @@
   <ItemGroup>
     <ProjectReference Include="..\TorrentGrease.Client\TorrentGrease.Client.csproj" />
     <ProjectReference Include="..\TorrentGrease.Data\TorrentGrease.Data.csproj" />
+    <ProjectReference Include="..\TorrentGrease.Hangfire\TorrentGrease.Hangfire.csproj" />
     <ProjectReference Include="..\TorrentGrease.Shared\TorrentGrease.Shared.csproj" />
     <ProjectReference Include="..\TorrentGrease.TorrentClient\TorrentGrease.TorrentClient.csproj" />
+    <ProjectReference Include="..\TorrentGrease.TorrentStatisticsHarvester\TorrentGrease.TorrentStatisticsHarvester.csproj" />
   </ItemGroup>
 
   <ItemGroup>

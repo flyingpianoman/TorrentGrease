@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace TorrentGrease.Data.Hosting
 {
-    public class DbInitializer
+    public class TorrentGreaseDbInitializer
     {
         private readonly ITorrentGreaseDbContext _torrentGreaseDbContext;
 
-        public DbInitializer(ITorrentGreaseDbContext torrentGreaseDbContext)
+        public TorrentGreaseDbInitializer(ITorrentGreaseDbContext torrentGreaseDbContext)
         {
             _torrentGreaseDbContext = torrentGreaseDbContext ?? throw new ArgumentNullException(nameof(torrentGreaseDbContext));
         }

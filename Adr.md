@@ -2,7 +2,7 @@
 In this document we'll record all architecture decisions and the rationale behind them. Decisions are sorted by date (oldest a lowest).
 
 ## CQRS and background jobs
-Background jobs will be implemented by Hangfire with an inmemory db (not support for sqlite yet, and presistance isn't required).
+Background jobs will be implemented by Hangfire with a sqlite db.
 
 For a quick and responsive user experience, user actions should not block and wait but rather send a command and get notified on completion (or failure). 
 In software architecture with multiple services a messagebroker is often used to fulfill this need. 

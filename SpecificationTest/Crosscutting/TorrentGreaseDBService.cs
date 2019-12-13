@@ -49,7 +49,7 @@ namespace SpecificationTest.Crosscutting
             using var dbContext = CreateDBContext();
             try
             {
-                var dbInitializer = new DbInitializer(dbContext);
+                var dbInitializer = new TorrentGreaseDbInitializer(dbContext);
                 await dbInitializer.InitializeAsync().ConfigureAwait(false);
             }
             finally

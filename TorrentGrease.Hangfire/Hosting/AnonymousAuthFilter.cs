@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TorrentGrease.Server.Hangfire
+namespace TorrentGrease.Hangfire.Hosting
 {
     public class AnonymousAuthFilter : IDashboardAuthorizationFilter
     {

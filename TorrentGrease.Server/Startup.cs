@@ -16,11 +16,9 @@ using TorrentGrease.Server.Services;
 using Knowit.Grpc.Web;
 using TorrentGrease.Server.Grpc;
 using Microsoft.AspNetCore.DataProtection;
-using Hangfire;
-using Hangfire.MemoryStorage;
 using System.Collections.Generic;
-using Hangfire.Dashboard;
-using TorrentGrease.Server.Hangfire;
+using TorrentGrease.TorrentStatisticsHarvester.Hosting;
+using TorrentGrease.Hangfire.Hosting;
 
 namespace TorrentGrease.Server
 {
@@ -43,7 +41,8 @@ namespace TorrentGrease.Server
             services.AddTorrentGreaseData(_config.GetConnectionString("DefaultConnection"));
             services.AddTorrentClient(_config.GetSection("torrentClient"));
 
-            services.AddHangfire(c => c.UseMemoryStorage());
+            services.AddHangfire(_config);
+            services.AddTorrentStatisticsHarvester();
 
             services.AddHealthChecks()
                 .AddTorrentGreaseDataCheck();
@@ -56,7 +55,7 @@ namespace TorrentGrease.Server
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IServiceProvider serviceProvider, IWebHostEnvironment env)
         {
             app.UseResponseCompression();
 
@@ -70,9 +69,9 @@ namespace TorrentGrease.Server
             app.UseClientSideBlazorFiles<Client.Startup>();
             app.UseGrpcWeb();
             app.UseRouting();
-
-            app.UseHangfireServer();
-            app.UseHangfireDashboard(options: new DashboardOptions { Authorization = new List<IDashboardAuthorizationFilter> { new AnonymousAuthFilter() } });
+            
+            app.UseHangfire();
+            app.UseTorrentStatisticsHarvester(serviceProvider);
 
             app.UseHealthChecks("/health");
 

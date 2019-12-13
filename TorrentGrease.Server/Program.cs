@@ -8,6 +8,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TorrentGrease.Data.Hosting;
+using TorrentGrease.Hangfire.Hosting;
 
 namespace TorrentGrease.Server
 {
@@ -22,7 +23,7 @@ namespace TorrentGrease.Server
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var dbInitializer = services.GetRequiredService<DbInitializer>();
+                var dbInitializer = services.GetRequiredService<TorrentGreaseDbInitializer>();
                 await dbInitializer.InitializeAsync();
             }
             await host.RunAsync();

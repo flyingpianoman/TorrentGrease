@@ -23,12 +23,55 @@ namespace TorrentGrease.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //Policy schema
             ConfigureActionModel(modelBuilder);
             ConfigureConditionModel(modelBuilder);
             ConfigurePolicyModel(modelBuilder);
             ConfigureTrackerModel(modelBuilder);
             ConfigureTrackerPolicyModel(modelBuilder);
+
+            //Statistics schema
+            ConfigureTorrentModel(modelBuilder);
+            ConfigureTorrentUploadDeltaSnapshotModel(modelBuilder);
+            ConfigureTrackerUrlCollectionModel(modelBuilder);
+            ConfigureTrackerUrlModel(modelBuilder);
         }
+
+        #region Statistics schema
+        private static void ConfigureTorrentModel(ModelBuilder modelBuilder)
+        {
+            var b = modelBuilder
+                .Entity<Shared.TorrentStatistics.Torrent>()
+                .ToTable(nameof(Shared.TorrentStatistics.Torrent));
+
+            b.HasIndex(t => t.Hash);
+        }
+
+        private static void ConfigureTorrentUploadDeltaSnapshotModel(ModelBuilder modelBuilder)
+        {
+            var b = modelBuilder
+                .Entity<Shared.TorrentStatistics.TorrentUploadDeltaSnapshot>()
+                .ToTable(nameof(Shared.TorrentStatistics.TorrentUploadDeltaSnapshot));
+
+            b.HasIndex(t => new { t.TorrentId, t.DateTime });
+        }
+
+        private static void ConfigureTrackerUrlCollectionModel(ModelBuilder modelBuilder)
+        {
+            var b = modelBuilder
+                .Entity<Shared.TorrentStatistics.TrackerUrlCollection>()
+                .ToTable(nameof(Shared.TorrentStatistics.TrackerUrlCollection));
+        }
+
+        private static void ConfigureTrackerUrlModel(ModelBuilder modelBuilder)
+        {
+            var b = modelBuilder
+                .Entity<Shared.TorrentStatistics.TrackerUrl>()
+                .ToTable(nameof(Shared.TorrentStatistics.TrackerUrl));
+
+            b.HasIndex(t => t.TrackerUrlCollectionId);
+        }
+        #endregion
 
         private static void ConfigureTrackerPolicyModel(ModelBuilder modelBuilder)
         {

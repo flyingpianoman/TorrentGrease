@@ -17,6 +17,7 @@ services:
       - 5657:5657
       
   transmission: #username = usr, password = pwd
+    container_name: transmission
     image: linuxserver/transmission:2.94-r1-ls14
     environment:
       - PUID=1000
@@ -27,6 +28,22 @@ services:
       - ./transmission/settings.json:/config/settings.json
     ports:
       - 9091:9091
+
+  transmission-downloader:
+    container_name: transmission-downloader
+    image: linuxserver/transmission:2.94-r1-ls14
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - transmission-downloader-data:/config
+    ports:
+      - 9092:9091
+
+  opentracker:
+    container_name: my-tracker
+    image: lednerb/opentracker-docker:latest
 
   #for ui testing. see also https://github.com/SeleniumHQ/docker-selenium#debugging
   selenium-firefox-standalone:
@@ -39,3 +56,4 @@ volumes:
   torrent-grease-data:
   torrent-grease-data-protection-keys:
   transmission-data:
+  transmission-downloader-data:

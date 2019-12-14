@@ -9,7 +9,7 @@ using TorrentGrease.Data;
 namespace TorrentGrease.Data.Migrations
 {
     [DbContext(typeof(TorrentGreaseDbContext))]
-    [Migration("20191214194845_InitialTorrentStatisticsSchema")]
+    [Migration("20191214205703_InitialTorrentStatisticsSchema")]
     partial class InitialTorrentStatisticsSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -118,10 +118,10 @@ namespace TorrentGrease.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BytesOnDisk")
+                    b.Property<long>("BytesOnDisk")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Hash")
+                    b.Property<string>("InfoHash")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Location")
@@ -130,10 +130,10 @@ namespace TorrentGrease.Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("SizeInBytes")
+                    b.Property<long>("SizeInBytes")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TotalUploadInBits")
+                    b.Property<long>("TotalUploadInBytes")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("WasInClientOnLastScan")
@@ -141,7 +141,7 @@ namespace TorrentGrease.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Hash");
+                    b.HasIndex("InfoHash");
 
                     b.ToTable("Torrent");
                 });
@@ -158,13 +158,13 @@ namespace TorrentGrease.Data.Migrations
                     b.Property<int>("TorrentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TotalUploadInBits")
+                    b.Property<long>("TotalUploadInBytes")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TrackerUrlCollectionId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("UploadDeltaSinceLastSnapshotInBits")
+                    b.Property<long>("UploadDeltaSinceLastSnapshotInBytes")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

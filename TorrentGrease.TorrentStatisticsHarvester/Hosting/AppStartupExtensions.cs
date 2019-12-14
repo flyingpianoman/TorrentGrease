@@ -18,7 +18,7 @@ namespace TorrentGrease.TorrentStatisticsHarvester.Hosting
             IServiceProvider serviceProvider)
         {
             var recuringJobManager = serviceProvider.GetRequiredService<IRecurringJobManager>();
-            recuringJobManager.AddOrUpdateJob<TorrentStatisticsHarvesterJob>("*/5 * * * *"); //every 5 min
+            recuringJobManager.AddOrUpdateAsyncJob<TorrentStatisticsHarvesterJob>("*/5 * * * *"); //every 5 min
 
             return app;
         }

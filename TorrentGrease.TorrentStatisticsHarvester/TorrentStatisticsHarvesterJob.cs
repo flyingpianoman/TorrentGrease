@@ -2,22 +2,26 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using TorrentGrease.Hangfire;
+using TorrentGrease.TorrentClient;
 
 namespace TorrentGrease.TorrentStatisticsHarvester
 {
-    public class TorrentStatisticsHarvesterJob : IJob
+    public class TorrentStatisticsHarvesterJob : IAsyncJob
     {
         private readonly ILogger<TorrentStatisticsHarvesterJob> _logger;
+        private readonly ITorrentClient _torrentClient;
 
-        public TorrentStatisticsHarvesterJob(ILogger<TorrentStatisticsHarvesterJob> logger)
+        public TorrentStatisticsHarvesterJob(ILogger<TorrentStatisticsHarvesterJob> logger, ITorrentClient torrentClient)
         {
             _logger = logger;
+            _torrentClient = torrentClient;
         }
 
-        public void Execute()
+        public async Task ExecuteAsync()
         {
-            _logger.LogInformation("Hello world from TorrentStatisticsHarvesterJob");
+            var torrents = await _torrentClient.GetAllTorrentsAsync().ConfigureAwait(false);
         }
     }
 }

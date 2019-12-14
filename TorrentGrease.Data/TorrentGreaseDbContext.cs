@@ -44,7 +44,7 @@ namespace TorrentGrease.Data
                 .Entity<Shared.TorrentStatistics.Torrent>()
                 .ToTable(nameof(Shared.TorrentStatistics.Torrent));
 
-            b.HasIndex(t => t.Hash);
+            b.HasIndex(t => t.InfoHash);
         }
 
         private static void ConfigureTorrentUploadDeltaSnapshotModel(ModelBuilder modelBuilder)

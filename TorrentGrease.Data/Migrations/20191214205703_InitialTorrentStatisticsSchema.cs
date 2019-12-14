@@ -13,13 +13,13 @@ namespace TorrentGrease.Data.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Hash = table.Column<string>(nullable: true),
+                    InfoHash = table.Column<string>(nullable: true),
                     WasInClientOnLastScan = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Location = table.Column<string>(nullable: true),
-                    SizeInBytes = table.Column<int>(nullable: false),
-                    BytesOnDisk = table.Column<int>(nullable: false),
-                    TotalUploadInBits = table.Column<int>(nullable: false)
+                    SizeInBytes = table.Column<long>(nullable: false),
+                    BytesOnDisk = table.Column<long>(nullable: false),
+                    TotalUploadInBytes = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,8 +47,8 @@ namespace TorrentGrease.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     DateTime = table.Column<DateTime>(nullable: false),
                     TorrentId = table.Column<int>(nullable: false),
-                    UploadDeltaSinceLastSnapshotInBits = table.Column<int>(nullable: false),
-                    TotalUploadInBits = table.Column<int>(nullable: false),
+                    UploadDeltaSinceLastSnapshotInBytes = table.Column<long>(nullable: false),
+                    TotalUploadInBytes = table.Column<long>(nullable: false),
                     TrackerUrlCollectionId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -89,9 +89,9 @@ namespace TorrentGrease.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Torrent_Hash",
+                name: "IX_Torrent_InfoHash",
                 table: "Torrent",
-                column: "Hash");
+                column: "InfoHash");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TorrentUploadDeltaSnapshot_TrackerUrlCollectionId",

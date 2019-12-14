@@ -13,17 +13,27 @@ else
     <table class="table">
         <thead>
             <tr>
+                <th>Info hash</th>
                 <th>Name</th>
-                <th>Size</th>
+                <th>Downloaded</th>
+                <th>Total size</th>
+                <th>Total uploaded</th>
+                <th>Location on disk</th>
+                <th>Tracker urls</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var torrent in torrents)
             {
-                <tr>
-                    <td>@torrent.Name</td>
-                    <td>@torrent.SizeInGB.ToString("N2") GB</td>
-                </tr>
+            <tr>
+                <td>@torrent.InfoHash</td>
+                <td>@torrent.Name</td>
+                <td>@torrent.GBsOnDisk.ToString("N2") GB</td>
+                <td>@torrent.SizeInGB.ToString("N2") GB</td>
+                <td>@torrent.TotalUploadInGB.ToString("N2") GB</td>
+                <td>@torrent.Location</td>
+                <td>@String.Join(", ", torrent.TrackerUrls)</td>
+            </tr>
             }
         </tbody>
     </table>

@@ -10,8 +10,8 @@ namespace TorrentGrease.Shared.TorrentStatistics
         public DateTime DateTime { get; set; }
         public int TorrentId { get; set; }
         public Torrent Torrent { get; set; }
-        public int UploadDeltaSinceLastSnapshotInBits { get; set; }
-        public int TotalUploadInBits { get; set; }
+        public long UploadDeltaSinceLastSnapshotInBytes { get; set; }
+        public long TotalUploadInBytes { get; set; }
         public int TrackerUrlCollectionId { get; set; }
         public TrackerUrlCollection TrackerUrlCollection { get; set; }
     }

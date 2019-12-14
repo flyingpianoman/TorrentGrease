@@ -23,9 +23,21 @@ namespace TorrentGrease.TorrentClient.Transmission
 
         public async Task<IEnumerable<Torrent>> GetAllTorrentsAsync()
         {
+            var fields = new[]
+            {
+                TorrentFields.TOTAL_SIZE, //is in bytes
+                TorrentFields.NAME,
+                TorrentFields.DOWNLOAD_DIR,
+                TorrentFields.HASH_STRING,
+                TorrentFields.TRACKERS,
+                TorrentFields.UPLOADED_EVER,
+                TorrentFields.LEFT_UNTIL_DONE,
+                TorrentFields.FILES
+            };
+
             try
             {
-                return (await _rpcClient.TorrentGetAsync(TorrentFields.ALL_FIELDS)
+                return (await _rpcClient.TorrentGetAsync(fields)
                     .ConfigureAwait(false))
                     .Torrents
                     .Select(t => t.ToSharedModel())

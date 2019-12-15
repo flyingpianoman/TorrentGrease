@@ -30,13 +30,8 @@ namespace SpecificationTest.Pages
                     return elements[0];
                 });
 
-            var noPoliciesFoundMessageElement = policiesCardContainer
-                .FindElements(By.CssSelector("*[data-content='no-policies-message']"))
-                .SingleOrDefault();
-            NoPoliciesFoundMessage = noPoliciesFoundMessageElement?.Text;
-
             var policyCards = policiesCardContainer.FindElements(By.CssSelector("*[data-content='policy']"));
-
+            
             Policies = policyCards
                 .Select(card => new Components.PolicyOverview.PolicyComponent(card))
                 .ToList();
@@ -45,6 +40,5 @@ namespace SpecificationTest.Pages
         }
 
         public IList<Components.PolicyOverview.PolicyComponent> Policies { get; private set; }
-        public string NoPoliciesFoundMessage { get; private set; }
     }
 }

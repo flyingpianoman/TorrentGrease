@@ -25,5 +25,7 @@ namespace TorrentGrease.Shared.TorrentClient
         public decimal TotalUploadInGB => (new Decimal(TotalUploadInBytes) / 1024 / 1024 / 1024);
         [ProtoMember(7)]
         public List<string> TrackerUrls { get; set; }
+        [ProtoMember(8)]
+        public DateTime AddedDateTime { get; set; }
     }
 }

@@ -14,6 +14,7 @@ namespace TorrentGrease.Data.Hosting
             return services
                 .AddTransient<TorrentGreaseDbInitializer>()
                 .AddScoped<IPolicyRepository, PolicyRepository>()
+                .AddScoped<ITorrentStatisticsRepository, TorrentStatisticsRepository>()
                 .AddDbContext<TorrentGreaseDbContext>(o => o.UseSqlite(connectionString))
                 .AddScoped<ITorrentGreaseDbContext>(s => s.GetRequiredService<TorrentGreaseDbContext>()); //Allows the dbcontext to be retrieved by interface and impl (needed for health check)
         }

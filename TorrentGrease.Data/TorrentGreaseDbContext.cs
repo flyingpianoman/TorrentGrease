@@ -16,10 +16,17 @@ namespace TorrentGrease.Data
         {
         }
 
+        //Policy schema
         public DbSet<Shared.Action> Actions { get; set; }
         public DbSet<Shared.Condition> Conditions { get; set; }
         public DbSet<Shared.Policy> Policies { get; set; }
         public DbSet<Shared.Tracker> Trackers { get; set; }
+
+        //Statistics schema
+        public DbSet<Shared.TorrentStatistics.Torrent> Torrents { get; set; }
+        public DbSet<Shared.TorrentStatistics.TorrentUploadDeltaSnapshot> TorrentUploadDeltaSnapshots { get; set; }
+        public DbSet<Shared.TorrentStatistics.TrackerUrl> TrackerUrls { get; set; }
+        public DbSet<Shared.TorrentStatistics.TrackerUrlCollection> TrackerUrlCollections { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +52,7 @@ namespace TorrentGrease.Data
                 .ToTable(nameof(Shared.TorrentStatistics.Torrent));
 
             b.HasIndex(t => t.InfoHash);
+            b.HasIndex(t => t.WasInClientOnLastScan);
         }
 
         private static void ConfigureTorrentUploadDeltaSnapshotModel(ModelBuilder modelBuilder)
@@ -72,6 +80,8 @@ namespace TorrentGrease.Data
             b.HasIndex(t => t.TrackerUrlCollectionId);
         }
         #endregion
+
+        #region Policy schema
 
         private static void ConfigureTrackerPolicyModel(ModelBuilder modelBuilder)
         {
@@ -121,7 +131,8 @@ namespace TorrentGrease.Data
 
             actionBuilder.Property(e => e.ActionType)
                 .HasConversion(new EnumToStringConverter<Shared.ActionType>());
-        }
+        } 
+        #endregion
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

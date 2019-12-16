@@ -19,7 +19,8 @@ namespace TorrentGrease.TorrentClient.Transmission
                 TotalUploadInBytes = torrentInfo.UploadedEver,
                 TrackerUrls = torrentInfo.Trackers
                     .Select(t => new Uri(t.announce).Authority)
-                    .ToList()
+                    .ToList(),
+                AddedDateTime = DateTimeOffset.FromUnixTimeSeconds(torrentInfo.AddedDate).UtcDateTime
             };
         }
 

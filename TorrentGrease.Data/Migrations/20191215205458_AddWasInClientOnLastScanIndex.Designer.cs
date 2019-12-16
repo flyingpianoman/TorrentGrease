@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TorrentGrease.Data;
 
 namespace TorrentGrease.Data.Migrations
 {
     [DbContext(typeof(TorrentGreaseDbContext))]
-    partial class TorrentGreaseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191215205458_AddWasInClientOnLastScanIndex")]
+    partial class AddWasInClientOnLastScanIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,9 +124,6 @@ namespace TorrentGrease.Data.Migrations
                     b.Property<string>("InfoHash")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("LatestAddedDateTime")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Location")
                         .HasColumnType("TEXT");
 
@@ -159,9 +158,6 @@ namespace TorrentGrease.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("TorrentId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("TotalUploadForThisTorrentInBytes")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("TotalUploadInBytes")

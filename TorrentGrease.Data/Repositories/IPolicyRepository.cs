@@ -4,7 +4,7 @@ using TorrentGrease.Shared;
 
 namespace TorrentGrease.Data.Repositories
 {
-    public interface IPolicyRepository
+    public interface IPolicyRepository : IRepository
     {
         Task<ICollection<Policy>> GetAllAsync();
     }

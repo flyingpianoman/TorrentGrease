@@ -32,7 +32,8 @@ namespace TorrentGrease.TorrentClient.Transmission
                 TorrentFields.TRACKERS,
                 TorrentFields.UPLOADED_EVER,
                 TorrentFields.LEFT_UNTIL_DONE,
-                TorrentFields.FILES
+                TorrentFields.FILES,
+                TorrentFields.ADDED_DATE
             };
 
             try

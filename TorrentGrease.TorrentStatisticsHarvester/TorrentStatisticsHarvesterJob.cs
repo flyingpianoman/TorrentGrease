@@ -40,9 +40,82 @@ namespace TorrentGrease.TorrentStatisticsHarvester
             await AddUploadDeltaSnapshotsAsync(jobDateTime, torrentsFromClient);
         }
 
+        #region SynchronizeTorrentDbAsync
+        /// <summary>
+        /// Synchronize persisted torrents with torrents in torrent client
+        /// </summary>
+        private async Task SynchronizeTorrentDbAsync(IEnumerable<Shared.TorrentClient.Torrent> torrentsFromClient)
+        {
+            _logger.LogInformation("Synchronizing torrents in the torrentclient with the torrents in the db");
+            var infoHashes = torrentsFromClient.Select(t => t.InfoHash).ToArray();
+
+            //Use a scoped repo so that we'll dispose the dbcontext after we're done with this step freeing up memory
+            using var scope = _serviceScopeFactory.CreateScope();
+            var torrentStatisticsRepository = scope.ServiceProvider.GetRequiredService<ITorrentStatisticsRepository>();
+
+            _logger.LogInformation("Retrieving persisted torrents for torrents currently in torrentclient");
+            var persistedTorrents = await torrentStatisticsRepository.GetTorrentsByInfoHashAsync(infoHashes);
+
+            UpdateReAddedTorrents(persistedTorrents);
+            await AddNewTorrentsAsync(torrentStatisticsRepository, torrentsFromClient, persistedTorrents);
+            await UpdateRemovedTorrentsAsync(torrentStatisticsRepository, persistedTorrents);
+
+            _logger.LogInformation("Send changes to db");
+            await torrentStatisticsRepository.SaveChangesAsync();
+        }
+
+        private void UpdateReAddedTorrents(IList<Stats.Torrent> persistedTorrents)
+        {
+            var reAddedTorrents = persistedTorrents.Where(t => !t.WasInClientOnLastScan).ToArray();
+            _logger.LogInformation("Updating {0} torrents that were re-added in the torrentclient", reAddedTorrents.Count());
+
+            foreach (var torrent in reAddedTorrents)
+            {
+                _logger.LogDebug("Setting WasInClientOnLastScan to true for torrent with hash {0}", torrent.InfoHash);
+                torrent.WasInClientOnLastScan = true;
+            }
+        }
+
+        private async Task AddNewTorrentsAsync(ITorrentStatisticsRepository torrentStatisticsRepository,
+            IEnumerable<Shared.TorrentClient.Torrent> torrentsFromClient, IList<Stats.Torrent> persistedTorrents)
+        {
+            var newTorrents = torrentsFromClient
+                .Where(t => !persistedTorrents.Any(pt => pt.InfoHash == t.InfoHash))
+                .Select(t => new Stats.Torrent(t))
+                .ToArray();
+
+            _logger.LogInformation("Adding {0} new torrents that were added to the torrentclient for the first time", newTorrents.Count());
+
+            foreach (var newTorrent in newTorrents)
+            {
+                _logger.LogDebug("Adding torrent with hash {0} and name '{1}'", newTorrent.InfoHash, newTorrent.Name);
+            }
+
+            await torrentStatisticsRepository.AddRangeAsync(newTorrents);
+        }
+
+        /// <summary>
+        /// Disable torrents that are missing since last scan
+        /// </summary>
+        private async Task UpdateRemovedTorrentsAsync(ITorrentStatisticsRepository torrentStatisticsRepository, IList<Shared.TorrentStatistics.Torrent> persistedTorrents)
+        {
+            var exlcudedIds = persistedTorrents.Select(t => t.Id).ToArray();
+            var removedTorrents = await torrentStatisticsRepository.GetTorrentsThatWereInLastScanAsync(exlcudedIds);
+            _logger.LogInformation("Updating {0} torrents that were removed in the torrentclient", removedTorrents.Count());
+
+            foreach (var removedTorrent in removedTorrents)
+            {
+                _logger.LogDebug("Setting WasInClientOnLastScan to false for torrent with hash {0} and name '{1}'", removedTorrent.InfoHash, removedTorrent.Name);
+                removedTorrent.WasInClientOnLastScan = false;
+            }
+        }
+        #endregion
+
         #region AddUploadDeltaSnapshotsAsync
         private async Task AddUploadDeltaSnapshotsAsync(DateTime jobDateTime, IEnumerable<Shared.TorrentClient.Torrent> torrentsFromClient)
         {
+            _logger.LogInformation("Adding new upload delta snapshots for any relevant changes");
+
             //Use a scoped repo so that we'll dispose the dbcontext after we're done with this step freeing up memory
             using var scope = _serviceScopeFactory.CreateScope();
             var torrentStatisticsRepository = scope.ServiceProvider.GetRequiredService<ITorrentStatisticsRepository>();
@@ -57,7 +130,8 @@ namespace TorrentGrease.TorrentStatisticsHarvester
             await torrentStatisticsRepository.SaveChangesAsync();
         }
 
-        private async Task AddUploadDeltaSnapshotsInnerAsync(DateTime jobDateTime, IEnumerable<Shared.TorrentClient.Torrent> torrentsFromClient, ITorrentStatisticsRepository torrentStatisticsRepository, Dictionary<byte[], Stats.TrackerUrlCollection> trackerUrlCollectionsDict)
+        private async Task AddUploadDeltaSnapshotsInnerAsync(DateTime jobDateTime, IEnumerable<Shared.TorrentClient.Torrent> torrentsFromClient, 
+            ITorrentStatisticsRepository torrentStatisticsRepository, Dictionary<byte[], Stats.TrackerUrlCollection> trackerUrlCollectionsDict)
         {
             foreach (var clientTorrent in torrentsFromClient)
             {
@@ -140,8 +214,6 @@ namespace TorrentGrease.TorrentStatisticsHarvester
             return CreateTorrentUploadDeltaSnapshot(jobDateTime, clientTorrent, persistedTorrent, trackerUrlCollection, delta, totalUpload);
         }
 
-
-
         private static Stats.TorrentUploadDeltaSnapshot CreateTorrentUploadDeltaSnapshot(DateTime jobDateTime, Shared.TorrentClient.Torrent clientTorrent, Stats.Torrent persistedTorrent, Stats.TrackerUrlCollection trackerUrlCollection, long delta, long totalUpload)
         {
             return new Stats.TorrentUploadDeltaSnapshot
@@ -193,76 +265,6 @@ namespace TorrentGrease.TorrentStatisticsHarvester
             return trackerUrlCollection;
         }
         #endregion
-        #endregion
-
-        #region SynchronizeTorrentDbAsync
-        /// <summary>
-        /// Synchronize persisted torrents with torrents in torrent client
-        /// </summary>
-        private async Task SynchronizeTorrentDbAsync(IEnumerable<Shared.TorrentClient.Torrent> torrentsFromClient)
-        {
-            var infoHashes = torrentsFromClient.Select(t => t.InfoHash).ToArray();
-
-            //Use a scoped repo so that we'll dispose the dbcontext after we're done with this step freeing up memory
-            using var scope = _serviceScopeFactory.CreateScope();
-            var torrentStatisticsRepository = scope.ServiceProvider.GetRequiredService<ITorrentStatisticsRepository>();
-
-            _logger.LogInformation("Retrieving persisted torrents for torrents currently in torrentclient");
-            var persistedTorrents = await torrentStatisticsRepository.GetTorrentsByInfoHashAsync(infoHashes);
-
-            UpdateReAddedTorrents(persistedTorrents);
-            await AddNewTorrentsAsync(torrentStatisticsRepository, torrentsFromClient, persistedTorrents);
-            await UpdateRemovedTorrentsAsync(torrentStatisticsRepository, persistedTorrents);
-
-            _logger.LogInformation("Send changes to db"); 
-            await torrentStatisticsRepository.SaveChangesAsync();
-        }
-
-        private void UpdateReAddedTorrents(IList<Stats.Torrent> persistedTorrents)
-        {
-            var reAddedTorrents = persistedTorrents.Where(t => !t.WasInClientOnLastScan).ToArray();
-            _logger.LogInformation("Updating {0} torrents that were re-added in the torrentclient", reAddedTorrents.Count());
-
-            foreach (var torrent in reAddedTorrents)
-            {
-                _logger.LogDebug("Setting WasInClientOnLastScan to true for torrent with hash {0}", torrent.InfoHash);
-                torrent.WasInClientOnLastScan = true;
-            }
-        }
-
-        private async Task AddNewTorrentsAsync(ITorrentStatisticsRepository torrentStatisticsRepository,
-            IEnumerable<Shared.TorrentClient.Torrent> torrentsFromClient, IList<Shared.TorrentStatistics.Torrent> persistedTorrents)
-        {
-            var newTorrents = torrentsFromClient
-                .Where(t => persistedTorrents.Any(pt => pt.InfoHash == t.InfoHash))
-                .Select(t => new Shared.TorrentStatistics.Torrent(t))
-                .ToArray();
-
-            _logger.LogInformation("Adding {0} new torrents that were added to the torrentclient for the first time", newTorrents.Count());
-
-            foreach (var newTorrent in newTorrents)
-            {
-                _logger.LogDebug("Adding torrent with hash {0} and name '{1}'", newTorrent.InfoHash, newTorrent.Name);
-            }
-
-            await torrentStatisticsRepository.AddRangeAsync(newTorrents);
-        }
-
-        /// <summary>
-        /// Disable torrents that are missing since last scan
-        /// </summary>
-        private async Task UpdateRemovedTorrentsAsync(ITorrentStatisticsRepository torrentStatisticsRepository, IList<Shared.TorrentStatistics.Torrent> persistedTorrents)
-        {
-            var exlcudedIds = persistedTorrents.Select(t => t.Id).ToArray();
-            var removedTorrents = await torrentStatisticsRepository.GetTorrentsThatWereInLastScanAsync(exlcudedIds);
-            _logger.LogInformation("Updating {0} torrents that were removed in the torrentclient", removedTorrents.Count());
-
-            foreach (var removedTorrent in removedTorrents)
-            {
-                _logger.LogDebug("Setting WasInClientOnLastScan to false for torrent with hash {0} and name '{1}'", removedTorrent.InfoHash, removedTorrent.Name);
-                removedTorrent.WasInClientOnLastScan = false;
-            }
-        }
         #endregion
 
         #region IDisposable Support

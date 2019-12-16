@@ -9,7 +9,7 @@ using TorrentGrease.Data;
 namespace TorrentGrease.Data.Migrations
 {
     [DbContext(typeof(TorrentGreaseDbContext))]
-    [Migration("20191214205703_InitialTorrentStatisticsSchema")]
+    [Migration("20191216171517_InitialTorrentStatisticsSchema")]
     partial class InitialTorrentStatisticsSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -124,6 +124,9 @@ namespace TorrentGrease.Data.Migrations
                     b.Property<string>("InfoHash")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("LatestAddedDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Location")
                         .HasColumnType("TEXT");
 
@@ -143,6 +146,8 @@ namespace TorrentGrease.Data.Migrations
 
                     b.HasIndex("InfoHash");
 
+                    b.HasIndex("WasInClientOnLastScan");
+
                     b.ToTable("Torrent");
                 });
 
@@ -156,6 +161,9 @@ namespace TorrentGrease.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("TorrentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TotalUploadForThisTorrentInBytes")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("TotalUploadInBytes")

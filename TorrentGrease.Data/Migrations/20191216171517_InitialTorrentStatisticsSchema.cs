@@ -17,6 +17,7 @@ namespace TorrentGrease.Data.Migrations
                     WasInClientOnLastScan = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Location = table.Column<string>(nullable: true),
+                    LatestAddedDateTime = table.Column<DateTime>(nullable: false),
                     SizeInBytes = table.Column<long>(nullable: false),
                     BytesOnDisk = table.Column<long>(nullable: false),
                     TotalUploadInBytes = table.Column<long>(nullable: false)
@@ -47,6 +48,7 @@ namespace TorrentGrease.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     DateTime = table.Column<DateTime>(nullable: false),
                     TorrentId = table.Column<int>(nullable: false),
+                    TotalUploadForThisTorrentInBytes = table.Column<long>(nullable: false),
                     UploadDeltaSinceLastSnapshotInBytes = table.Column<long>(nullable: false),
                     TotalUploadInBytes = table.Column<long>(nullable: false),
                     TrackerUrlCollectionId = table.Column<int>(nullable: false)
@@ -92,6 +94,11 @@ namespace TorrentGrease.Data.Migrations
                 name: "IX_Torrent_InfoHash",
                 table: "Torrent",
                 column: "InfoHash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Torrent_WasInClientOnLastScan",
+                table: "Torrent",
+                column: "WasInClientOnLastScan");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TorrentUploadDeltaSnapshot_TrackerUrlCollectionId",

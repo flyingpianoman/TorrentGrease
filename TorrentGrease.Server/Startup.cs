@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.DataProtection;
 using System.Collections.Generic;
 using TorrentGrease.TorrentStatisticsHarvester.Hosting;
 using TorrentGrease.Hangfire.Hosting;
+using Serilog;
 
 namespace TorrentGrease.Server
 {
@@ -68,6 +69,8 @@ namespace TorrentGrease.Server
             app.UseStaticFiles();
             app.UseClientSideBlazorFiles<Client.Startup>();
             app.UseGrpcWeb();
+
+            app.UseSerilogRequestLogging();
             app.UseRouting();
             
             app.UseHangfire();

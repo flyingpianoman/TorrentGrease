@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.9.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
     <PackageReference Include="MSTest.TestFramework" Version="2.0.0" />
@@ -17,8 +18,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TestUtils\TestUtils.csproj" />
     <ProjectReference Include="..\TorrentGrease.GrpcClient\TorrentGrease.GrpcClient.csproj" />
     <ProjectReference Include="..\TorrentGrease.Shared\TorrentGrease.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Torrent\TestFiles\TorrentWith1File128kb.torent">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Torrent\TestFiles\TorrentWith2Files32kbAnd64kb.torent">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

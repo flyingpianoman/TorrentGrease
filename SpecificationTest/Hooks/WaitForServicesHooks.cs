@@ -37,31 +37,19 @@ namespace SpecificationTest.Hooks
 
         private static async Task WaitForTransmissionAsync()
         {
-            var transmissionClient = CreateTransmissionClient();
+            var torrentClient = DIContainer.Default.Get<ITorrentClient>();
 
             try
             {
                 await _WaitForHealthyPolicy.ExecuteAsync(async () =>
                     {
-                        await transmissionClient.GetAllTorrentsAsync().ConfigureAwait(false);
+                        await torrentClient.GetAllTorrentsAsync().ConfigureAwait(false);
                     }).ConfigureAwait(false);
             }
             catch (Polly.Timeout.TimeoutRejectedException e)
             {
-                throw new ApplicationException("Timed out while waiting on transmission", e);
+                throw new ApplicationException("Timed out while waiting on the torrent client", e);
             }
-        }
-
-        private static TransmissionClient CreateTransmissionClient()
-        {
-            var torrentClientSettings = new TorrentClientSettings
-            {
-                Url = TestSettings.TransmissionExposedAddress,
-                Username = TestSettings.TransmissionUser,
-                Password = TestSettings.TransmissionPassword
-            };
-
-            return new TransmissionClient(TransmissionRcpClientHelper.CreateTransmissionRpcClient(torrentClientSettings));
         }
 
         private static async Task WaitForTorrentGreaseAsync()

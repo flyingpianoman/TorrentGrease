@@ -8,7 +8,7 @@ namespace TestUtils.Torrent
     {
         public string Name { get; set; }
         public IEnumerable<CreateTorrentFileMapping> FileMappings { get; set; }
-        public string TrackerAnnounceUrl { get; set; }
+        public IList<string> TrackerAnnounceUrls { get; set; } = new List<string>();
         public bool IsPrivate { get; set; } = true;
     }
 }

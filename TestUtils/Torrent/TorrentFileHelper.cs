@@ -45,13 +45,16 @@ namespace TestUtils.Torrent
             var tc = new TorrentCreator
             {
                 CreatedBy = "TorrentGrease",
-                Private = torrentFile.IsPrivate,
+                Private = torrentFile.IsPrivate
             };
 
-            tc.Announces.Add(new RawTrackerTier(new BEncodedList(new BEncodedValue[]
+            foreach (var announceUrl in torrentFile.TrackerAnnounceUrls)
             {
-                new BEncodedString(torrentFile.TrackerAnnounceUrl)
-            })));
+                tc.Announces.Add(new RawTrackerTier(new BEncodedList(new BEncodedValue[]
+                {
+                    new BEncodedString(announceUrl)
+                })));
+            }
 
             await tc.CreateAsync(new CustomTorrentFileSource(torrentFile.Name, torrentFile.FileMappings), torrentFileLocation);
         }

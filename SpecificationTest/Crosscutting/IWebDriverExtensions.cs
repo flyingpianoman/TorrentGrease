@@ -29,6 +29,14 @@ namespace SpecificationTest.Crosscutting
             return page;
         }
 
+        public static async Task<TPage> UpdateCurrentPageToAync<TPage>(this IWebDriver webDriver)
+            where TPage : IPage
+        {
+            var page = await CreateAndInitPageAsync<TPage>(webDriver).ConfigureAwait(false);
+            _currentPage = page;
+            return page;
+        }
+
 #pragma warning disable IDE0060 // Remove unused parameter
         public static TPage CurrentPageAs<TPage>(this IWebDriver webDriver)
             where TPage : IPage

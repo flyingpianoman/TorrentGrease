@@ -113,10 +113,10 @@ namespace IntegrationTest.Torrent
             await CreateTorrentAsyncTestBodyAsync(sut, torrentFileLoc, newTorrentFile);
         }
 
-        private static async Task CreateFile(TorrentFileHelper sut, string fileLoc2, int sizeInBytes)
+        private static async Task CreateFile(TorrentFileHelper sut, string fileLoc, int sizeInBytes)
         {
-            var fileSize2 = sizeInBytes * 1024;
-            await sut.CreateTextFileAsync(fileLoc2, fileSize2);
+            var fileSize = sizeInBytes * 1024;
+            await sut.CreateTextFileAsync(fileLoc, fileSize);
         }
 
         private static NewTorrentFile CreateNewTorrentFile(CreateTorrentFileMapping[] innerFiles, string torrentName)

@@ -18,8 +18,23 @@ namespace SpecificationTest.Steps
         [When(@"I navigate to the policy overview")]
         public async Task NavigateToTheRootUrl()
         {
-            await WebDriver
-                .NavigateToPageAsync<PoliciesOverviewPage>(TestSettings.TorrentGreaseDockerAddress).ConfigureAwait(false);
+            await NavigateToRootUrlAsync().ConfigureAwait(false);
+        }
+
+        private async Task<PoliciesOverviewPage> NavigateToRootUrlAsync()
+        {
+            return await WebDriver
+                    .NavigateToPageAsync<PoliciesOverviewPage>(TestSettings.TorrentGreaseDockerAddress).ConfigureAwait(false);
+        }
+
+        [When(@"I navigate to the torrent overview")]
+        public async Task NavigateToTheTorrentOverview()
+        {
+            await (await NavigateToRootUrlAsync().ConfigureAwait(false))
+                .NavigationMenu
+                .TorrentsNavMenuLink
+                .NavigateAsync<TorrentOverviewPage>()
+                .ConfigureAwait(false);
         }
 
         [Then(@"I can see the navigation menu")]

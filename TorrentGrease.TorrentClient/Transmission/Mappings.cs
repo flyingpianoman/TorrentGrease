@@ -11,6 +11,7 @@ namespace TorrentGrease.TorrentClient.Transmission
         {
             return new Shared.TorrentClient.Torrent
             {
+                ID = torrentInfo.ID,
                 Name = torrentInfo.Name,
                 SizeInBytes = torrentInfo.TotalSize,
                 BytesOnDisk = torrentInfo.TotalSize - torrentInfo.LeftUntilDone,
@@ -20,7 +21,8 @@ namespace TorrentGrease.TorrentClient.Transmission
                 TrackerUrls = torrentInfo.Trackers
                     .Select(t => new Uri(t.announce).Authority)
                     .ToList(),
-                AddedDateTime = DateTimeOffset.FromUnixTimeSeconds(torrentInfo.AddedDate).UtcDateTime
+                AddedDateTime = DateTimeOffset.FromUnixTimeSeconds(torrentInfo.AddedDate).UtcDateTime,
+                Files = torrentInfo.Files.ToSharedModel()
             };
         }
 
@@ -33,6 +35,21 @@ namespace TorrentGrease.TorrentClient.Transmission
             return torrentInfo.Files.Length > 1
                 ? torrentInfo.DownloadDir + pathSeperator + torrentInfo.Name
                 : torrentInfo.DownloadDir;
+        }
+
+
+        internal static Shared.TorrentClient.TorrentFile[] ToSharedModel(this RpcEntity.TransmissionTorrentFiles[] torrentFiles)
+        {
+            return torrentFiles.Select(tf => tf.ToSharedModel()).ToArray();
+        }
+
+        internal static Shared.TorrentClient.TorrentFile ToSharedModel(this RpcEntity.TransmissionTorrentFiles torrentFile)
+        {
+            return new Shared.TorrentClient.TorrentFile
+            {
+                FileLocationInTorrent = torrentFile.Name,
+                SizeInBytes = Convert.ToInt64(torrentFile.Length)
+            };
         }
     }
 }

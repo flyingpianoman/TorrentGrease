@@ -13,6 +13,7 @@ services:
     volumes:
       - torrent-grease-data:/app/data
       - torrent-grease-logs:/app/logs
+      - transmission-downloads:/downloads
     ports:
       - 5656:5656
       - 5657:5657
@@ -26,6 +27,7 @@ services:
       - TZ=Europe/London
     volumes:
       - transmission-data:/config
+      - transmission-downloads:/downloads
       - ./transmission/settings.json:/config/settings.json
     ports:
       - 9091:9091
@@ -57,4 +59,5 @@ volumes:
   torrent-grease-data:
   torrent-grease-logs:
   transmission-data:
+  transmission-downloads:
   transmission-downloader-data:

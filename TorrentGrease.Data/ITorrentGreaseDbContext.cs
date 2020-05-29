@@ -13,8 +13,8 @@ namespace TorrentGrease.Data
     {
         DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-        ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>([NotNullAttribute] TEntity entity, CancellationToken cancellationToken = default) where TEntity : class;
-        Task AddRangeAsync([NotNullAttribute] IEnumerable<object> entities, CancellationToken cancellationToken = default);
+        ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class;
+        Task AddRangeAsync(IEnumerable<object> entities, CancellationToken cancellationToken = default);
 
         //Policy schema
         DbSet<Action> Actions { get; set; }

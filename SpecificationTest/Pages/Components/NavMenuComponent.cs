@@ -19,7 +19,6 @@ namespace SpecificationTest.Pages.Components
             _webDriver = webDriver;
         }
 
-
         public async Task InitializeAsync()
         {
             NavMenuLinks = await PageHelper.WaitForWebElementPolicyAsync
@@ -31,7 +30,7 @@ namespace SpecificationTest.Pages.Components
 
                     foreach (var element in elements)
                     {
-                        var link = new NavMenuLinkComponent(element);
+                        var link = new NavMenuLinkComponent(element, _webDriver);
                         await link.InitializeAsync().ConfigureAwait(false);
                         links.Add(link);
                     }
@@ -39,5 +38,8 @@ namespace SpecificationTest.Pages.Components
                     return links;
                 }).ConfigureAwait(false);
         }
+
+        public NavMenuLinkComponent PoliciesNaveMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.Policies);
+        public NavMenuLinkComponent TorrentsNavMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.Torrents);
     }
 }

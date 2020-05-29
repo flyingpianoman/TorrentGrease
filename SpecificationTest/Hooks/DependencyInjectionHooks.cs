@@ -16,6 +16,7 @@ namespace SpecificationTest.Hooks
         {
             var services = DIContainer.Default;
             services.RegisterDockerClient();
+            services.RegisterTorrentClient();
             services.RegisterWebDriver();
             services.Register(new TorrentGreaseDBService(services.Get<DockerClient>()));
         }

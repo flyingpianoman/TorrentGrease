@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TestUtils\TestUtils.csproj" />
     <ProjectReference Include="..\TorrentGrease.Data\TorrentGrease.Data.csproj" />
     <ProjectReference Include="..\TorrentGrease.Shared\TorrentGrease.Shared.csproj" />
     <ProjectReference Include="..\TorrentGrease.TorrentClient\TorrentGrease.TorrentClient.csproj" />

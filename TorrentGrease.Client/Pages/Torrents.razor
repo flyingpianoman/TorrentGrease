@@ -95,8 +95,8 @@ else
                                 var relocatableTorrentCandidate = selectableRelocatableTorrentCandidate.Item;
                                 <tr>
                                     <td>
-                                        @if(relocatableTorrentCandidate.RelocateOptions.Any())
-                                        { 
+                                        @if (relocatableTorrentCandidate.RelocateOptions.Any())
+                                        {
                                             <Blazorise.CheckEdit data-content="selector" IsDisabled="@(_isInWaitMode)" @bind-Checked="selectableRelocatableTorrentCandidate.IsSelected" />
                                         }
                                         else
@@ -125,6 +125,11 @@ else
                             }
                         </tbody>
                     </table>
+
+                    <Field>
+                        <Blazorise.CheckEdit data-content="verify-torrents-after-relocating" IsDisabled="@(_isInWaitMode)" @bind-Checked="_verifyTorrentsAfterRelocating" />
+                        <FieldLabel>Verify torrents after relocating</FieldLabel>
+                    </Field>
                 }
             </ModalBody>
             <ModalFooter>
@@ -145,7 +150,6 @@ else
 @code {
     Modal _relocateTorrentsModal;
     IEnumerable<SelectableItem<Torrent>> _selectableTorrents;
-    IEnumerable<SelectableItem<RelocatableTorrentCandidate>> _relocatableTorrentCandidates;
 
     protected override async Task OnInitializedAsync()
     {
@@ -161,8 +165,10 @@ else
         : RelocateTorrentsStages.RelocateCandidates;
 
     List<string> _pathsToScan = new List<String> { string.Empty };
+    IEnumerable<SelectableItem<RelocatableTorrentCandidate>> _relocatableTorrentCandidates;
     bool _isScanningForRelocatableTorrents = false;
     bool _isRelocatingTorrents = false;
+    bool _verifyTorrentsAfterRelocating = true;
     bool _isInWaitMode => _isScanningForRelocatableTorrents || _isRelocatingTorrents || _selectableTorrents == null;
 
     void ResetRelocateTorrentsModel()
@@ -170,6 +176,9 @@ else
         _pathsToScan.Clear();
         _pathsToScan.Add(string.Empty);
         _relocatableTorrentCandidates = null;
+        _verifyTorrentsAfterRelocating = true;
+        _isRelocatingTorrents = false;
+        _isScanningForRelocatableTorrents = false;
     }
 
     void AddPathToScan()
@@ -214,7 +223,7 @@ else
             .ToList();
 
         _isRelocatingTorrents = true;
-        await TorrentService.RelocateTorrentsAsync(relocateTorrentCommands).ConfigureAwait(false);
+        await TorrentService.RelocateTorrentsAsync(relocateTorrentCommands, _verifyTorrentsAfterRelocating).ConfigureAwait(false);
         _isRelocatingTorrents = false;
 
         CloseRelocateTorrentsModal();

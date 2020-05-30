@@ -10,5 +10,7 @@ namespace TorrentGrease.Shared.RelocateTorrent
     {
         [ProtoMember(1)]
         public IList<RelocateTorrentCommand> RelocateTorrentCommands { get; set; }
+        [ProtoMember(2)]
+        public bool VerifyAfterMoving { get; set; }
     }
 }

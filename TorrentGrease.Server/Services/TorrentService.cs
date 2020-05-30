@@ -166,6 +166,11 @@ namespace TorrentGrease.Server.Services
                 await _torrentClient.RelocateTorrentAsync(relocateTorrentCommand.TorrentID, relocateTorrentCommand.NewLocation).ConfigureAwait(false);
                 _logger.LogDebug("Torrent {0} is relocated", relocateTorrentCommand.TorrentID);
             }
+
+            if(request.VerifyAfterMoving)
+            {
+                await _torrentClient.VerifyTorrentsAsync(request.RelocateTorrentCommands.Select(c => c.TorrentID).ToArray());
+            }
         }
     }
 }

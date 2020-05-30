@@ -19,11 +19,13 @@ namespace TorrentGrease.Client.ServiceClientExtensions
             });
         }
 
-        public static Task RelocateTorrentsAsync(this ITorrentService svc, IList<RelocateTorrentCommand> relocateTorrentCommands)
+        public static Task RelocateTorrentsAsync(this ITorrentService svc, 
+            IList<RelocateTorrentCommand> relocateTorrentCommands, bool verifyAfterMoving)
         {
             return svc.RelocateTorrentsAsync(new RelocateTorrentsRequest
             {
-                RelocateTorrentCommands = relocateTorrentCommands
+                RelocateTorrentCommands = relocateTorrentCommands,
+                VerifyAfterMoving = verifyAfterMoving
             });
         }
     }

@@ -94,5 +94,10 @@ namespace TorrentGrease.TorrentClient.Transmission
             return Task.CompletedTask;
         }
 
+        public Task VerifyTorrentsAsync(int[] IDs)
+        {
+            _rpcClient.TorrentVerify(IDs);
+            return Task.CompletedTask;
+        }
     }
 }

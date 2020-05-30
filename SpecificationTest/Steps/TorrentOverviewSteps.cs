@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Docker.DotNet;
+using FluentAssertions;
 using MonoTorrent;
 using SpecificationTest.Crosscutting;
 using SpecificationTest.Pages;
@@ -55,9 +56,10 @@ namespace SpecificationTest.Steps
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             var torrentFilePath = Path.Combine(tempDir, torrentDto.Name + ".torrent");
-            Directory.CreateDirectory(tempDir);
+            var torrentDataDir = Path.Combine(tempDir, torrentDto.Name);
+            Directory.CreateDirectory(torrentDataDir);
 
-            var torrentFileMappings = await CreateTorrentFilesAsync(torrentDto, tempDir).ConfigureAwait(false);
+            var torrentFileMappings = await CreateTorrentFilesAsync(torrentDto, torrentDataDir).ConfigureAwait(false);
 
             var newTorrentFile = new NewTorrentFile
             {
@@ -70,6 +72,7 @@ namespace SpecificationTest.Steps
 
             await _torrentFileHelper.CreateTorrentAsync(torrentFilePath, newTorrentFile);
             await _torrentClient.AddTorrentAsync(torrentDto.Name, torrentFilePath, torrentDto.Location, newTorrentFile.FileMappings.Count()).ConfigureAwait(false);
+            DI.Get<Dictionary<string, string>>("TorrentDataFolders")[torrentDto.Name] = torrentDataDir;
         }
 
         private async Task<List<CreateTorrentFileMapping>> CreateTorrentFilesAsync(
@@ -116,6 +119,53 @@ namespace SpecificationTest.Steps
             AssertTorrents(actualTorrents, expectedTorrents);
         }
 
+        [When(@"I select the following torrents")]
+        public void WhenISelectTheFollowingTorrents(Table table)
+        {
+            var torrentNames = table.CreateSet<string>().ToList();
+            var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+            var torrents = page.Torrents.Where(t => torrentNames.Contains(t.Name)).ToArray();
+
+            torrents.Length.Should().Be(torrentNames.Count);
+
+            foreach (var torrent in torrents)
+            {
+                torrent.IsSelected = true;
+            }
+        }
+
+        [When(@"I open the relocate data dialog")]
+        public void WhenOpenTheRelocateDataDialog()
+        {
+            var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+            page.ShowRelocateTorrentsModalButton.Click();
+        }
+
+        [When(@"I set the following paths to scan")]
+        public void WhenISetTheFollowingPathsToScan(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var pathsToScan = table.CreateSet<string>().ToList();
+                var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+                var dialog = await page.GetRelocateTorrentsLocationDialogComponentAsync().ConfigureAwait(false);
+                var first = true;
+
+                foreach (var pathToScan in pathsToScan)
+                {
+                    if(!first)
+                    {
+                        dialog.ClickAddPathToScanButton();
+                    }
+
+                    dialog.PathToScanElements.Last().SendKeys(pathToScan);
+                }
+            }
+        }
+
+
         private static void AssertTorrents(IEnumerable<Pages.Components.TorrentOverview.TorrentComponent> actualTorrents,
             IEnumerable<TorrentOverviewRowDto> expectedTorrents)
         {
@@ -145,6 +195,56 @@ namespace SpecificationTest.Steps
             {
                 actualTorrent.TrackerUrls.Contains(expectedTrackerUrl).Should().BeTrue();
             }
+        }
+
+        [Given(@"the data of the following torrents is sent to the torrent client")]
+        public void GivenTheDataOfTheFollowingTorrentsIsSentToTheTorrentClient(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var copyTorrentDataRequests = table.CreateSet<CopyTorrentDataDto>().ToList();
+                var dockerClient = DI.Get<DockerClient>();
+                var transmissionContainerId = await dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TransmissionContainerName).ConfigureAwait(false);
+                var torrentDataDirs = DI.Get<Dictionary<string, string>>("TorrentDataFolders");
+
+                foreach (var copyTorrentDataRequest in copyTorrentDataRequests)
+                {
+                    var dataDirPath = torrentDataDirs[copyTorrentDataRequest.TorrentName];
+                    var tarStream = ArchiveHelper.CreateDirectoryTarStream(dataDirPath);
+
+                    await CreateDirectoryStructureInContainerAsync(dockerClient, transmissionContainerId, copyTorrentDataRequest).ConfigureAwait(false);
+                    await dockerClient.Containers.UploadTarredFileToContainerAsync(tarStream, TestSettings.TransmissionContainerName, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private static async Task CreateDirectoryStructureInContainerAsync(DockerClient dockerClient, string transmissionContainerId, CopyTorrentDataDto copyTorrentDataRequest)
+        {
+            var targetDirParts = copyTorrentDataRequest.TargetLocation.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            var mkDirCommands = new List<string>();
+            var dir = "";
+
+            foreach (var targetDirPart in targetDirParts)
+            {
+                dir += "/" + targetDirPart;
+                mkDirCommands.Add($"mkdir {dir}");
+            }
+
+            var execCommandResponse = await dockerClient.Containers.ExecCreateContainerAsync(transmissionContainerId, new Docker.DotNet.Models.ContainerExecCreateParameters
+            {
+                Cmd = new List<string>
+                        {
+                            "bash",
+                            "-c",
+                            string.Join(" || ", mkDirCommands)
+                        },
+                AttachStderr = true,
+                AttachStdout = true
+            }).ConfigureAwait(false);
+
+            await dockerClient.Containers.StartContainerExecAsync(execCommandResponse.ID).ConfigureAwait(false);
         }
     }
 }

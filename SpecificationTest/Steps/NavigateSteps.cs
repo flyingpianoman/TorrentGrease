@@ -27,6 +27,7 @@ namespace SpecificationTest.Steps
                     .NavigateToPageAsync<PoliciesOverviewPage>(TestSettings.TorrentGreaseDockerAddress).ConfigureAwait(false);
         }
 
+        [Given(@"I navigate to the torrent overview")]
         [When(@"I navigate to the torrent overview")]
         public async Task NavigateToTheTorrentOverview()
         {

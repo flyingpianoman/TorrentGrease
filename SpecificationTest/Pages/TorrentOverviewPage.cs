@@ -23,7 +23,7 @@ namespace SpecificationTest.Pages
             await base.InitializeAsync().ConfigureAwait(false);
 
             await InitializeTorrentsAsync().ConfigureAwait(false);
-            ShowRemapTorrentsModalButton = _webDriver.FindElement(By.CssSelector("*[data-content='show-remap-torrents-button']"));
+            ShowRelocateTorrentsModalButton = _webDriver.FindElement(By.CssSelector("*[data-content='show-relocate-torrents-button']"));
         }
 
         private async Task InitializeTorrentsAsync()
@@ -46,15 +46,15 @@ namespace SpecificationTest.Pages
             await Torrents.InitializeAsync();
         }
 
-        public async Task<RemapTorrentsLocationDialogComponent> GetRemapTorrentsLocationDialogComponentAsync()
+        public async Task<RelocateTorrentsLocationDialogComponent> GetRelocateTorrentsLocationDialogComponentAsync()
         {
             var dialog = PageHelper.WaitForWebElementPolicy
                 .Execute(() =>
                 {
-                    var elements = _webDriver.FindElements(By.CssSelector("*[data-content='remap-torrents-modal']"));
+                    var elements = _webDriver.FindElements(By.CssSelector("*[data-content='relocate-torrents-modal']"));
                     elements.Count.Should().Be(1);
 
-                    return new RemapTorrentsLocationDialogComponent(elements[0]);
+                    return new RelocateTorrentsLocationDialogComponent(elements[0]);
                 });
 
             await dialog.InitializeAsync().ConfigureAwait(false);
@@ -62,7 +62,7 @@ namespace SpecificationTest.Pages
             return dialog;
         }
 
-        public IWebElement ShowRemapTorrentsModalButton { get; set; }
+        public IWebElement ShowRelocateTorrentsModalButton { get; set; }
         public IList<TorrentComponent> Torrents { get; private set; }
     }
 }

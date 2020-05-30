@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
+using TorrentGrease.Shared.RelocateTorrent;
 using TorrentGrease.Shared.ServiceContracts.TorrentRequests;
 
 namespace TorrentGrease.Shared.ServiceContracts
@@ -12,6 +13,7 @@ namespace TorrentGrease.Shared.ServiceContracts
     public interface ITorrentService
     {
         ValueTask<IEnumerable<Shared.TorrentClient.Torrent>> GetAllTorrentsAsync();
-        ValueTask MapTorrentsToDiskAsync(MapTorrentsToDiskRequest request);
+        Task<List<RelocatableTorrentCandidate>> FindRelocatableTorrentCandidatesAsync(MapTorrentsToDiskRequest request);
+        Task RelocateTorrentsAsync(RelocateTorrentsRequest request);
     }
 }

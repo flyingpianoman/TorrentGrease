@@ -9,21 +9,35 @@ namespace SpecificationTest.Crosscutting
 {
     public sealed class DIContainer : IAsyncDisposable
     {
-        private readonly Dictionary<Type, object> _services;
+        private readonly Dictionary<Type, Dictionary<string, object>> _services;
 
         public DIContainer()
         {
-            _services = new Dictionary<Type, object>();
+            _services = new Dictionary<Type, Dictionary<string, object>>();
         }
 
         public void Register<T>(T service)
         {
-            _services[typeof(T)] = service;
+            Register<T>(service, string.Empty);
+        }
+        public void Register<T>(T service, string name)
+        {
+            if(!_services.ContainsKey(typeof(T)))
+            {
+                _services[typeof(T)] = new Dictionary<string, object>();
+            }
+
+            _services[typeof(T)][name] = service;
         }
 
         public T Get<T>()
         {
-            return (T)_services[typeof(T)];
+            return Get<T>(string.Empty);
+        }
+
+        public T Get<T>(string name)
+        {
+            return (T)_services[typeof(T)][name];
         }
 
         public async ValueTask DisposeAsync()

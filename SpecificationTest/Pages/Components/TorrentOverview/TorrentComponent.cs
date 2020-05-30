@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using OpenQA.Selenium;
 
 namespace SpecificationTest.Pages.Components.TorrentOverview
@@ -16,8 +17,22 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
         {
             _torrentWebElement = torrentWebElement;
         }
+        private IWebElement _isSelectedWebElement;
 
-        public bool Selected { get; set; }
+        public bool IsSelected
+        {
+            get
+            {
+                return _isSelectedWebElement.Selected;
+            }
+            set
+            {
+                if (IsSelected != value)
+                {
+                    _isSelectedWebElement.Click();
+                }
+            }
+        }
         public string Name { get; set; }
         public string InfoHash { get; set; }
         public string Location { get; set; }
@@ -26,6 +41,8 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
         public decimal GBsOnDisk { get; set; }
         public decimal TotalUploadInGB { get; set; }
         public List<string> TrackerUrls { get; set; }
+
+
         public DateTime AddedDateTime { get; set; }
 
         public Task InitializeAsync()
@@ -38,6 +55,7 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
             Location = _torrentWebElement.FindElement(By.CssSelector("*[data-content='location']")).Text;
             JoinedTrackerUrls = _torrentWebElement.FindElement(By.CssSelector("*[data-content='trackerUrls']")).Text;
             TrackerUrls = JoinedTrackerUrls.Split(", ").ToList();
+            _isSelectedWebElement = _torrentWebElement.FindElement(By.CssSelector("*[data-content='selector']"));
 
             return Task.CompletedTask;
         }

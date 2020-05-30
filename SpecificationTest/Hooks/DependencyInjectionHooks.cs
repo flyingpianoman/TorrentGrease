@@ -19,6 +19,7 @@ namespace SpecificationTest.Hooks
             services.RegisterTorrentClient();
             services.RegisterWebDriver();
             services.Register(new TorrentGreaseDBService(services.Get<DockerClient>()));
+            services.Register(new Dictionary<string, string>(), "TorrentDataFolders");
         }
 
         [AfterTestRun]

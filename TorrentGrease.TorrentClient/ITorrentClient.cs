@@ -12,5 +12,6 @@ namespace TorrentGrease.TorrentClient
 
         Task AddTorrentAsync(string torrentName, string torrentFile, string downloadDir, int nrOfFilesToInclude);
         Task RemoveTorrentsByIDsAsync(IEnumerable<int> IDs, bool deleteData);
+        Task RelocateTorrentAsync(int ID, string newLocation, bool moveDataFromOldLocation = false);
     }
 }

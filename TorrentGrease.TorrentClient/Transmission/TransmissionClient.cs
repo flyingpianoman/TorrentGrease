@@ -88,5 +88,11 @@ namespace TorrentGrease.TorrentClient.Transmission
             return Task.CompletedTask;
         }
 
+        public Task RelocateTorrentAsync(int ID, string newLocation, bool moveDataFromOldLocation = false)
+        {
+            _rpcClient.TorrentSetLocation(new int[] { ID }, newLocation, moveDataFromOldLocation);
+            return Task.CompletedTask;
+        }
+
     }
 }

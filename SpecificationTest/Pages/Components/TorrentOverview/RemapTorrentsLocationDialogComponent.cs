@@ -7,26 +7,38 @@ using OpenQA.Selenium;
 
 namespace SpecificationTest.Pages.Components.TorrentOverview
 {
-    class RemapTorrentsLocationDialogComponent : IComponent
+    class RelocateTorrentsLocationDialogComponent : IComponent
     {
-        private readonly IWebElement _remapTorrentsLocationDialogWebElement;
+        private readonly IWebElement _relocateTorrentsLocationDialogWebElement;
 
-        public RemapTorrentsLocationDialogComponent(IWebElement remapTorrentsLocationDialogWebElement)
+        public RelocateTorrentsLocationDialogComponent(IWebElement relocateTorrentsLocationDialogWebElement)
         {
-            _remapTorrentsLocationDialogWebElement = remapTorrentsLocationDialogWebElement;
+            _relocateTorrentsLocationDialogWebElement = relocateTorrentsLocationDialogWebElement;
         }
 
         public IEnumerable<IWebElement> PathToScanElements { get; set; }
-        public IWebElement RemapTorrentsButton { get; set; }
-        public IWebElement AddPathToScanButton { get; set; }
+        public IWebElement RelocateTorrentsButton { get; set; }
+        private IWebElement AddPathToScanButton { get; set; }
+
+        public void ClickAddPathToScanButton()
+        {
+            AddPathToScanButton.Click();
+            LoadPathToScanInputs();
+        }
 
         public Task InitializeAsync()
         {
-            PathToScanElements = _remapTorrentsLocationDialogWebElement.FindElements(By.CssSelector("*[data-content='path-to-scan']"));
-            RemapTorrentsButton = _remapTorrentsLocationDialogWebElement.FindElement(By.CssSelector("*[data-content='show-remap-torrents-button']"));
-            AddPathToScanButton = _remapTorrentsLocationDialogWebElement.FindElement(By.CssSelector("*[data-content='add-path-to-scan-button']"));
+            LoadPathToScanInputs();
+
+            RelocateTorrentsButton = _relocateTorrentsLocationDialogWebElement.FindElement(By.CssSelector("*[data-content='show-relocate-torrents-button']"));
+            AddPathToScanButton = _relocateTorrentsLocationDialogWebElement.FindElement(By.CssSelector("*[data-content='add-path-to-scan-button']"));
 
             return Task.CompletedTask;
+        }
+
+        private void LoadPathToScanInputs()
+        {
+            PathToScanElements = _relocateTorrentsLocationDialogWebElement.FindElements(By.CssSelector("*[data-content='path-to-scan']"));
         }
     }
 }

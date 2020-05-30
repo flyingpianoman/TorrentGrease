@@ -22,14 +22,14 @@ namespace SpecificationTest.Crosscutting
             diContainer.Register(dockerClient);
         }
 
-        internal static async Task<string> GetContainerIdByNameAsync(this IContainerOperations containerOperations, 
+        internal static async Task<string> GetContainerIdByNameAsync(this IContainerOperations containerOperations,
             string containerName)
         {
             var containers = await containerOperations.ListContainersAsync(new ContainersListParameters()).ConfigureAwait(false);
             return containers.Single(c => c.State == "running" && c.Names.Contains("/" + containerName)).ID;
         }
 
-        internal static async Task<GetArchiveFromContainerResponse> GetArchiveFromContainerAsync(this IContainerOperations containerOperations, 
+        internal static async Task<GetArchiveFromContainerResponse> GetArchiveFromContainerAsync(this IContainerOperations containerOperations,
             string sourcePath, string containerId)
         {
             return await containerOperations.GetArchiveFromContainerAsync(containerId, new GetArchiveFromContainerParameters
@@ -42,11 +42,10 @@ namespace SpecificationTest.Crosscutting
             string sourcePath, string containerName)
         {
             string containerId = await containerOperations.GetContainerIdByNameAsync(containerName).ConfigureAwait(false);
-            var archiveData = await containerOperations.GetArchiveFromContainerAsync(sourcePath, containerId).ConfigureAwait(false);
-            return archiveData;
+            return await containerOperations.GetArchiveFromContainerAsync(sourcePath, containerId).ConfigureAwait(false);
         }
 
-        internal static async Task UploadTarredFileToContainerAsync(this IContainerOperations containerOperations, 
+        internal static async Task UploadTarredFileToContainerAsync(this IContainerOperations containerOperations,
             MemoryStream tarredFileStream, string containerName, string destinationPath)
         {
             var id = await containerOperations.GetContainerIdByNameAsync(containerName).ConfigureAwait(false);

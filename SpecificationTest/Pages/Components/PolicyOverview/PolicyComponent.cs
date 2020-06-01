@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SpecificationTest.Pages.Components.PolicyOverview
 {
-    class PolicyComponent : IComponent
+    class PolicyComponent : IComponent<PolicyComponent>
     {
         private readonly IWebElement _policyWebElement;
 
@@ -20,7 +20,7 @@ namespace SpecificationTest.Pages.Components.PolicyOverview
             _policyWebElement = policyWebElement;
         }
 
-        public async Task InitializeAsync()
+        public async Task<PolicyComponent> InitializeAsync()
         {
             Name = _policyWebElement.FindElement(By.CssSelector("*[data-content='title']")).Text;
             Description = _policyWebElement.FindElement(By.CssSelector("*[data-content='description']")).Text;
@@ -29,6 +29,7 @@ namespace SpecificationTest.Pages.Components.PolicyOverview
                 .ToList();
 
             await Trackers.InitializeAsync();
+            return this;
         }
     }
 }

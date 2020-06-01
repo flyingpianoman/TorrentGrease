@@ -8,11 +8,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SpecificationTest.Pages.Components.TorrentOverview;
+using SpecificationTest.Crosscutting;
 
 namespace SpecificationTest.Pages
 {
     internal sealed class TorrentOverviewPage : PageBase
     {
+        private IWebElement _rootElement;
+
         public TorrentOverviewPage(IWebDriver webDriver)
             : base(webDriver)
         {
@@ -21,45 +24,44 @@ namespace SpecificationTest.Pages
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync().ConfigureAwait(false);
+            _rootElement = _webDriver.WaitForWebElementByContentName("torrent-overview");
 
             await InitializeTorrentsAsync().ConfigureAwait(false);
-            ShowRelocateTorrentsModalButton = _webDriver.FindElement(By.CssSelector("*[data-content='show-relocate-torrents-button']"));
+            RefreshButton = _webDriver.FindElementByContentName("reload-torrents-button");
+            ShowRelocateTorrentsModalButton = _webDriver.FindElementByContentName("show-relocate-torrents-button");
         }
 
         private async Task InitializeTorrentsAsync()
         {
-            var torrentsContainer = PageHelper.WaitForWebElementPolicy
-                .Execute(() =>
-                {
-                    var elements = _webDriver.FindElements(By.CssSelector("*[data-content='torrents-container']"));
-                    elements.Count.Should().Be(1);
-
-                    return elements[0];
-                });
-
-            var torrents = torrentsContainer.FindElements(By.CssSelector("*[data-content='torrent']"));
+            var torrentsContainer = _rootElement.WaitForWebElementByContentName("torrents-container");
+            var torrents = torrentsContainer.FindElementsByContentName("torrent");
 
             Torrents = torrents
-                .Select(torrent => new TorrentComponent(torrent))
+                .Select(torrent => new TorrentComponent(torrent, _webDriver))
                 .ToList();
 
             await Torrents.InitializeAsync();
         }
 
-        public async Task<RelocateTorrentsLocationDialogComponent> GetRelocateTorrentsLocationDialogComponentAsync()
+        public async Task<ScanForRelocationCandidatesComponent> GetScanForRelocationCandidatesComponentAsync()
         {
-            var dialog = PageHelper.WaitForWebElementPolicy
-                .Execute(() =>
-                {
-                    var elements = _webDriver.FindElements(By.CssSelector("*[data-content='relocate-torrents-modal']"));
-                    elements.Count.Should().Be(1);
+            var dialog = new ScanForRelocationCandidatesComponent(_rootElement);
+            return await dialog.InitializeAsync().ConfigureAwait(false);
+        }
 
-                    return new RelocateTorrentsLocationDialogComponent(elements[0]);
-                });
 
-            await dialog.InitializeAsync().ConfigureAwait(false);
+        public async Task<PickRelocationCandidatesComponent> GetPickRelocationCandidatesComponentAsync()
+        {
+            var dialog = new PickRelocationCandidatesComponent(_rootElement, _webDriver);
+            return await dialog.InitializeAsync().ConfigureAwait(false);
+        }
 
-            return dialog;
+        private IWebElement RefreshButton { get;  set; }
+        public async Task RefreshTorrentsAsync()
+        {
+            RefreshButton.Click();
+            //Maybe we need to figure out how to first see the loading animation, but I think we don't
+            await InitializeTorrentsAsync().ConfigureAwait(false);
         }
 
         public IWebElement ShowRelocateTorrentsModalButton { get; set; }

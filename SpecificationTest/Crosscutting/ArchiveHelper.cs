@@ -50,7 +50,7 @@ namespace SpecificationTest.Crosscutting
             });
 
             var basePath = Directory.GetParent(directoryPath).FullName; //use parent so the dir name will be included in the tar
-            foreach (var filePath in Directory.GetFiles(directoryPath))
+            foreach (var filePath in Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories))
             {
                 var filePathInTar = Path.GetRelativePath(basePath, filePath);
                 writer.Write(filePathInTar, filePath);

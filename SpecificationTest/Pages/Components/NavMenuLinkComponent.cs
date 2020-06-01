@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SpecificationTest.Pages.Components
 {
-    class NavMenuLinkComponent : IComponent
+    class NavMenuLinkComponent : IComponent<NavMenuLinkComponent>
     {
         private readonly IWebElement _webElement;
         private readonly IWebDriver _webDriver;
@@ -22,23 +22,17 @@ namespace SpecificationTest.Pages.Components
 
         public NavMenuItemTarget Target { get; private set; }
 
-        public Task InitializeAsync()
+        public Task<NavMenuLinkComponent> InitializeAsync()
         {
             var href = _webElement.GetAttribute("href").Split('/').Last();
 
-            switch (href)
+            Target = href switch
             {
-                case "":
-                    Target = NavMenuItemTarget.Policies;
-                    break;
-                case "torrents":
-                    Target = NavMenuItemTarget.Torrents;
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unknown nav item target href '{href}'");
-            }
-
-            return Task.CompletedTask;
+                "" => NavMenuItemTarget.Policies,
+                "torrents" => NavMenuItemTarget.Torrents,
+                _ => throw new InvalidOperationException($"Unknown nav item target href '{href}'"),
+            };
+            return Task.FromResult(this);
         }
 
         public async Task<TPage> NavigateAsync<TPage>()

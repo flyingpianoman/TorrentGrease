@@ -3,19 +3,24 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using SpecificationTest.Crosscutting;
 
 namespace SpecificationTest.Pages.Components.TorrentOverview
 {
-    class TorrentComponent : IComponent
+    class TorrentComponent : IComponent<TorrentComponent>
     {
         private readonly IWebElement _torrentWebElement;
+        private readonly IWebDriver _webDriver;
 
-        public TorrentComponent(IWebElement torrentWebElement)
+        public TorrentComponent(IWebElement torrentWebElement, IWebDriver webDriver)
         {
             _torrentWebElement = torrentWebElement;
+            _webDriver = webDriver;
         }
         private IWebElement _isSelectedWebElement;
 
@@ -29,10 +34,12 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
             {
                 if (IsSelected != value)
                 {
-                    _isSelectedWebElement.Click();
+                    _isSelectedWebElement.ClickBootstrapCheckBox(_webDriver);
                 }
             }
         }
+
+
         public string Name { get; set; }
         public string InfoHash { get; set; }
         public string Location { get; set; }
@@ -45,7 +52,7 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
 
         public DateTime AddedDateTime { get; set; }
 
-        public Task InitializeAsync()
+        public Task<TorrentComponent> InitializeAsync()
         {
             Name = _torrentWebElement.FindElement(By.CssSelector("*[data-content='name']")).Text;
             GBsOnDisk = Decimal.Parse(_torrentWebElement.FindElement(By.CssSelector("*[data-content='data-on-disk-in-gb']")).Text, CultureInfo.InvariantCulture);
@@ -57,7 +64,7 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
             TrackerUrls = JoinedTrackerUrls.Split(", ").ToList();
             _isSelectedWebElement = _torrentWebElement.FindElement(By.CssSelector("*[data-content='selector']"));
 
-            return Task.CompletedTask;
+            return Task.FromResult(this);
         }
     }
 }

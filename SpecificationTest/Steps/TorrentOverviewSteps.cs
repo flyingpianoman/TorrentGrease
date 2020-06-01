@@ -1,5 +1,6 @@
 ﻿using Docker.DotNet;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MonoTorrent;
 using SpecificationTest.Crosscutting;
 using SpecificationTest.Pages;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
@@ -49,7 +51,26 @@ namespace SpecificationTest.Steps
                 {
                     await CreateAndAddTorrentAsync(torrentDto).ConfigureAwait(false);
                 }
+
+                await WaitUntilTorrentClientProcessedTheTorrentsAsync(torrentsToStage).ConfigureAwait(false);
             }
+
+        }
+
+        private async Task WaitUntilTorrentClientProcessedTheTorrentsAsync(List<StageTorrentDto> torrentsToStage)
+        {
+            await Polly
+                .Policy
+                .Handle<PageHelper.RetryException>()
+                .WaitAndRetryUntilTimeoutAsync(TimeSpan.FromMilliseconds(10), TimeSpan.FromSeconds(5))
+                .ExecuteAsync(async () =>
+                {
+                    var torrents = await _torrentClient.GetAllTorrentsAsync().ConfigureAwait(false);
+                    if (torrents.Count() != torrentsToStage.Count)
+                    {
+                        throw new PageHelper.RetryException();
+                    }
+                }).ConfigureAwait(false);
         }
 
         private async Task CreateAndAddTorrentAsync(StageTorrentDto torrentDto)
@@ -112,17 +133,19 @@ namespace SpecificationTest.Steps
         [Then(@"I see an overview of the following torrents")]
         public void ThenISeeAnOverviewOfTheFollowingTorrents(Table table)
         {
+            var propertiesToAssert = table.Header;
+
             var expectedTorrents = table.CreateSet<TorrentOverviewRowDto>().ToList();
             var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
             var actualTorrents = page.Torrents;
 
-            AssertTorrents(actualTorrents, expectedTorrents);
+            AssertTorrents(actualTorrents, expectedTorrents, propertiesToAssert);
         }
 
         [When(@"I select the following torrents")]
         public void WhenISelectTheFollowingTorrents(Table table)
         {
-            var torrentNames = table.CreateSet<string>().ToList();
+            var torrentNames = table.Rows.Select(r => r.Values.First()).ToList();
             var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
             var torrents = page.Torrents.Where(t => torrentNames.Contains(t.Name)).ToArray();
 
@@ -134,12 +157,30 @@ namespace SpecificationTest.Steps
             }
         }
 
-        [When(@"I open the relocate data dialog")]
-        public void WhenOpenTheRelocateDataDialog()
+        [When(@"I open the relocate data dialog for the following torrents")]
+        public void WhenOpenTheRelocateDataDialog(Table table)
         {
+            WhenISelectTheFollowingTorrents(table);
+
             var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
             page.ShowRelocateTorrentsModalButton.Click();
         }
+
+        [When(@"I scan for torrent data relocate candidates with the following paths")]
+        public void WhenIScanForTorrentDataRelocateCandidatesWithTheFollowingPaths(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                WhenISetTheFollowingPathsToScan(table);
+                var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+                var dialog = await page.GetScanForRelocationCandidatesComponentAsync().ConfigureAwait(false);
+
+                dialog.ClickScanForCandidatesButton();
+            }
+        }
+
 
         [When(@"I set the following paths to scan")]
         public void WhenISetTheFollowingPathsToScan(Table table)
@@ -148,16 +189,20 @@ namespace SpecificationTest.Steps
 
             async Task InnerAsync()
             {
-                var pathsToScan = table.CreateSet<string>().ToList();
+                var pathsToScan = table.Rows.Select(r => r[0]).ToList();
                 var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
-                var dialog = await page.GetRelocateTorrentsLocationDialogComponentAsync().ConfigureAwait(false);
+                var dialog = await page.GetScanForRelocationCandidatesComponentAsync().ConfigureAwait(false);
                 var first = true;
 
                 foreach (var pathToScan in pathsToScan)
                 {
-                    if(!first)
+                    if (!first)
                     {
                         dialog.ClickAddPathToScanButton();
+                    }
+                    else
+                    {
+                        first = false;
                     }
 
                     dialog.PathToScanElements.Last().SendKeys(pathToScan);
@@ -165,21 +210,60 @@ namespace SpecificationTest.Steps
             }
         }
 
+        [Then(@"the following torrents have no relocation options")]
+        public void ThenTheFollowingTorrentsHaveNoRelocationOptions(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var torrentNames = table.Rows.Select(r => r[0]).ToList();
+                var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+                var modal = await page.GetPickRelocationCandidatesComponentAsync().ConfigureAwait(false);
+
+                foreach (var torrentName in torrentNames)
+                {
+                    var candidate = modal.TorrentRelocationCandidates.Single(c => c.TorrentName == torrentName);
+                    candidate.RelocateOptionsCount.Should().Be(0);
+                }
+            }
+        }
+
+
 
         private static void AssertTorrents(IEnumerable<Pages.Components.TorrentOverview.TorrentComponent> actualTorrents,
-            IEnumerable<TorrentOverviewRowDto> expectedTorrents)
+        IEnumerable<TorrentOverviewRowDto> expectedTorrents,
+        ICollection<string> propertiesToAssert)
         {
             actualTorrents.Count().Should().Be(expectedTorrents.Count());
 
             foreach (var expectedTorrent in expectedTorrents)
             {
                 var actualTorrent = actualTorrents.Single(p => p.Name == expectedTorrent.Name);
-                actualTorrent.GBsOnDisk.Should().Be(expectedTorrent.GBsOnDisk);
-                actualTorrent.Location.Should().Be(expectedTorrent.LocationOnDisk);
-                actualTorrent.SizeInGB.Should().Be(expectedTorrent.TotalSizeInGB);
-                actualTorrent.TotalUploadInGB.Should().Be(expectedTorrent.TotalUploadedInGB);
+                if (propertiesToAssert.Contains(nameof(expectedTorrent.GBsOnDisk)))
+                {
+                    actualTorrent.GBsOnDisk.Should().Be(expectedTorrent.GBsOnDisk);
+                }
 
-                AssertTrackers(expectedTorrent, actualTorrent);
+                if (propertiesToAssert.Contains(nameof(expectedTorrent.LocationOnDisk)))
+                {
+                    actualTorrent.Location.Should().Be(expectedTorrent.LocationOnDisk);
+                }
+
+                if (propertiesToAssert.Contains(nameof(expectedTorrent.TotalSizeInGB)))
+                {
+                    actualTorrent.SizeInGB.Should().Be(expectedTorrent.TotalSizeInGB);
+                }
+
+                if (propertiesToAssert.Contains(nameof(expectedTorrent.TotalUploadedInGB)))
+                {
+                    actualTorrent.TotalUploadInGB.Should().Be(expectedTorrent.TotalUploadedInGB);
+                }
+
+                if (propertiesToAssert.Contains(nameof(expectedTorrent.TrackerAnnounceUrl1)))
+                {
+                    AssertTrackers(expectedTorrent, actualTorrent);
+                }
             }
         }
 
@@ -246,5 +330,47 @@ namespace SpecificationTest.Steps
 
             await dockerClient.Containers.StartContainerExecAsync(execCommandResponse.ID).ConfigureAwait(false);
         }
+
+        [When(@"I relocate the data of the following torrents and verify them afterwards")]
+        public void WhenIRelocateTheFollowingCandidates(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var relocateTorrentDataDtos = table.CreateSet<RelocateTorrentDataDto>().ToList();
+                var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+                var modal = await page.GetPickRelocationCandidatesComponentAsync().ConfigureAwait(false);
+
+                foreach (var candidate in modal.TorrentRelocationCandidates)
+                {
+                    var matchingDto = relocateTorrentDataDtos.SingleOrDefault(dto => dto.TorrentName == candidate.TorrentName);
+
+                    if (matchingDto == null)
+                    {
+                        if (candidate.IsSelectable)
+                        {
+                            candidate.IsSelected = false;
+                        }
+                    }
+                    else
+                    {
+                        candidate.IsSelected = true;
+                    }
+                }
+
+                modal.TorrentRelocationCandidates
+                    .Where(c => c.IsSelected)
+                    .Count().Should().Be(relocateTorrentDataDtos.Count);
+
+                modal.IsVerifyTorrentsEnabled = true;
+
+                modal.RelocateCandidatesButton.Click();
+                modal.WaitUntilClosed();
+
+                await page.RefreshTorrentsAsync().ConfigureAwait(false);
+            }
+        }
+
     }
 }

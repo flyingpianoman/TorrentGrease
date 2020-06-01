@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace SpecificationTest.Pages.Components
 {
-    interface IComponent
+    interface IComponent<TSelf>
     {
-        Task InitializeAsync();
+        Task<TSelf> InitializeAsync();
     }
 }

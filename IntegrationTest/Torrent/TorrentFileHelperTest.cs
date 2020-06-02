@@ -125,7 +125,7 @@ namespace IntegrationTest.Torrent
             {
                 Name = torrentName,
                 IsPrivate = true,
-                TrackerAnnounceUrl = "http://mytracker.org:2710/announce",
+                TrackerAnnounceUrls = new List<string>() { "http://mytracker.org:2710/announce" },
                 FileMappings = innerFiles
             };
         }
@@ -140,7 +140,7 @@ namespace IntegrationTest.Torrent
             var torrentFile = await sut.ReadTorrentAsync(torrentFileLoc);
             torrentFile.Name.Should().Be(newTorrentFile.Name);
             torrentFile.IsPrivate.Should().Be(newTorrentFile.IsPrivate);
-            torrentFile.TrackerAnnounceUrl.Should().Be(newTorrentFile.TrackerAnnounceUrl);
+            torrentFile.TrackerAnnounceUrl.Should().Be(newTorrentFile.TrackerAnnounceUrls.SingleOrDefault());
             torrentFile.InnerTorrentFiles.Count().Should().Be(newTorrentFile.FileMappings.Count());
 
             foreach (var fileMapping in newTorrentFile.FileMappings)

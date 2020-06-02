@@ -15,5 +15,7 @@ namespace SpecificationTest
         public static string TransmissionUser => "usr";
         public static string TransmissionPassword => "pwd";
         public static string TorrentGreaseContainerName => "torrent-grease";
+
+        public static string TransmissionContainerName => "transmission";
     }
 }

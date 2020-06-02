@@ -124,3 +124,6 @@ dotnet_diagnostic.CA1062.severity = silent
 dotnet_diagnostic.CA1303.severity = silent
 dotnet_diagnostic.CA1812.severity = silent
 dotnet_diagnostic.CA1822.severity = silent
+
+# Default severity for analyzer diagnostics with category 'Globalization'
+dotnet_analyzer_diagnostic.category-Globalization.severity = none

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SpecificationTest.Pages.Components
 {
-    class NavMenuComponent : IComponent
+    class NavMenuComponent : IComponent<NavMenuComponent>
     {
         private const string NavMenuLinkSelector = "#navMenu > ul.nav > li > a";
         private readonly IWebDriver _webDriver;
@@ -19,25 +19,33 @@ namespace SpecificationTest.Pages.Components
             _webDriver = webDriver;
         }
 
-
-        public async Task InitializeAsync()
+        public async Task<NavMenuComponent> InitializeAsync()
         {
             NavMenuLinks = await PageHelper.WaitForWebElementPolicyAsync
                 .ExecuteAsync(async () =>
                 {
                     var elements = _webDriver.FindElements(By.CssSelector(NavMenuLinkSelector));
-                    elements.Should().NotBeEmpty();
+                    if(!elements.Any())
+                    {
+                        throw new PageHelper.RetryException();
+                    }
+
                     var links = new List<NavMenuLinkComponent>(elements.Count);
 
                     foreach (var element in elements)
                     {
-                        var link = new NavMenuLinkComponent(element);
+                        var link = new NavMenuLinkComponent(element, _webDriver);
                         await link.InitializeAsync().ConfigureAwait(false);
                         links.Add(link);
                     }
 
                     return links;
                 }).ConfigureAwait(false);
+
+            return this;
         }
+
+        public NavMenuLinkComponent PoliciesNaveMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.Policies);
+        public NavMenuLinkComponent TorrentsNavMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.Torrents);
     }
 }

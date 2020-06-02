@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SpecificationTest.Crosscutting;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -23,6 +24,8 @@ namespace SpecificationTest.Hooks
         [BeforeScenario]
         public static async Task UploadCleanDBToContainerAsync()
         {
+            DIContainer.Default.Get<Dictionary<string, string>>("TorrentDataFolders").Clear();
+
             var torrentGreaseDBService = DIContainer.Default.Get<TorrentGreaseDBService>();
             await torrentGreaseDBService.UploadCleanDBToContainerAsync().ConfigureAwait(false);
             torrentGreaseDBService.DbContext = null; //ensures that a clean prep dbcontext is created each test

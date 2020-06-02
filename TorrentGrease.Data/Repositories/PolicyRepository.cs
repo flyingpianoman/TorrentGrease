@@ -7,13 +7,10 @@ using System.Threading.Tasks;
 
 namespace TorrentGrease.Data.Repositories
 {
-    public class PolicyRepository : IPolicyRepository
+    public class PolicyRepository : RepositoryBase, IPolicyRepository
     {
-        private readonly ITorrentGreaseDbContext _dbContext;
-
-        public PolicyRepository(ITorrentGreaseDbContext dbContext)
+        public PolicyRepository(ITorrentGreaseDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<ICollection<Shared.Policy>> GetAllAsync()

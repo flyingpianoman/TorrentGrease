@@ -15,12 +15,13 @@ namespace SpecificationTest.Steps
     [Binding]
     public class PoliciesOverviewSteps : StepsBase
     {
-        [Then(@"I see a no policies created message")]
-        public void ThenISeeANoPoliciesCreatedMessage()
+        [Then(@"I see an overview containing 0 policies")]
+        public void ThenISeeAnOverviewOfThePolicies()
         {
             var page = WebDriver.CurrentPageAs<PoliciesOverviewPage>();
-            page.NoPoliciesFoundMessage.Should().NotBeNullOrEmpty();
+            page.Policies.Count.Should().Be(0);
         }
+
 
         [Then(@"I see an overview of the following policies")]
         public void ThenISeeAnOverviewOfTheFollowingPolicies(Table table)

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SpecificationTest.Pages.Components.PolicyOverview
 {
-    class TrackerComponent : IComponent
+    class TrackerComponent : IComponent<TrackerComponent>
     {
         private readonly IWebElement _webElement;
 
@@ -17,10 +17,10 @@ namespace SpecificationTest.Pages.Components.PolicyOverview
 
         public string Name { get; private set; }
 
-        public Task InitializeAsync()
+        public Task<TrackerComponent> InitializeAsync()
         {
             this.Name = _webElement.Text;
-            return Task.CompletedTask;
+            return Task.FromResult(this);
         }
     }
 }

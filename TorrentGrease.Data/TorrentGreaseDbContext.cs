@@ -16,19 +16,72 @@ namespace TorrentGrease.Data
         {
         }
 
+        //Policy schema
         public DbSet<Shared.Action> Actions { get; set; }
         public DbSet<Shared.Condition> Conditions { get; set; }
         public DbSet<Shared.Policy> Policies { get; set; }
         public DbSet<Shared.Tracker> Trackers { get; set; }
 
+        //Statistics schema
+        public DbSet<Shared.TorrentStatistics.Torrent> Torrents { get; set; }
+        public DbSet<Shared.TorrentStatistics.TorrentUploadDeltaSnapshot> TorrentUploadDeltaSnapshots { get; set; }
+        public DbSet<Shared.TorrentStatistics.TrackerUrl> TrackerUrls { get; set; }
+        public DbSet<Shared.TorrentStatistics.TrackerUrlCollection> TrackerUrlCollections { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //Policy schema
             ConfigureActionModel(modelBuilder);
             ConfigureConditionModel(modelBuilder);
             ConfigurePolicyModel(modelBuilder);
             ConfigureTrackerModel(modelBuilder);
             ConfigureTrackerPolicyModel(modelBuilder);
+
+            //Statistics schema
+            ConfigureTorrentModel(modelBuilder);
+            ConfigureTorrentUploadDeltaSnapshotModel(modelBuilder);
+            ConfigureTrackerUrlCollectionModel(modelBuilder);
+            ConfigureTrackerUrlModel(modelBuilder);
         }
+
+        #region Statistics schema
+        private static void ConfigureTorrentModel(ModelBuilder modelBuilder)
+        {
+            var b = modelBuilder
+                .Entity<Shared.TorrentStatistics.Torrent>()
+                .ToTable(nameof(Shared.TorrentStatistics.Torrent));
+
+            b.HasIndex(t => t.InfoHash);
+            b.HasIndex(t => t.WasInClientOnLastScan);
+        }
+
+        private static void ConfigureTorrentUploadDeltaSnapshotModel(ModelBuilder modelBuilder)
+        {
+            var b = modelBuilder
+                .Entity<Shared.TorrentStatistics.TorrentUploadDeltaSnapshot>()
+                .ToTable(nameof(Shared.TorrentStatistics.TorrentUploadDeltaSnapshot));
+
+            b.HasIndex(t => new { t.TorrentId, t.DateTime });
+        }
+
+        private static void ConfigureTrackerUrlCollectionModel(ModelBuilder modelBuilder)
+        {
+            var b = modelBuilder
+                .Entity<Shared.TorrentStatistics.TrackerUrlCollection>()
+                .ToTable(nameof(Shared.TorrentStatistics.TrackerUrlCollection));
+        }
+
+        private static void ConfigureTrackerUrlModel(ModelBuilder modelBuilder)
+        {
+            var b = modelBuilder
+                .Entity<Shared.TorrentStatistics.TrackerUrl>()
+                .ToTable(nameof(Shared.TorrentStatistics.TrackerUrl));
+
+            b.HasIndex(t => t.TrackerUrlCollectionId);
+        }
+        #endregion
+
+        #region Policy schema
 
         private static void ConfigureTrackerPolicyModel(ModelBuilder modelBuilder)
         {
@@ -78,7 +131,8 @@ namespace TorrentGrease.Data
 
             actionBuilder.Property(e => e.ActionType)
                 .HasConversion(new EnumToStringConverter<Shared.ActionType>());
-        }
+        } 
+        #endregion
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

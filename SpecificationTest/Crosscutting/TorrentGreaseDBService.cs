@@ -49,7 +49,7 @@ namespace SpecificationTest.Crosscutting
             using var dbContext = CreateDBContext();
             try
             {
-                var dbInitializer = new DbInitializer(dbContext);
+                var dbInitializer = new TorrentGreaseDbInitializer(dbContext);
                 await dbInitializer.InitializeAsync().ConfigureAwait(false);
             }
             finally
@@ -57,7 +57,7 @@ namespace SpecificationTest.Crosscutting
                 await dbContext.DisposeAsync(); //make sure that everything is written to disk
             }
 
-            _CleanDBTarMemoryStream = ArchiveHelper.CreateTarStream(_PrepDBPath, ContainerDBFileName);
+            _CleanDBTarMemoryStream = ArchiveHelper.CreateSingleFileTarStream(_PrepDBPath, ContainerDBFileName);
         }
 
         public async Task UploadCleanDBToContainerAsync()
@@ -95,7 +95,7 @@ namespace SpecificationTest.Crosscutting
             await DbContext.SaveChangesAsync().ConfigureAwait(false);
             await DbContext.DisposeAsync();
 
-            using var tarStream = ArchiveHelper.CreateTarStream(_PrepDBPath, ContainerDBFileName);
+            using var tarStream = ArchiveHelper.CreateSingleFileTarStream(_PrepDBPath, ContainerDBFileName);
             await _dockerClient.Containers.UploadTarredFileToContainerAsync(tarStream, TestSettings.TorrentGreaseContainerName, ContainerDBDirPath).ConfigureAwait(false);
 
             DbContext = CreateDBContext();

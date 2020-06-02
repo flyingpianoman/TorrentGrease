@@ -9,11 +9,46 @@ namespace TorrentGrease.TorrentClient.Transmission
     {
         internal static Shared.TorrentClient.Torrent ToSharedModel(this RpcEntity.TorrentInfo torrentInfo)
         {
-            var sizeInGB = torrentInfo.TotalSize / 1024 / 1024 / 1024; //Convert bytes to GB
             return new Shared.TorrentClient.Torrent
             {
+                ID = torrentInfo.ID,
                 Name = torrentInfo.Name,
-                SizeInGB = sizeInGB
+                SizeInBytes = torrentInfo.TotalSize,
+                BytesOnDisk = torrentInfo.TotalSize - torrentInfo.LeftUntilDone,
+                InfoHash = torrentInfo.HashString,
+                Location = GetRealLocation(torrentInfo),
+                TotalUploadInBytes = torrentInfo.UploadedEver,
+                TrackerUrls = torrentInfo.Trackers
+                    .Select(t => new Uri(t.announce).Authority)
+                    .ToList(),
+                AddedDateTime = DateTimeOffset.FromUnixTimeSeconds(torrentInfo.AddedDate).UtcDateTime,
+                Files = torrentInfo.Files.ToSharedModel()
+            };
+        }
+
+        private static string GetRealLocation(RpcEntity.TorrentInfo torrentInfo)
+        {
+            var pathSeperator = torrentInfo.DownloadDir.Contains('/')
+                ? "/"
+                : "\\";
+
+            return torrentInfo.Files.Length > 1
+                ? torrentInfo.DownloadDir + pathSeperator + torrentInfo.Name
+                : torrentInfo.DownloadDir;
+        }
+
+
+        internal static Shared.TorrentClient.TorrentFile[] ToSharedModel(this RpcEntity.TransmissionTorrentFiles[] torrentFiles)
+        {
+            return torrentFiles.Select(tf => tf.ToSharedModel()).ToArray();
+        }
+
+        internal static Shared.TorrentClient.TorrentFile ToSharedModel(this RpcEntity.TransmissionTorrentFiles torrentFile)
+        {
+            return new Shared.TorrentClient.TorrentFile
+            {
+                FileLocationInTorrent = torrentFile.Name,
+                SizeInBytes = Convert.ToInt64(torrentFile.Length)
             };
         }
     }

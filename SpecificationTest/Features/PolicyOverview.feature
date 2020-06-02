@@ -7,7 +7,7 @@ Background:
     
 Scenario: View empty policies page
 	When I navigate to the policy overview
-	Then I see a no policies created message
+	Then I see an overview containing 0 policies
         
 Scenario: View filled policies page
 	Given the following trackers are staged

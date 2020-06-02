@@ -7,7 +7,7 @@ namespace SpecificationTest.Pages.Components
 {
     internal static class ComponentExtensions
     {
-        internal static async ValueTask InitializeAsync(this IEnumerable<IComponent> components)
+        internal static async ValueTask InitializeAsync<T>(this IEnumerable<IComponent<T>> components)
         {
             foreach (var component in components)
             {

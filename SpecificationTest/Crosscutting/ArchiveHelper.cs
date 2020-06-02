@@ -29,7 +29,7 @@ namespace SpecificationTest.Crosscutting
             }
         }
 
-        public static MemoryStream CreateTarStream(string sourceFile, string fileNameInTar)
+        public static MemoryStream CreateSingleFileTarStream(string sourceFile, string fileNameInTar)
         {
             var tarStream = new MemoryStream();
             using var writer = WriterFactory.Open(tarStream, ArchiveType.Tar, new WriterOptions(CompressionType.None)
@@ -38,6 +38,24 @@ namespace SpecificationTest.Crosscutting
             });
 
             writer.Write(fileNameInTar, sourceFile);
+            return tarStream;
+        }
+
+        public static MemoryStream CreateDirectoryTarStream(string directoryPath)
+        {
+            var tarStream = new MemoryStream();
+            using var writer = WriterFactory.Open(tarStream, ArchiveType.Tar, new WriterOptions(CompressionType.None)
+            {
+                LeaveStreamOpen = true
+            });
+
+            var basePath = Directory.GetParent(directoryPath).FullName; //use parent so the dir name will be included in the tar
+            foreach (var filePath in Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories))
+            {
+                var filePathInTar = Path.GetRelativePath(basePath, filePath);
+                writer.Write(filePathInTar, filePath);
+            }
+
             return tarStream;
         }
     }

@@ -110,6 +110,111 @@ namespace TorrentGrease.Data.Migrations
                     b.ToTable("Policy");
                 });
 
+            modelBuilder.Entity("TorrentGrease.Shared.TorrentStatistics.Torrent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("BytesOnDisk")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("InfoHash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LatestAddedDateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("SizeInBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TotalUploadInBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("WasInClientOnLastScan")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InfoHash");
+
+                    b.HasIndex("WasInClientOnLastScan");
+
+                    b.ToTable("Torrent");
+                });
+
+            modelBuilder.Entity("TorrentGrease.Shared.TorrentStatistics.TorrentUploadDeltaSnapshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TorrentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TotalUploadForThisTorrentInBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TotalUploadInBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TrackerUrlCollectionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UploadDeltaSinceLastSnapshotInBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TrackerUrlCollectionId");
+
+                    b.HasIndex("TorrentId", "DateTime");
+
+                    b.ToTable("TorrentUploadDeltaSnapshot");
+                });
+
+            modelBuilder.Entity("TorrentGrease.Shared.TorrentStatistics.TrackerUrl", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TrackerUrlCollectionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TrackerUrlCollectionId");
+
+                    b.ToTable("TrackerUrl");
+                });
+
+            modelBuilder.Entity("TorrentGrease.Shared.TorrentStatistics.TrackerUrlCollection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("CollectionHash")
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TrackerUrlCollection");
+                });
+
             modelBuilder.Entity("TorrentGrease.Shared.Tracker", b =>
                 {
                     b.Property<int>("Id")
@@ -119,7 +224,7 @@ namespace TorrentGrease.Data.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasMaxLength(50) ;
+                        .HasMaxLength(50);
 
                     b.HasKey("Id");
 
@@ -153,6 +258,30 @@ namespace TorrentGrease.Data.Migrations
                     b.HasOne("TorrentGrease.Shared.Policy", null)
                         .WithMany("Conditions")
                         .HasForeignKey("PolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TorrentGrease.Shared.TorrentStatistics.TorrentUploadDeltaSnapshot", b =>
+                {
+                    b.HasOne("TorrentGrease.Shared.TorrentStatistics.Torrent", "Torrent")
+                        .WithMany()
+                        .HasForeignKey("TorrentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TorrentGrease.Shared.TorrentStatistics.TrackerUrlCollection", "TrackerUrlCollection")
+                        .WithMany()
+                        .HasForeignKey("TrackerUrlCollectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TorrentGrease.Shared.TorrentStatistics.TrackerUrl", b =>
+                {
+                    b.HasOne("TorrentGrease.Shared.TorrentStatistics.TrackerUrlCollection", null)
+                        .WithMany("TrackerUrls")
+                        .HasForeignKey("TrackerUrlCollectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

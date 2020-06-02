@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SpecificationTest.Crosscutting;
 
 namespace SpecificationTest.Pages
 {
@@ -21,22 +22,9 @@ namespace SpecificationTest.Pages
         {
             await base.InitializeAsync().ConfigureAwait(false);
 
-            var policiesCardContainer = PageHelper.WaitForWebElementPolicy
-                .Execute(() =>
-                {
-                    var elements = _webDriver.FindElements(By.CssSelector("*[data-content='policy-card-container']"));
-                    elements.Count.Should().Be(1);
-
-                    return elements[0];
-                });
-
-            var noPoliciesFoundMessageElement = policiesCardContainer
-                .FindElements(By.CssSelector("*[data-content='no-policies-message']"))
-                .SingleOrDefault();
-            NoPoliciesFoundMessage = noPoliciesFoundMessageElement?.Text;
-
-            var policyCards = policiesCardContainer.FindElements(By.CssSelector("*[data-content='policy']"));
-
+            var policiesCardContainer = _webDriver.WaitForWebElementByContentName("policy-card-container");
+            var policyCards = policiesCardContainer.FindElementsByContentName("policy");
+            
             Policies = policyCards
                 .Select(card => new Components.PolicyOverview.PolicyComponent(card))
                 .ToList();
@@ -45,6 +33,5 @@ namespace SpecificationTest.Pages
         }
 
         public IList<Components.PolicyOverview.PolicyComponent> Policies { get; private set; }
-        public string NoPoliciesFoundMessage { get; private set; }
     }
 }

@@ -145,11 +145,11 @@ namespace TorrentGrease.Server.Services
         private static ILookup<string, string> GetFilePathsByFileNameLookup(IEnumerable<string> pathsToScan, string[] extensionsWhitelist)
         {
             var filePaths = new List<string>();
-            var pattern = string.Join("|", extensionsWhitelist.Select(ext => $"*{ext}"));
 
             foreach (var pathToScan in pathsToScan)
             {
-                filePaths.AddRange(Directory.GetFiles(pathToScan, pattern, SearchOption.AllDirectories));
+                filePaths.AddRange(Directory.EnumerateFiles(pathToScan, "*.*", SearchOption.AllDirectories)
+                    .Where(s => extensionsWhitelist.Any(e => s.EndsWith(e, StringComparison.OrdinalIgnoreCase))));
             }
 
             return filePaths

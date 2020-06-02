@@ -39,6 +39,32 @@ Scenario: Relocate torrent data
 		| Name               | LocationOnDisk      | GBsOnDisk |
 		| TorrentWithOneFile | /downloads/unmapped | 0         |
         
+Scenario: Relocate torrent data with different extensions
+	Given the following torrents are staged
+		| Name               | Location             | TrackerAnnounceUrl1             | TorrentFile1Path | TorrentFile1SizeInKB | TorrentFile2Path | TorrentFile2SizeInKB |
+		| TorrentWithOneFile | /downloads/completed | http://my-tracker:6969/announce | file1.txt        | 128                  |                  |                      |
+		| TorrentWithDifferentExtension | /downloads/completed | http://my-tracker:6969/announce | file1.pdf        | 128                  |                  |                      |
+	And the data of the following torrents is sent to the torrent client
+		| TorrentName        | TargetLocation      |
+		| TorrentWithOneFile | /downloads/unmapped |
+		| TorrentWithDifferentExtension | /downloads/unmapped |
+	And I navigate to the torrent overview
+	When I open the relocate data dialog for the following torrents
+		| Name               |
+		| TorrentWithOneFile |
+		| TorrentWithDifferentExtension |
+	And I scan for torrent data relocate candidates with the following paths
+		| Path                 |
+		| /downloads/unmapped/ |
+	And I relocate the data of the following torrents and verify them afterwards
+		| TorrentName        |
+		| TorrentWithOneFile |
+		| TorrentWithDifferentExtension |
+	Then I see an overview of the following torrents
+		| Name               | LocationOnDisk      | GBsOnDisk |
+		| TorrentWithOneFile | /downloads/unmapped | 0         |
+		| TorrentWithDifferentExtension | /downloads/unmapped | 0         |
+        
 Scenario: Relocate torrent data - no data found
 	Given the following torrents are staged
 		| Name               | Location             | TrackerAnnounceUrl1             | TorrentFile1Path | TorrentFile1SizeInKB | TorrentFile2Path | TorrentFile2SizeInKB |
@@ -54,6 +80,7 @@ Scenario: Relocate torrent data - no data found
 		| TorrentName        |
 		| TorrentWithOneFile |
 
+@Ignore
 Scenario: Relocate torrent data with multi dir torrents
 	Given the following torrents are staged
 		| Name                               | Location             | TrackerAnnounceUrl1             | TorrentFile1Path    | TorrentFile1SizeInKB | TorrentFile2Path    | TorrentFile2SizeInKB |

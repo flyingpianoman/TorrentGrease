@@ -74,7 +74,8 @@ namespace TorrentGrease.Server
             app.UseRouting();
             
             app.UseHangfire();
-            app.UseTorrentStatisticsHarvester(serviceProvider);
+            //not yet
+            //app.UseTorrentStatisticsHarvester(serviceProvider);
 
             app.UseHealthChecks("/health");
 

@@ -1,0 +1,41 @@
+﻿@typeparam TItem
+@using Blazorise
+
+@foreach (var item in CurrentPageItems)
+{
+    @ChildContent(item)
+}
+
+@code {
+
+    [Parameter]
+    public RenderFragment<TItem> ChildContent { get; set; }
+
+
+    private IEnumerable<TItem> _allItems;
+    [Parameter]
+    public IEnumerable<TItem> AllItems
+    {
+        get => _allItems;
+        set
+        {
+            _allItems = value;
+            PageIndex = 0;
+        }
+    }
+
+    [Parameter]
+    public int PageSize { get; set; } = 50;
+
+    private int _pageIndex;
+    public int PageIndex
+    {
+        get { return _pageIndex; }
+        set { _pageIndex = value; StateHasChanged(); }
+    }
+
+    public int TotalNrOfPages => (int)Math.Ceiling((double)AllItems.Count() / PageSize);
+    public int RowsToSkipToGetToCurrentPage => PageIndex == 0 ? 0 : PageIndex * PageSize;
+
+    public IEnumerable<TItem> CurrentPageItems => AllItems.Skip(RowsToSkipToGetToCurrentPage).Take(PageSize);
+}

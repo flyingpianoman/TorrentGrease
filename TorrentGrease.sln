@@ -42,7 +42,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.TorrentStatis
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.Hangfire", "TorrentGrease.Hangfire\TorrentGrease.Hangfire.csproj", "{B5BEDC76-71FD-4A1B-A7D6-28E96EF7A062}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUtils", "TestUtils\TestUtils.csproj", "{481D7FBF-BBCA-4FE5-A052-F718052DAE2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestUtils", "TestUtils\TestUtils.csproj", "{481D7FBF-BBCA-4FE5-A052-F718052DAE2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

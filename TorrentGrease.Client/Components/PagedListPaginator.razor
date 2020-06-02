@@ -1,0 +1,49 @@
+﻿@typeparam TItem
+@using Blazorise
+
+@if(PagedList == null)
+{
+    <span>nulled</span>
+}
+else
+{ 
+<Pagination Alignment="Alignment.Center">
+    <PaginationItem>
+        <PaginationLink Clicked="GoToPreviousPage">
+            <span aria-hidden="true">«</span>
+        </PaginationLink>
+    </PaginationItem>
+    <PaginationItem IsActive="true">
+        <PaginationLink>
+            @(PagedList.PageIndex + 1)
+        </PaginationLink>
+    </PaginationItem>
+    <PaginationItem>
+        <PaginationLink Clicked="GoToNextPage">
+            <span aria-hidden="true">»</span>
+        </PaginationLink>
+    </PaginationItem>
+</Pagination>
+}
+
+@code {
+
+    [Parameter]
+    public PagedList<TItem> PagedList { get; set; }
+
+    void GoToPreviousPage()
+    {
+        PagedList.PageIndex = PagedList.PageIndex == 0 ? 0 : PagedList.PageIndex - 1;
+    }
+
+    void GoToNextPage()
+    {
+        if(PagedList.TotalNrOfPages == 0)
+        {
+            return;
+        }
+
+        PagedList.PageIndex = PagedList.PageIndex == PagedList.TotalNrOfPages - 1 ? PagedList.PageIndex : PagedList.PageIndex + 1;
+    }
+
+}

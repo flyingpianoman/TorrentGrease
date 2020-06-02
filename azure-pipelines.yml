@@ -73,12 +73,12 @@ steps:
     projects: 'IntegrationTest/IntegrationTest.csproj'
     testRunTitle: 'IntegrationTest'
     
-#- task: DotNetCoreCLI@2
-#  displayName: dotnet test SpecificationTest
-#  inputs:
-#    command: 'test'
-#    projects: 'SpecificationTest/SpecificationTest.csproj'
-#    testRunTitle: 'SpecificationTest'
+- task: DotNetCoreCLI@2
+  displayName: dotnet test SpecificationTest
+  inputs:
+    command: 'test'
+    projects: 'SpecificationTest/SpecificationTest.csproj'
+    testRunTitle: 'SpecificationTest'
 
 - task: DockerCompose@0
   displayName: Docker-compose logs

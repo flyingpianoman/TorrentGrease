@@ -67,7 +67,7 @@ namespace TorrentGrease.Server
             }
 
             app.UseStaticFiles();
-            app.UseClientSideBlazorFiles<Client.Startup>();
+            app.UseClientSideBlazorFiles<Client.Program>();
             app.UseGrpcWeb();
 
             app.UseSerilogRequestLogging();
@@ -82,7 +82,7 @@ namespace TorrentGrease.Server
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcServices();
-                endpoints.MapFallbackToClientSideBlazor<Client.Startup>("index.html");
+                endpoints.MapFallbackToClientSideBlazor<Client.Program>("index.html");
             });
         }
     }

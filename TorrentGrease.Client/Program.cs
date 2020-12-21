@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Blazor.Hosting;
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 using System.Threading.Tasks;
 using ProtoBuf.Grpc.Client;
 using TorrentGrease.GrpcClient;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TorrentGrease.Client
 {
@@ -17,6 +18,7 @@ namespace TorrentGrease.Client
 
             GrpcClientFactory.AllowUnencryptedHttp2 = true;
             builder.Services
+                .AddBaseAddressHttpClient()
                 .AddGrpcClients()
                 .AddBlazorise(options =>
                 {

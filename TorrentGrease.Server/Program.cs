@@ -39,7 +39,7 @@ namespace TorrentGrease.Server
 
         private static void CorrectBlazorConfigPaths()
         {
-            const string blazorConfigPath = @"/app/bin/Debug/netcoreapp3.1/TorrentGrease.Client.blazor.config";
+            const string blazorConfigPath = @"/app/bin/Debug/netcoreapp3.2/TorrentGrease.Client.blazor.config";
             var blazorConfig = File.ReadAllText(blazorConfigPath);
             blazorConfig = Regex.Replace(blazorConfig, @"[a-zA-Z]:[\/\\].+?[\/\\]TorrentGrease.Client[\/\\]", "/TorrentGrease.Client/")
                 .Replace('\\', '/');

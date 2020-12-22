@@ -16,11 +16,11 @@ namespace TorrentGrease.Client
         public static async Task Main()
         {
             var builder = WebAssemblyHostBuilder.CreateDefault();
-            builder.RootComponents.Add<App>("app");
+            builder.RootComponents.Add<App>("#app");
 
             GrpcClientFactory.AllowUnencryptedHttp2 = true;
             builder.Services
-                .AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
+                .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
                 .AddGrpcClients()
                 .AddBlazorise(options =>
                 {

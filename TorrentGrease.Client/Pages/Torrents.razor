@@ -47,7 +47,7 @@ else
                     }
                     <tr data-content="torrent">
                         <td>
-                            <Blazorise.CheckEdit data-content="selector" IsDisabled="@_isInWaitMode" @bind-Checked="selectableTorrent.IsSelected" />
+                            <Blazorise.Check data-content="selector" IsDisabled="@_isInWaitMode" @bind-Checked="@selectableTorrent.IsSelected" />
                         </td>
                         <td data-content="name">@torrent.Name</td>
                         <td><span data-content="percentage-available">@Math.Round((decimal)torrent.BytesOnDisk / torrent.SizeInBytes * 100, 2).ToString("N2")</span>%</td>
@@ -109,7 +109,7 @@ else
                                 <td>
                                     @if (relocatableTorrentCandidate.RelocateOptions.Any())
                                     {
-                                        <Blazorise.CheckEdit data-content="selector" IsDisabled="@(_isInWaitMode)" @bind-Checked="selectableRelocatableTorrentCandidate.IsSelected" />
+                                        <Blazorise.Check data-content="selector" IsDisabled="@(_isInWaitMode)" @bind-Checked="@selectableRelocatableTorrentCandidate.IsSelected" />
                                     }
                                     else
                                     {
@@ -121,12 +121,12 @@ else
                                 <td>
                                     @if (relocatableTorrentCandidate.RelocateOptions.Any())
                                     {
-                                        <Blazorise.SelectEdit data-content="relocate-options" IsDisabled="_isInWaitMode" @bind-SelectedValue="relocatableTorrentCandidate.ChosenOption" TValue="string">
+                                        <Blazorise.Select data-content="relocate-options" IsDisabled="_isInWaitMode" @bind-SelectedValue="@relocatableTorrentCandidate.ChosenOption" TValue="string">
                                             @foreach (var relocateOption in relocatableTorrentCandidate.RelocateOptions)
                                             {
                                                 <Blazorise.SelectItem data-content="relocate-option" Value="relocateOption">@relocateOption</Blazorise.SelectItem>
                                             }
-                                        </Blazorise.SelectEdit>
+                                        </Blazorise.Select>
                                     }
                                     else
                                     {
@@ -140,7 +140,7 @@ else
                 <TorrentGrease.Client.Components.PagedListPaginator TItem="SelectableItem<RelocatableTorrentCandidate>" PagedList="PagedRelocatableTorrentCandidateList" />
 
                 <Field>
-                    <Blazorise.CheckEdit data-content="verify-torrents-after-relocating" IsDisabled="@(_isInWaitMode)" @bind-Checked="_verifyTorrentsAfterRelocating" />
+                    <Blazorise.Check data-content="verify-torrents-after-relocating" IsDisabled="@(_isInWaitMode)" @bind-Checked="@_verifyTorrentsAfterRelocating" />
                     <FieldLabel>Verify torrents after relocating</FieldLabel>
                 </Field>
             </ModalBody>

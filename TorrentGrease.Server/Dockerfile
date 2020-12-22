@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.0-alpine3.10 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS base
 RUN apk add curl
 
 WORKDIR /app
@@ -10,7 +10,7 @@ ENV ASPNETCORE_URLS=
 
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --fail http://localhost:5656/health || exit 1
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1.100-alpine3.10 AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 ARG VERSION=0.1.0-devbuild
 WORKDIR /src
 COPY ["TorrentGrease.Server/TorrentGrease.Server.csproj", "TorrentGrease.Server/"]

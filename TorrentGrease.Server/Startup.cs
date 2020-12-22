@@ -61,6 +61,7 @@ namespace TorrentGrease.Server
 
             app.UseStaticFiles();
             app.UseBlazorFrameworkFiles();
+            app.UseStaticFiles();
             app.UseGrpcWeb();
 
             app.UseSerilogRequestLogging();

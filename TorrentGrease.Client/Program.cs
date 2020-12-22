@@ -29,10 +29,13 @@ namespace TorrentGrease.Client
                 .AddBootstrapProviders()
                 .AddFontAwesomeIcons();
 
-            //builder.Services
-            //   .UseBootstrapProviders()
-            //   .UseFontAwesomeIcons();
-            await builder.Build().RunAsync();
+            var host = builder.Build();
+
+            host.Services
+               .UseBootstrapProviders()
+               .UseFontAwesomeIcons();
+
+            await host.RunAsync();
         }
     }
 }

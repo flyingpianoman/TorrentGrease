@@ -24,9 +24,6 @@ namespace TorrentGrease.Server
 
         public static async Task Main(string[] args)
         {
-#if DEBUG
-            CorrectBlazorConfigPaths();
-#endif
             var host = BuildWebHost(args);
             using (var scope = host.Services.CreateScope())
             {
@@ -35,15 +32,6 @@ namespace TorrentGrease.Server
                 await dbInitializer.InitializeAsync();
             }
             await host.RunAsync();
-        }
-
-        private static void CorrectBlazorConfigPaths()
-        {
-            const string blazorConfigPath = @"/app/bin/Debug/netcoreapp3.2/TorrentGrease.Client.blazor.config";
-            var blazorConfig = File.ReadAllText(blazorConfigPath);
-            blazorConfig = Regex.Replace(blazorConfig, @"[a-zA-Z]:[\/\\].+?[\/\\]TorrentGrease.Client[\/\\]", "/TorrentGrease.Client/")
-                .Replace('\\', '/');
-            File.WriteAllText(blazorConfigPath, blazorConfig);
         }
 
         public static IHost BuildWebHost(string[] args) =>

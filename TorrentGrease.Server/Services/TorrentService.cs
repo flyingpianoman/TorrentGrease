@@ -30,7 +30,6 @@ namespace TorrentGrease.Server.Services
             return await _torrentClient.GetAllTorrentsAsync().ConfigureAwait(false);
         }
 
-
         public async Task<List<RelocatableTorrentCandidate>> FindRelocatableTorrentCandidatesAsync(MapTorrentsToDiskRequest request)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
@@ -51,7 +50,7 @@ namespace TorrentGrease.Server.Services
                 .ToArray();
 
             var filePathsByFileNameLookup = GetFilePathsByFileNameLookup(request.PathsToScan, extensionsWhitelist);
-            _logger.LogDebug("Found {0} files to go through", filePathsByFileNameLookup.Count());
+            _logger.LogDebug("Found {0} files to go through", filePathsByFileNameLookup.Count);
 
             foreach (var torrent in torrents)
             {
@@ -63,7 +62,7 @@ namespace TorrentGrease.Server.Services
                 _logger.LogDebug("Searching for a file named '{0}' with a size around {1}B", fileNameToSearch, largestFileSize);
                 var matchingFiles = filePathsByFileNameLookup.Contains(fileNameToSearch)
                     ? filePathsByFileNameLookup[fileNameToSearch].Select(f => new FileInfo(f))
-                    : new FileInfo[] { };
+                    : Array.Empty<FileInfo>();
 
                 _logger.LogDebug("Found {0} matches by filename: {1}", matchingFiles.Count(),
                     string.Join(", ", matchingFiles.Select(fi => $"<{fi.Name}, {fi.Length}B>")));
@@ -131,16 +130,17 @@ namespace TorrentGrease.Server.Services
             var torrentFileDepth = biggestFileInTorrent.FileLocationInTorrent.Split('/', '\\', StringSplitOptions.RemoveEmptyEntries).Length - 1;
             return matchingFiles.Select(f =>
             {
-                var torrentPathCandidate = Path.GetDirectoryName(f.FullName);
+                var torrentPathCandidate = Path.GetDirectoryName(f.FullName) ?? throw new InvalidDataException();
 
                 for (int i = 0; i < torrentFileDepth; i++)
                 {
-                    torrentPathCandidate = Directory.GetParent(torrentPathCandidate).FullName;
+                    torrentPathCandidate = Directory.GetParent(torrentPathCandidate)?.FullName ?? throw new InvalidDataException();
                 }
 
                 return torrentPathCandidate ?? throw new InvalidDataException();
             }).ToArray();
         }
+
 
         private static ILookup<string, string> GetFilePathsByFileNameLookup(IEnumerable<string> pathsToScan, string[] extensionsWhitelist)
         {

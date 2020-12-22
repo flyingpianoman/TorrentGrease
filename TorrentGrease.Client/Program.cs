@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using ProtoBuf.Grpc.Client;
 using TorrentGrease.GrpcClient;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Net.Http;
 
 namespace TorrentGrease.Client
 {
@@ -18,7 +20,7 @@ namespace TorrentGrease.Client
 
             GrpcClientFactory.AllowUnencryptedHttp2 = true;
             builder.Services
-                .AddBaseAddressHttpClient()
+                .AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
                 .AddGrpcClients()
                 .AddBlazorise(options =>
                 {

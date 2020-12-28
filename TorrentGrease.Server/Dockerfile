@@ -19,6 +19,7 @@ COPY ["TorrentGrease.Data/TorrentGrease.Data.csproj", "TorrentGrease.Data/"]
 COPY ["TorrentGrease.Shared/TorrentGrease.Shared.csproj", "TorrentGrease.Shared/"]
 COPY ["TorrentGrease.TorrentClient/TorrentGrease.TorrentClient.csproj", "TorrentGrease.TorrentClient/"]
 COPY ["TorrentGrease.Client/TorrentGrease.Client.csproj", "TorrentGrease.Client/"]
+COPY ["TorrentGrease.TorrentStatisticsHarvester/TorrentGrease.TorrentStatisticsHarvester.csproj", "TorrentGrease.TorrentStatisticsHarvester/"]
 RUN dotnet restore "TorrentGrease.Server/TorrentGrease.Server.csproj"
 COPY . .
 WORKDIR "/src/TorrentGrease.Server"

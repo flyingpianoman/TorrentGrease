@@ -31,7 +31,7 @@ namespace TorrentGrease.Data.Hosting
             var con = (SqliteConnection)_torrentGreaseDbContext.Database.GetDbConnection();
             var dirContainingDbFile = Path.GetDirectoryName(con.DataSource);
 
-            if (!Directory.Exists(dirContainingDbFile))
+            if (dirContainingDbFile != null && !Directory.Exists(dirContainingDbFile))
             {
                 Directory.CreateDirectory(dirContainingDbFile);
             }

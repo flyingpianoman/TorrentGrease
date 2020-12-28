@@ -39,7 +39,7 @@ namespace TorrentGrease.Data.Repositories
 
         public async Task<Torrent> GetTorrentByInfoHashAsync(string infoHash)
         {
-            return (await GetTorrentsByInfoHashAsync(new[] { infoHash })).SingleOrDefault();
+            return (await GetTorrentsByInfoHashAsync(new[] { infoHash })).Single();
         }
 
         public async Task<IList<Torrent>> GetTorrentsByInfoHashAsync(IEnumerable<string> infoHashes)

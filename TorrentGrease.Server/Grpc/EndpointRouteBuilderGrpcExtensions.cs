@@ -20,22 +20,21 @@ namespace TorrentGrease.Server.Grpc
 
             foreach (var grpcServiceInterfaceType in grpcServiceInterfaceTypes)
             {
-                services.MapGrpcService(grpcServiceInterfaceType);
+                services.MapGrpcService(grpcServiceInterfaceType).EnableGrpcWeb();
             }
 
             return services;
         }
 
-        public static IEndpointRouteBuilder MapGrpcService(this IEndpointRouteBuilder services, Type grpcServiceType)
+        public static IEndpointConventionBuilder MapGrpcService(this IEndpointRouteBuilder services, Type grpcServiceType)
         {
             var method = typeof(GrpcEndpointRouteBuilderExtensions)
                 .GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static)
                 .Single(m => m.Name == nameof(GrpcEndpointRouteBuilderExtensions.MapGrpcService))
                 .MakeGenericMethod(grpcServiceType);
 
-            method.Invoke(null, new[] { services });
-
-            return services;
+            var bldr = (IEndpointConventionBuilder?)method.Invoke(null, new[] { services });
+            return bldr ?? throw new InvalidOperationException($"{nameof(GrpcEndpointRouteBuilderExtensions.MapGrpcService)} returned null");
         }
     }
 }

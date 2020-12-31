@@ -316,7 +316,7 @@ namespace SpecificationTest.Steps
                 mkDirCommands.Add($"mkdir {dir}");
             }
 
-            var execCommandResponse = await dockerClient.Containers.ExecCreateContainerAsync(transmissionContainerId, new Docker.DotNet.Models.ContainerExecCreateParameters
+            var execCommandResponse = await dockerClient.Exec.ExecCreateContainerAsync(transmissionContainerId, new Docker.DotNet.Models.ContainerExecCreateParameters
             {
                 Cmd = new List<string>
                         {
@@ -328,7 +328,7 @@ namespace SpecificationTest.Steps
                 AttachStdout = true
             }).ConfigureAwait(false);
 
-            await dockerClient.Containers.StartContainerExecAsync(execCommandResponse.ID).ConfigureAwait(false);
+            await dockerClient.Exec.StartContainerExecAsync(execCommandResponse.ID).ConfigureAwait(false);
         }
 
         [When(@"I relocate the data of the following torrents and verify them afterwards")]

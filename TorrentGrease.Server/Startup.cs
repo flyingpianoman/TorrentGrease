@@ -35,7 +35,7 @@ namespace TorrentGrease.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCodeFirstGrpc();
+            services.AddCodeFirstGrpc(config => { config.ResponseCompressionLevel = System.IO.Compression.CompressionLevel.Optimal; });
 
             services.AddTorrentGreaseData(_config.GetConnectionString("DefaultConnection"));
             services.AddTorrentClient(_config.GetSection("torrentClient"));
@@ -59,12 +59,12 @@ namespace TorrentGrease.Server
             app.UseStaticFiles();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
-            app.UseGrpcWeb();
 
             app.UseSerilogRequestLogging();
             app.UseRouting();
             
             app.UseHangfire();
+            app.UseGrpcWeb(new GrpcWebOptions() { DefaultEnabled = true });
             //not yet
             //app.UseTorrentStatisticsHarvester(serviceProvider);
 

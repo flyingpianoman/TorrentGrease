@@ -4,10 +4,10 @@ using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 using System.Threading.Tasks;
 using ProtoBuf.Grpc.Client;
-using TorrentGrease.GrpcClient;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http;
+using TorrentGrease.Client.ServiceClientExtensions;
 
 namespace TorrentGrease.Client
 {

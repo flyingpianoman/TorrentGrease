@@ -37,8 +37,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.TorrentClient
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose\docker-compose.dcproj", "{22A80331-CC3D-48FF-8837-B1AE8EC8C34B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.GrpcClient", "TorrentGrease.GrpcClient\TorrentGrease.GrpcClient.csproj", "{96CC5C26-376E-4E37-A717-9B765A02471A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.TorrentStatisticsHarvester", "TorrentGrease.TorrentStatisticsHarvester\TorrentGrease.TorrentStatisticsHarvester.csproj", "{FAA1B286-5CBB-4F24-BF5A-2EA6BA3F8A03}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentGrease.Hangfire", "TorrentGrease.Hangfire\TorrentGrease.Hangfire.csproj", "{B5BEDC76-71FD-4A1B-A7D6-28E96EF7A062}"
@@ -83,10 +81,6 @@ Global
 		{22A80331-CC3D-48FF-8837-B1AE8EC8C34B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22A80331-CC3D-48FF-8837-B1AE8EC8C34B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22A80331-CC3D-48FF-8837-B1AE8EC8C34B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{96CC5C26-376E-4E37-A717-9B765A02471A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{96CC5C26-376E-4E37-A717-9B765A02471A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{96CC5C26-376E-4E37-A717-9B765A02471A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{96CC5C26-376E-4E37-A717-9B765A02471A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FAA1B286-5CBB-4F24-BF5A-2EA6BA3F8A03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FAA1B286-5CBB-4F24-BF5A-2EA6BA3F8A03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAA1B286-5CBB-4F24-BF5A-2EA6BA3F8A03}.Release|Any CPU.ActiveCfg = Release|Any CPU

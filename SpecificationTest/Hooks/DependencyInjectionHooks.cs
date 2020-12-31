@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 using TechTalk.SpecFlow;
+using TestUtils.Torrent;
 
 namespace SpecificationTest.Hooks
 {
@@ -20,6 +21,7 @@ namespace SpecificationTest.Hooks
             services.RegisterTorrentClient();
             services.RegisterWebDriver();
             services.Register(new TorrentGreaseDBService(services.Get<DockerClient>()));
+            services.Register(new TorrentFileHelper());
             services.Register(new Dictionary<string, string>(), "TorrentDataFolders");
         }
 

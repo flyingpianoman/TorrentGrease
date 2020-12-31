@@ -213,7 +213,7 @@ namespace IntegrationTest.Torrent
 
         private string GenerateTempFilePath(string extension = "txt")
         {
-            var tmpFileLoc = Path.Combine(Path.GetTempPath(), $"testfile_{Guid.NewGuid().ToString("N")}.{extension}");
+            var tmpFileLoc = Path.Combine(Path.GetTempPath(), $"testfile_{Guid.NewGuid():N}.{extension}");
             _createdTmpFiles.Add(tmpFileLoc);
             return tmpFileLoc;
         }

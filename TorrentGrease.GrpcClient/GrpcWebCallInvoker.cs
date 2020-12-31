@@ -100,21 +100,19 @@ namespace TorrentGrease.GrpcClient
                     return default;
                 }
 
-                using (var responseReader = new BinaryReader(new MemoryStream(responseBody)))
-                {
-                    responseReader.ReadByte(); // Ignore
+                using var responseReader = new BinaryReader(new MemoryStream(responseBody));
+                responseReader.ReadByte(); // Ignore
 
-                    var part1LengthBytes = responseReader.ReadBytes(4);
-                    Array.Reverse(part1LengthBytes);
-                    var part1Length = BitConverter.ToInt32(part1LengthBytes, 0);
+                var part1LengthBytes = responseReader.ReadBytes(4);
+                Array.Reverse(part1LengthBytes);
+                var part1Length = BitConverter.ToInt32(part1LengthBytes, 0);
 
-                    var part1Bytes = responseReader.ReadBytes(part1Length);
-                    var deserializationContext = new DefaultDeserializationContext();
-                    deserializationContext.SetPayload(part1Bytes);
-                    var deserializer = method.ResponseMarshaller.ContextualDeserializer;
-                    var result = deserializer(deserializationContext);
-                    return result;
-                }
+                var part1Bytes = responseReader.ReadBytes(part1Length);
+                var deserializationContext = new DefaultDeserializationContext();
+                deserializationContext.SetPayload(part1Bytes);
+                var deserializer = method.ResponseMarshaller.ContextualDeserializer;
+                var result = deserializer(deserializationContext);
+                return result;
             }
 
             private static void WriteInt32BigEndian(int value, byte[] buffer, int offset)

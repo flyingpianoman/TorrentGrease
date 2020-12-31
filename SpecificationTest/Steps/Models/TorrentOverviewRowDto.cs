@@ -12,9 +12,7 @@ namespace SpecificationTest.Steps.Models
         public Decimal TotalUploadedInGB { get; set; }
         public string LocationOnDisk { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:Uri properties should not be strings", Justification = "<Pending>")]
         public string TrackerAnnounceUrl1 { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:Uri properties should not be strings", Justification = "<Pending>")]
         public string TrackerAnnounceUrl2 { get; set; }
     }
 }

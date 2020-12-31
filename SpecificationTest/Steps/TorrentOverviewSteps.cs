@@ -22,7 +22,7 @@ namespace SpecificationTest.Steps
     [Binding]
     public class TorrentOverviewSteps : StepsBase
     {
-        private readonly TorrentFileHelper _torrentFileHelper = new TorrentFileHelper();
+        private readonly TorrentFileHelper _torrentFileHelper = DI.Get<TorrentFileHelper>();
         private readonly ITorrentClient _torrentClient = DI.Get<ITorrentClient>();
 
         [Then(@"I see an overview containing 0 torrents")]
@@ -108,6 +108,7 @@ namespace SpecificationTest.Steps
                 .Where(t => !string.IsNullOrWhiteSpace(t.FilePath))
                 .ToArray();
 
+            var torrentFileHelper = DI.Get<TorrentFileHelper>();
             foreach (var torrentFile in torrentFiles)
             {
                 var subDirs = Path.GetDirectoryName(torrentFile.FilePath);
@@ -118,7 +119,7 @@ namespace SpecificationTest.Steps
                 }
 
                 var torrentFilePath = Path.Combine(tempDir, torrentFile.FilePath);
-                await _torrentFileHelper.CreateTextFileAsync(torrentFilePath, (int)torrentFile.SizeInBytes);
+                await torrentFileHelper.CreateTextFileAsync(torrentFilePath, (int)torrentFile.SizeInBytes);
 
                 torrentFileMappings.Add(new CreateTorrentFileMapping
                 {

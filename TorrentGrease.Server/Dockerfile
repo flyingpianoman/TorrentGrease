@@ -13,21 +13,18 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --fail http://loca
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 ARG VERSION=0.1.0-devbuild
 WORKDIR /src
-COPY ["TorrentGrease.Server/TorrentGrease.Server.csproj", "TorrentGrease.Server/"]
-COPY ["TorrentGrease.GrpcClient/TorrentGrease.GrpcClient.csproj", "TorrentGrease.GrpcClient/"]
-COPY ["TorrentGrease.Data/TorrentGrease.Data.csproj", "TorrentGrease.Data/"]
-COPY ["TorrentGrease.Shared/TorrentGrease.Shared.csproj", "TorrentGrease.Shared/"]
-COPY ["TorrentGrease.TorrentClient/TorrentGrease.TorrentClient.csproj", "TorrentGrease.TorrentClient/"]
-COPY ["TorrentGrease.Client/TorrentGrease.Client.csproj", "TorrentGrease.Client/"]
-COPY ["TorrentGrease.TorrentStatisticsHarvester/TorrentGrease.TorrentStatisticsHarvester.csproj", "TorrentGrease.TorrentStatisticsHarvester/"]
+# Copy the main source project files
+COPY */*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p ${file%.*}/ && mv $file ${file%.*}/; done
+
 RUN dotnet restore "TorrentGrease.Server/TorrentGrease.Server.csproj"
 COPY . .
 WORKDIR "/src/TorrentGrease.Server"
-RUN dotnet build "TorrentGrease.Server.csproj" -c Release -o /app/build -p:Version=${VERSION} /p:warnaserror=true /p:TreatWarningsAsErrors=true
+RUN dotnet build "TorrentGrease.Server.csproj" -c Release -o /app/build -p:Version=${VERSION} /p:warnaserror=true /p:TreatWarningsAsErrors=true --no-restore
 
 FROM build AS publish
 ARG VERSION=0.1.0-devbuild
-RUN dotnet publish "TorrentGrease.Server.csproj" -c Release -o /app/publish -p:Version=${VERSION}
+RUN dotnet publish "TorrentGrease.Server.csproj" -c Release -o /app/publish -p:Version=${VERSION} --no-restore
 
 FROM base AS final
 

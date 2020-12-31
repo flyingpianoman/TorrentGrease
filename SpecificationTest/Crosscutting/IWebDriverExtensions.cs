@@ -12,7 +12,6 @@ namespace SpecificationTest.Crosscutting
     {
         private static IPage _currentPage;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Driver is disposed by DI container")]
         public static void RegisterWebDriver(this DIContainer diContainer)
         {
             var capabilities = new OpenQA.Selenium.Firefox.FirefoxOptions().ToCapabilities();

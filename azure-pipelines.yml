@@ -30,7 +30,6 @@ steps:
       $(GitVersion.NugetVersion)
       latest
 
-
 - task: DockerCompose@0
   displayName: Docker-compose up
   inputs:
@@ -64,7 +63,7 @@ steps:
     echo "torrent-grease is healthy"
   failOnStderr: true
   timeoutInMinutes: 5
-  displayName: 'Waiti for torrent-grease to become healthy'
+  displayName: 'Waiting for torrent-grease to become healthy'
 
 - task: DotNetCoreCLI@2
   displayName: dotnet test IntegrationTest

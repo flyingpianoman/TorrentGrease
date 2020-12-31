@@ -67,7 +67,7 @@ namespace TorrentGrease.TorrentStatisticsHarvester
         private void UpdateReAddedTorrents(IList<Stats.Torrent> persistedTorrents)
         {
             var reAddedTorrents = persistedTorrents.Where(t => !t.WasInClientOnLastScan).ToArray();
-            _logger.LogInformation("Updating {0} torrents that were re-added in the torrentclient", reAddedTorrents.Count());
+            _logger.LogInformation("Updating {0} torrents that were re-added in the torrentclient", reAddedTorrents.Length);
 
             foreach (var torrent in reAddedTorrents)
             {
@@ -84,7 +84,7 @@ namespace TorrentGrease.TorrentStatisticsHarvester
                 .Select(t => new Stats.Torrent(t))
                 .ToArray();
 
-            _logger.LogInformation("Adding {0} new torrents that were added to the torrentclient for the first time", newTorrents.Count());
+            _logger.LogInformation("Adding {0} new torrents that were added to the torrentclient for the first time", newTorrents.Length);
 
             foreach (var newTorrent in newTorrents)
             {
@@ -101,7 +101,7 @@ namespace TorrentGrease.TorrentStatisticsHarvester
         {
             var exlcudedIds = persistedTorrents.Select(t => t.Id).ToArray();
             var removedTorrents = await torrentStatisticsRepository.GetTorrentsThatWereInLastScanAsync(exlcudedIds);
-            _logger.LogInformation("Updating {0} torrents that were removed in the torrentclient", removedTorrents.Count());
+            _logger.LogInformation("Updating {0} torrents that were removed in the torrentclient", removedTorrents.Count);
 
             foreach (var removedTorrent in removedTorrents)
             {

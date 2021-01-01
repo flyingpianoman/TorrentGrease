@@ -1,7 +1,5 @@
 ﻿using Docker.DotNet;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using MonoTorrent;
 using SpecificationTest.Crosscutting;
 using SpecificationTest.Pages;
 using SpecificationTest.Steps.Models;
@@ -9,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;

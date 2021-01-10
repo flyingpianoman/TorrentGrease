@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using TestUtils;
 using TorrentGrease.Data;
 using TorrentGrease.Data.Hosting;
 

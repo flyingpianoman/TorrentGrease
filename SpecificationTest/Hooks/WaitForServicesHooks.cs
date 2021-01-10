@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TechTalk.SpecFlow;
+using TestUtils;
 using TorrentGrease.TorrentClient;
 using TorrentGrease.TorrentClient.Hosting;
 using TorrentGrease.TorrentClient.Transmission;

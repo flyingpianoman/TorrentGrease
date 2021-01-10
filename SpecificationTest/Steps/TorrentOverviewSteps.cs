@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
+using TestUtils;
 using TestUtils.Torrent;
 using TorrentGrease.TorrentClient;
 
@@ -295,37 +296,10 @@ namespace SpecificationTest.Steps
                     var dataDirPath = torrentDataDirs[copyTorrentDataRequest.TorrentName];
                     var tarStream = ArchiveHelper.CreateDirectoryTarStream(dataDirPath);
 
-                    await CreateDirectoryStructureInContainerAsync(dockerClient, transmissionContainerId, copyTorrentDataRequest).ConfigureAwait(false);
+                    await dockerClient.CreateDirectoryStructureInContainerAsync(transmissionContainerId, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
                     await dockerClient.Containers.UploadTarredFileToContainerAsync(tarStream, TestSettings.TransmissionContainerName, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
                 }
             }
-        }
-
-        private static async Task CreateDirectoryStructureInContainerAsync(DockerClient dockerClient, string transmissionContainerId, CopyTorrentDataDto copyTorrentDataRequest)
-        {
-            var targetDirParts = copyTorrentDataRequest.TargetLocation.Split('/', StringSplitOptions.RemoveEmptyEntries);
-            var mkDirCommands = new List<string>();
-            var dir = "";
-
-            foreach (var targetDirPart in targetDirParts)
-            {
-                dir += "/" + targetDirPart;
-                mkDirCommands.Add($"mkdir {dir}");
-            }
-
-            var execCommandResponse = await dockerClient.Exec.ExecCreateContainerAsync(transmissionContainerId, new Docker.DotNet.Models.ContainerExecCreateParameters
-            {
-                Cmd = new List<string>
-                        {
-                            "bash",
-                            "-c",
-                            string.Join(" || ", mkDirCommands)
-                        },
-                AttachStderr = true,
-                AttachStdout = true
-            }).ConfigureAwait(false);
-
-            await dockerClient.Exec.StartContainerExecAsync(execCommandResponse.ID).ConfigureAwait(false);
         }
 
         [When(@"I relocate the data of the following torrents and verify them afterwards")]

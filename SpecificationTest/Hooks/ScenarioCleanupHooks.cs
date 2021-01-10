@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using TechTalk.SpecFlow;
+using TestUtils;
 using TorrentGrease.Data;
 using TorrentGrease.Shared;
 

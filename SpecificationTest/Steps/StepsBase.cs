@@ -3,6 +3,7 @@ using SpecificationTest.Crosscutting;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TestUtils;
 
 namespace SpecificationTest.Steps
 {

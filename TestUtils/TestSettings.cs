@@ -1,11 +1,10 @@
-﻿using SpecificationTest.Crosscutting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SpecificationTest
+namespace TestUtils
 {
-    internal static class TestSettings
+    public static class TestSettings
     {
         public static Uri SeleniumHubAddress => new Uri("http://localhost:4444/wd/hub");
         public static Uri TorrentGreaseDockerAddress => new Uri("http://torrent-grease:5656");

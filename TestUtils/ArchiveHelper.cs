@@ -5,15 +5,32 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SpecificationTest.Crosscutting
 {
     static class ArchiveHelper
     {
-        public static void ExtractSingleFileFromTar(Stream tarStream, string filePath)
+        public static void ExtractSingleFileFromTarToDisk(Stream tarStream, string filePath)
+        {
+            ReadSingleFileFromTar(tarStream,
+                reader => reader.WriteEntryToFile(filePath, new ExtractionOptions { Overwrite = true }));
+        }
+
+        public static async Task<string> ExtractSingleFileFromTarToStringAsync(Stream tarStream)
+        {
+            using var memStr = new MemoryStream();
+            ReadSingleFileFromTar(tarStream,
+                reader => reader.WriteEntryTo(memStr));
+
+            memStr.Position = 0;
+            using var reader = new StreamReader(memStr);
+            return await reader.ReadToEndAsync();
+        }
+
+        public static void ReadSingleFileFromTar(Stream tarStream, Action<IReader> readerAction)
         {
             var first = true;
-            tarStream.Position = 0;
             using var reader = ReaderFactory.Open(tarStream, new ReaderOptions { LeaveStreamOpen = true });
             while (reader.MoveToNextEntry())
             {
@@ -24,7 +41,7 @@ namespace SpecificationTest.Crosscutting
                         throw new InvalidOperationException("More than one file in tar");
                     }
                     first = false;
-                    reader.WriteEntryToFile(filePath, new ExtractionOptions { Overwrite = true });
+                    readerAction(reader);
                 }
             }
         }

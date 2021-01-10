@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TechTalk.SpecFlow;
 
-namespace SpecificationTest.Crosscutting
+namespace TestUtils
 {
     public sealed class DIContainer : IAsyncDisposable
     {
@@ -18,11 +17,11 @@ namespace SpecificationTest.Crosscutting
 
         public void Register<T>(T service)
         {
-            Register<T>(service, string.Empty);
+            Register(service, string.Empty);
         }
         public void Register<T>(T service, string name)
         {
-            if(!_services.ContainsKey(typeof(T)))
+            if (!_services.ContainsKey(typeof(T)))
             {
                 _services[typeof(T)] = new Dictionary<string, object>();
             }

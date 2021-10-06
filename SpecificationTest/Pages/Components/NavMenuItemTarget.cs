@@ -7,6 +7,7 @@ namespace SpecificationTest.Pages.Components
     enum NavMenuItemTarget
     {
         Policies,
-        Torrents
+        Torrents,
+        FileManagement
     }
 }

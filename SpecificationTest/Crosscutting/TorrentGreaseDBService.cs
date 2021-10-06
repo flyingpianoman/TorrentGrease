@@ -70,7 +70,7 @@ namespace SpecificationTest.Crosscutting
         {
             EnsureDirectoryIsEmpty(Path.GetDirectoryName(_PrepDBPath));
             _CleanDBTarMemoryStream.Position = 0;
-            ArchiveHelper.ExtractSingleFileFromTar(_CleanDBTarMemoryStream, _PrepDBPath);
+            ArchiveHelper.ExtractSingleFileFromTarToDisk(_CleanDBTarMemoryStream, _PrepDBPath);
 
             return CreateDBContext();
         }

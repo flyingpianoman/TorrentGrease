@@ -30,6 +30,7 @@ namespace SpecificationTest.Pages.Components
             {
                 "" => NavMenuItemTarget.Policies,
                 "torrents" => NavMenuItemTarget.Torrents,
+                "file-management" => NavMenuItemTarget.FileManagement,
                 _ => throw new InvalidOperationException($"Unknown nav item target href '{href}'"),
             };
             return Task.FromResult(this);

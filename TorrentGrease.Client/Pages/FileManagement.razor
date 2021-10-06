@@ -1,0 +1,47 @@
+﻿@page "/file-management"
+
+<div>
+    <Row>
+        <Column>
+            <Card>
+                <CardTitle>FileManagement</CardTitle>
+                <CardBody>
+                    <CardText>
+                        Please supply one or more paths scan files
+                    </CardText>
+                    <Row>
+                        <Column>
+                            <Inline>
+                                <Field Horizontal="true">
+                                    <FieldLabel>Minimal file size</FieldLabel>
+                                    <TextEdit />
+                                </Field>
+                                <RadioGroup TValue="string" Name="minimalFileSizeUnit" Buttons="true">
+                                    <Radio TValue="string" Value="@("B")">B</Radio>
+                                    <Radio TValue="string" Value="@("KB")">KB</Radio>
+                                    <Radio TValue="string" Value="@("MB")">MB</Radio>
+                                    <Radio TValue="string" Value="@("GB")">GB</Radio>
+                                </RadioGroup>
+                            </Inline>
+                            <Field Horizontal="true">
+                                <FieldLabel>Dir 1</FieldLabel>
+                                <TextEdit />
+                            </Field>
+                            <Field Horizontal="true">
+                                <FieldLabel>Dir 2</FieldLabel>
+                                <TextEdit />
+                            </Field>
+                            <Field>
+                                <Button Color="Color.Primary">Scan</Button>
+                            </Field>
+                        </Column>
+                    </Row>
+                </CardBody>
+            </Card>
+        </Column>
+    </Row>
+</div>
+
+@code {
+
+}

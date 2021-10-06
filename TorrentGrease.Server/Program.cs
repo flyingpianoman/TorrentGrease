@@ -7,10 +7,13 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Core;
 using Serilog.Filters;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 using TorrentGrease.Data.Hosting;
 using TorrentGrease.Hangfire.Hosting;
 using TorrentGrease.TorrentStatisticsHarvester;
@@ -24,6 +27,11 @@ namespace TorrentGrease.Server
 
         public static async Task Main(string[] args)
         {
+
+#if DEBUG
+            CorrectPathsInStaticWebAssets();
+#endif
+
             var host = BuildWebHost(args);
             using (var scope = host.Services.CreateScope())
             {
@@ -34,6 +42,50 @@ namespace TorrentGrease.Server
             await host.RunAsync();
         }
 
+        private static void CorrectPathsInStaticWebAssets()
+        {
+            const string serverStaticWebAssetsPath = @"/app/bin/Debug/net5.0/TorrentGrease.Server.StaticWebAssets.xml";
+            var serverXmlDoc = new XmlDocument();
+            serverXmlDoc.Load(serverStaticWebAssetsPath);
+            var rootNode = serverXmlDoc.SelectSingleNode("StaticWebAssets") ?? throw new InvalidDataException();
+            
+
+            const string clientStaticWebAssetsPath = @"/app/bin/Debug/net5.0/TorrentGrease.Client.StaticWebAssets.xml";
+            var clientXmlDoc = new XmlDocument();
+            clientXmlDoc.Load(clientStaticWebAssetsPath);
+            var contentRootNodes = clientXmlDoc.SelectNodes("StaticWebAssets/ContentRoot") ?? throw new InvalidDataException();
+
+            foreach (var contentRootNode in contentRootNodes.Cast<XmlNode>())
+            {
+                var basePathAttr = contentRootNode?.Attributes?["BasePath"] ?? throw new NotSupportedException();
+                var pathAttr = contentRootNode.Attributes["Path"];
+                var modifiedPath = pathAttr?.Value.Replace('\\', '/') ?? throw new NotSupportedException();
+
+                if (basePathAttr.Value == "/")
+                {
+                    modifiedPath = Regex.Replace(modifiedPath, @"[a-zA-Z]:[\/].+?[\/]TorrentGrease.Client[\/]", "/src/TorrentGrease.Client/");
+                }
+                else if (basePathAttr.Value.StartsWith("_content/"))
+                {
+                    modifiedPath = Regex.Replace(modifiedPath, @"[a-zA-Z]:\/.+?\/\.nuget\/", "/root/.nuget/");
+
+                    //Also add these to the server xml
+                    var newNode = serverXmlDoc.CreateElement("ContentRoot");
+                    newNode.SetAttribute("BasePath", basePathAttr.Value);
+                    newNode.SetAttribute("Path", pathAttr.Value);
+                    rootNode.AppendChild(newNode);
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+
+                pathAttr.Value = modifiedPath;
+            }
+
+            clientXmlDoc.Save(clientStaticWebAssetsPath);
+            serverXmlDoc.Save(serverStaticWebAssetsPath);
+        }
         public static IHost BuildWebHost(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .UseSerilog((hostingContext, loggerConfiguration) => ConfigureSerilog(hostingContext, loggerConfiguration))

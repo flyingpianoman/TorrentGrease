@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SpecificationTest.Crosscutting
 {
-    static class ArchiveHelper
+    public static class ArchiveHelper
     {
         public static void ExtractSingleFileFromTarToDisk(Stream tarStream, string filePath)
         {

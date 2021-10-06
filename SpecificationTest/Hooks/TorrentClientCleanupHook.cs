@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SpecificationTest.Crosscutting;
 using TechTalk.SpecFlow;
+using TestUtils;
 using TorrentGrease.TorrentClient;
 
 namespace SpecificationTest.Hooks

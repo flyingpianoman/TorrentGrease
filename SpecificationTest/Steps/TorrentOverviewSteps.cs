@@ -262,6 +262,11 @@ namespace SpecificationTest.Steps
                 {
                     AssertTrackers(expectedTorrent, actualTorrent);
                 }
+
+                if (propertiesToAssert.Contains(nameof(expectedTorrent.Error)))
+                {
+                    actualTorrent.Error.Should().Be(expectedTorrent.Error);
+                }
             }
         }
 
@@ -290,6 +295,7 @@ namespace SpecificationTest.Steps
                 var dockerClient = DI.Get<DockerClient>();
                 var transmissionContainerId = await dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TransmissionContainerName).ConfigureAwait(false);
                 var torrentDataDirs = DI.Get<Dictionary<string, string>>("TorrentDataFolders");
+                var torrentsIDsToVerify = new List<int>();
 
                 foreach (var copyTorrentDataRequest in copyTorrentDataRequests)
                 {
@@ -298,8 +304,82 @@ namespace SpecificationTest.Steps
 
                     await dockerClient.CreateDirectoryStructureInContainerAsync(transmissionContainerId, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
                     await dockerClient.Containers.UploadTarredFileToContainerAsync(tarStream, TestSettings.TransmissionContainerName, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
+
+                    if (copyTorrentDataRequest.VerifyTorrent)
+                    {
+                        var torrent = (await _torrentClient.GetAllTorrentsAsync())
+                            .Single(t => t.Name == copyTorrentDataRequest.TorrentName);
+                        await _torrentClient.VerifyTorrentsAsync(new int[] { torrent.ID });
+                        torrentsIDsToVerify.Add(torrent.ID);
+                    }
+                }
+
+                if (torrentsIDsToVerify.Any())
+                {
+                    await WaitForTorrentsToBeMarkedAsDownloadedAsync(torrentsIDsToVerify).ConfigureAwait(false);
                 }
             }
+        }
+
+        [Given(@"the following torrents are \(re\)verified by the torrent client")]
+        public void GivenTheFollowingTorrentsAreReVerifiedByTheTorrentClient(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var torrentsBeforeVerify = (await _torrentClient.GetAllTorrentsAsync())
+                    .Where(t => table.Rows.Any(row => row["TorrentName"] == t.Name))
+                    .ToArray();
+
+                torrentsBeforeVerify.Length.Should().Be(table.RowCount);
+
+                foreach (var torrent in torrentsBeforeVerify)
+                {
+                    await _torrentClient.VerifyTorrentsAsync(new int[] { torrent.ID });
+                }
+
+                await WaitForTorrentsToHaveChangedAsync(torrentsBeforeVerify).ConfigureAwait(false);
+            }
+        }
+
+        private async Task WaitForTorrentsToHaveChangedAsync(TorrentGrease.Shared.TorrentClient.Torrent[] torrentsBeforeVerify)
+        {
+            var torrentsIDs = torrentsBeforeVerify.Select(t => t.ID).ToArray();
+            await Polly
+                .Policy
+                .Handle<PageHelper.RetryException>()
+                .WaitAndRetryUntilTimeoutAsync(TimeSpan.FromMilliseconds(10), TimeSpan.FromSeconds(5))
+                .ExecuteAsync(async () =>
+                {
+                    var currentTorrents = await _torrentClient.GetTorrentsByIDsAsync(torrentsIDs);
+
+                    foreach (var oldTorrent in torrentsBeforeVerify)
+                    {
+                        var currentTorrent = currentTorrents.First(t => t.ID == oldTorrent.ID);
+                        if (currentTorrent.BytesOnDisk == oldTorrent.BytesOnDisk &&
+                            currentTorrent.Error == oldTorrent.Error)
+                        {
+                            throw new PageHelper.RetryException();
+                        }
+                    }
+                }).ConfigureAwait(false);
+        }
+
+        private async Task WaitForTorrentsToBeMarkedAsDownloadedAsync(List<int> torrentsIDsToVerify)
+        {
+            await Polly
+                .Policy
+                .Handle<PageHelper.RetryException>()
+                .WaitAndRetryUntilTimeoutAsync(TimeSpan.FromMilliseconds(10), TimeSpan.FromSeconds(5))
+                .ExecuteAsync(async () =>
+                {
+                    var torrents = await _torrentClient.GetTorrentsByIDsAsync(torrentsIDsToVerify);
+                    if (torrents.Any(t => t.SizeInBytes != t.BytesOnDisk))
+                    {
+                        throw new PageHelper.RetryException();
+                    }
+                }).ConfigureAwait(false);
         }
 
         [When(@"I relocate the data of the following torrents and verify them afterwards")]

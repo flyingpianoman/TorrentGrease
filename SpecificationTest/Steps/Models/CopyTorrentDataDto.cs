@@ -8,5 +8,6 @@ namespace SpecificationTest.Steps.Models
     {
         public string TorrentName { get; set; }
         public string TargetLocation { get; set; }
+        public bool VerifyTorrent { get; set; }
     }
 }

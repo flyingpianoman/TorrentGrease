@@ -37,6 +37,7 @@ else
                     <th>Date added</th>
                     <th>Location on disk</th>
                     <th>Tracker urls</th>
+                    <th>Error</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,6 +58,7 @@ else
                         <td data-content="date-added">@torrent.AddedDateTime.ToLocalTime().ToString("g")</td>
                         <td data-content="location">@torrent.Location</td>
                         <td data-content="trackerUrls">@String.Join(", ", torrent.TrackerUrls)</td>
+                        <td data-content="error">@torrent.Error</td>
                     </tr>
                 </TorrentGrease.Client.Components.PagedList>
             </tbody>

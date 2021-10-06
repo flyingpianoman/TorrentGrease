@@ -27,7 +27,8 @@ namespace TorrentGrease.TorrentClient.Transmission
                 TorrentFields.UPLOADED_EVER,
                 TorrentFields.LEFT_UNTIL_DONE,
                 TorrentFields.FILES,
-                TorrentFields.ADDED_DATE
+                TorrentFields.ADDED_DATE,
+                TorrentFields.ERROR_STRING
             };
 
         public TransmissionClient(RpcClient.Client rpcClient)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Docker.DotNet;
+using Microsoft.EntityFrameworkCore;
 using SpecificationTest.Crosscutting;
 using SpecificationTest.Steps.Models;
 using System;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
+using TestUtils;
 using TorrentGrease.Data;
 using TorrentGrease.Shared;
 
@@ -76,5 +78,21 @@ namespace SpecificationTest.Steps
             await TorrentGreaseDBService.UploadDBContextToContainerAsync().ConfigureAwait(false);
         }
 
+        [Given(@"the following torrent data files are moved")]
+        public void GivenTheFollowingTorrentDataFilesAreMoved(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var dockerClient = DI.Get<DockerClient>();
+                var transmissionContainerId = await dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TransmissionContainerName).ConfigureAwait(false);
+
+                foreach (var row in table.Rows)
+                {
+                    await dockerClient.MoveFileInContainerAsync(transmissionContainerId, row["From"], row["To"]);
+                }
+            }
+        }
     }
 }

@@ -22,7 +22,8 @@ namespace TorrentGrease.TorrentClient.Transmission
                     .Select(t => new Uri(t.announce).Authority)
                     .ToList(),
                 AddedDateTime = DateTimeOffset.FromUnixTimeSeconds(torrentInfo.AddedDate).UtcDateTime,
-                Files = torrentInfo.Files.ToSharedModel()
+                Files = torrentInfo.Files.ToSharedModel(),
+                Error = torrentInfo.ErrorString
             };
         }
 

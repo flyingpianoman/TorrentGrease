@@ -31,5 +31,7 @@ namespace TorrentGrease.Shared.TorrentClient
         public DateTime AddedDateTime { get; set; }
         [ProtoMember(10)]
         public TorrentFile[] Files { get; set; }
+        [ProtoMember(11)]
+        public string Error { get; set; }
     }
 }

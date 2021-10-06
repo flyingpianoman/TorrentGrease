@@ -14,5 +14,6 @@ namespace SpecificationTest.Steps.Models
 
         public string TrackerAnnounceUrl1 { get; set; }
         public string TrackerAnnounceUrl2 { get; set; }
+        public string Error { get; set; }
     }
 }

@@ -48,9 +48,8 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
         public decimal GBsOnDisk { get; set; }
         public decimal TotalUploadInGB { get; set; }
         public List<string> TrackerUrls { get; set; }
-
-
         public DateTime AddedDateTime { get; set; }
+        public string Error { get; set; }
 
         public Task<TorrentComponent> InitializeAsync()
         {
@@ -63,6 +62,7 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
             JoinedTrackerUrls = _torrentWebElement.FindElement(By.CssSelector("*[data-content='trackerUrls']")).Text;
             TrackerUrls = JoinedTrackerUrls.Split(", ").ToList();
             _isSelectedWebElement = _torrentWebElement.FindElement(By.CssSelector("*[data-content='selector']"));
+            Error = _torrentWebElement.FindElement(By.CssSelector("*[data-content='error']")).Text;
 
             return Task.FromResult(this);
         }

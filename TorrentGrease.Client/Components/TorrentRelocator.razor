@@ -1,0 +1,207 @@
+﻿@using Blazorise
+@using TorrentGrease.Shared.TorrentClient
+@using TorrentGrease.Shared.RelocateTorrent;
+@inject ITorrentService TorrentService
+@inject ILogger<TorrentRelocator> _logger
+
+<Modal data-content="relocate-torrents-modal" @ref="_relocateTorrentsModal" Closing="@OnRelocateTorrentsModalClosing">
+    <ModalBackdrop />
+    <ModalContent Size="ModalSize.ExtraLarge" IsCentered="true">
+        <ModalHeader>
+            <ModalTitle>Relocate torrent data</ModalTitle>
+            <CloseButton IsDisabled="@IsInWaitMode" Clicked="@CloseRelocateTorrentsModal" />
+        </ModalHeader>
+        @if (RelocateTorrentsStage == RelocateTorrentsStages.FindCandidates)
+        {
+            <ModalBody data-content="find-relocate-candidates">
+                @for (int i = 0; i < _pathsToScan.Count; i++)
+                {
+                    var local = i;
+                    <Field>
+                        <FieldLabel>Path to scan</FieldLabel>
+                        <TextEdit data-content="path-to-scan" IsDisabled="@IsInWaitMode" @bind-Text="@_pathsToScan[local]" />
+                    </Field>
+                }
+
+                <Button data-content="add-path-to-scan-button" Color="Color.Primary" IsDisabled="@IsInWaitMode" Clicked="@AddPathToScan">Add path to scan</Button>
+
+            </ModalBody>
+        }
+        else if (RelocateTorrentsStage == RelocateTorrentsStages.RelocateCandidates)
+        {
+            <ModalBody data-content="relocate-candidates-picker">
+                <table class="table" data-content="relocate-candidates-container">
+                    <thead>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Torrent</th>
+                            <th>Relocation options</th>
+                            <th>Relocation choice</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <TorrentGrease.Client.Components.PagedList @ref="PagedRelocatableTorrentCandidateList" TItem="SelectableItem<RelocatableTorrentCandidate>" AllItems="_relocatableTorrentCandidates" PageSize="50">
+                            @{
+                                var selectableRelocatableTorrentCandidate = context;
+                                var relocatableTorrentCandidate = selectableRelocatableTorrentCandidate.Item;
+                            }
+                            <tr data-content="relocate-candidate">
+                                <td>
+                                    @if (relocatableTorrentCandidate.RelocateOptions.Any())
+                                    {
+                                        <Blazorise.Check data-content="selector" IsDisabled="@(IsInWaitMode)" @bind-Checked="@selectableRelocatableTorrentCandidate.IsSelected" />
+                                    }
+                                    else
+                                    {
+                                        <span>&nbsp;</span>
+                                    }
+                                </td>
+                                <td data-content="torrent-name">@relocatableTorrentCandidate.TorrentName</td>
+                                <td data-content="relocate-options-count">@relocatableTorrentCandidate.RelocateOptions.Count</td>
+                                <td>
+                                    @if (relocatableTorrentCandidate.RelocateOptions.Any())
+                                    {
+                                        <Blazorise.Select data-content="relocate-options" IsDisabled="_isInWaitMode" @bind-SelectedValue="@relocatableTorrentCandidate.ChosenOption" TValue="string">
+                                            @foreach (var relocateOption in relocatableTorrentCandidate.RelocateOptions)
+                                            {
+                                                <Blazorise.SelectItem data-content="relocate-option" Value="relocateOption">@relocateOption</Blazorise.SelectItem>
+                                            }
+                                        </Blazorise.Select>
+                                    }
+                                    else
+                                    {
+                                        <span>No relocate options found</span>
+                                    }
+                                </td>
+                            </tr>
+                        </TorrentGrease.Client.Components.PagedList>
+                    </tbody>
+                </table>
+                <TorrentGrease.Client.Components.PagedListPaginator TItem="SelectableItem<RelocatableTorrentCandidate>" PagedList="PagedRelocatableTorrentCandidateList" />
+
+                <Field>
+                    <Blazorise.Check data-content="verify-torrents-after-relocating" IsDisabled="@(IsInWaitMode)" @bind-Checked="@_verifyTorrentsAfterRelocating" />
+                    <FieldLabel>Verify torrents after relocating</FieldLabel>
+                </Field>
+            </ModalBody>
+        }
+        <ModalFooter>
+            <Button Color="Color.Secondary" IsDisabled="@IsInWaitMode" Clicked="@CloseRelocateTorrentsModal">Close</Button>
+            @if (RelocateTorrentsStage == RelocateTorrentsStages.FindCandidates)
+            {
+                <Button data-content="scan-for-candidates-button" Color="Color.Primary" IsLoading="@_isScanningForRelocatableTorrents" IsDisabled="@IsInWaitMode" Clicked="@ScanForRelocatableTorrentsAsync">Scan for relocatable torrents</Button>
+            }
+            else if (RelocateTorrentsStage == RelocateTorrentsStages.RelocateCandidates)
+            {
+                <Button data-content="relocate-candidates-button" Color="Color.Primary" IsLoading="@_isRelocatingTorrents" IsDisabled="@IsInWaitMode" Clicked="@RelocateTorrentsAsync">Relocate torrents</Button>
+            }
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+@code {
+
+    [Parameter]
+    public IEnumerable<Torrent> Torrents { get; set; }
+
+    public bool IsInWaitMode => _isScanningForRelocatableTorrents || _isRelocatingTorrents;
+    
+    Modal _relocateTorrentsModal;
+    public enum RelocateTorrentsStages { FindCandidates, RelocateCandidates };
+    public RelocateTorrentsStages RelocateTorrentsStage => _relocatableTorrentCandidates == null
+        ? RelocateTorrentsStages.FindCandidates
+        : RelocateTorrentsStages.RelocateCandidates;
+
+    List<string> _pathsToScan = new List<String> { string.Empty };
+    IEnumerable<SelectableItem<RelocatableTorrentCandidate>> _relocatableTorrentCandidates;
+    TorrentGrease.Client.Components.PagedList<SelectableItem<RelocatableTorrentCandidate>> PagedRelocatableTorrentCandidateList;
+    bool _hasPagedRelocatableTorrentCandidateListBeenVisible = false;
+
+    bool _isScanningForRelocatableTorrents = false;
+    bool _isRelocatingTorrents = false;
+    bool _verifyTorrentsAfterRelocating = true;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (!_hasPagedRelocatableTorrentCandidateListBeenVisible && PagedRelocatableTorrentCandidateList != null)
+        {
+            _hasPagedRelocatableTorrentCandidateListBeenVisible = true;
+            StateHasChanged(); //this will cause the paginator to be rendered
+        }
+    }
+
+    void ResetRelocateTorrentsModel()
+    {
+        _pathsToScan.Clear();
+        _pathsToScan.Add(string.Empty);
+        _relocatableTorrentCandidates = null;
+        _verifyTorrentsAfterRelocating = true;
+        _isRelocatingTorrents = false;
+        _isScanningForRelocatableTorrents = false;
+        _hasPagedRelocatableTorrentCandidateListBeenVisible = false;
+    }
+
+    void AddPathToScan()
+    {
+        _pathsToScan.Add(string.Empty);
+    }
+
+    async Task ScanForRelocatableTorrentsAsync()
+    {
+        var pathsToScan = _pathsToScan.Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
+
+        var torrentIDs = Torrents
+            .Select(t => t.ID)
+            .ToArray();
+
+        _isScanningForRelocatableTorrents = true;
+        _relocatableTorrentCandidates = (await TorrentService.FindRelocatableTorrentCandidatesAsync(pathsToScan, torrentIDs))
+            .Select(i => new SelectableItem<RelocatableTorrentCandidate>(i))
+            .ToArray();
+
+        foreach (var relocatableTorrentCandidate in _relocatableTorrentCandidates)
+        {
+            if (relocatableTorrentCandidate.Item.RelocateOptions.Any())
+            {
+                relocatableTorrentCandidate.IsSelected = true;
+            }
+        }
+
+        _isScanningForRelocatableTorrents = false;
+    }
+
+    async Task RelocateTorrentsAsync()
+    {
+        var relocateTorrentCommands = _relocatableTorrentCandidates
+            .Where(s => s.IsSelected)
+            .Select(s => new RelocateTorrentCommand
+            {
+                TorrentID = s.Item.TorrentID,
+                NewLocation = s.Item.ChosenOption
+            })
+            .ToList();
+
+        _isRelocatingTorrents = true;
+        await TorrentService.RelocateTorrentsAsync(relocateTorrentCommands, _verifyTorrentsAfterRelocating).ConfigureAwait(false);
+        _isRelocatingTorrents = false;
+
+        CloseRelocateTorrentsModal();
+    }
+
+    public void Show()
+    {
+        ResetRelocateTorrentsModel();
+        _relocateTorrentsModal.Show();
+    }
+
+    void CloseRelocateTorrentsModal()
+    {
+        _relocateTorrentsModal.Hide();
+    }
+
+    void OnRelocateTorrentsModalClosing(CancelEventArgs e)
+    {
+        e.Cancel = _isScanningForRelocatableTorrents;
+    }
+}

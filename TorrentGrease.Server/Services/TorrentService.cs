@@ -157,6 +157,10 @@ namespace TorrentGrease.Server.Services
         public async Task RelocateTorrentsAsync(RelocateTorrentsRequest request)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
+            if(request.RelocateTorrentCommands == null || !request.RelocateTorrentCommands.Any())
+            {
+                return;
+            }
 
             foreach (var relocateTorrentCommand in request.RelocateTorrentCommands)
             {

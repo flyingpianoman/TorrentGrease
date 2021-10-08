@@ -2,16 +2,9 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-18.04'
 
 steps:
-- task: UseDotNet@2
-  displayName: Install dotnet 2.1 sdk for gitversion
-  inputs:
-    packageType: 'sdk'
-    version: '2.1.x'
-    includePreviewVersions: false
-
 - task: GitVersion@5
   inputs:
     runtime: 'core'

@@ -16,6 +16,10 @@ namespace SpecificationTest.Pages
     {
         private IWebElement _rootElement;
 
+        private IWebElement RefreshButton { get; set; }
+        public IWebElement ShowRelocateTorrentsModalButton { get; set; }
+        public IList<TorrentComponent> Torrents { get; private set; }
+
         public TorrentOverviewPage(IWebDriver webDriver)
             : base(webDriver)
         {
@@ -49,22 +53,17 @@ namespace SpecificationTest.Pages
             return await dialog.InitializeAsync().ConfigureAwait(false);
         }
 
-
         public async Task<PickRelocationCandidatesComponent> GetPickRelocationCandidatesComponentAsync()
         {
             var dialog = new PickRelocationCandidatesComponent(_rootElement, _webDriver);
             return await dialog.InitializeAsync().ConfigureAwait(false);
         }
 
-        private IWebElement RefreshButton { get;  set; }
         public async Task RefreshTorrentsAsync()
         {
             RefreshButton.Click();
             //Maybe we need to figure out how to first see the loading animation, but I think we don't
             await InitializeTorrentsAsync().ConfigureAwait(false);
         }
-
-        public IWebElement ShowRelocateTorrentsModalButton { get; set; }
-        public IList<TorrentComponent> Torrents { get; private set; }
     }
 }

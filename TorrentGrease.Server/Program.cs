@@ -49,7 +49,6 @@ namespace TorrentGrease.Server
             serverXmlDoc.Load(serverStaticWebAssetsPath);
             var rootNode = serverXmlDoc.SelectSingleNode("StaticWebAssets") ?? throw new InvalidDataException();
 
-
             const string clientStaticWebAssetsPath = @"/app/bin/Debug/net5.0/TorrentGrease.Client.StaticWebAssets.xml";
             var clientXmlDoc = new XmlDocument();
             clientXmlDoc.Load(clientStaticWebAssetsPath);

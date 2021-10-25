@@ -76,7 +76,7 @@ else
     bool _hasTorrentListBeenVisible = false;
     IEnumerable<SelectableItem<Torrent>> _selectableTorrents;
     TorrentGrease.Client.Components.TorrentRelocator _torrentRelocator;
-    bool _isInWaitMode => _torrentRelocator.IsInWaitMode || _selectableTorrents == null;
+    bool _isInWaitMode => (_torrentRelocator?.IsInWaitMode ?? true) || _selectableTorrents == null;
 
     public IEnumerable<Torrent> SelectedTorrents => _selectableTorrents
         ?.Where(st => st.IsSelected)

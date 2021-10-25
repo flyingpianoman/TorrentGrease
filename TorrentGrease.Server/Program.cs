@@ -48,13 +48,21 @@ namespace TorrentGrease.Server
             var serverXmlDoc = new XmlDocument();
             serverXmlDoc.Load(serverStaticWebAssetsPath);
             var rootNode = serverXmlDoc.SelectSingleNode("StaticWebAssets") ?? throw new InvalidDataException();
-            
+
 
             const string clientStaticWebAssetsPath = @"/app/bin/Debug/net5.0/TorrentGrease.Client.StaticWebAssets.xml";
             var clientXmlDoc = new XmlDocument();
             clientXmlDoc.Load(clientStaticWebAssetsPath);
             var contentRootNodes = clientXmlDoc.SelectNodes("StaticWebAssets/ContentRoot") ?? throw new InvalidDataException();
 
+            ChangeHostPathsToContainerizedPaths(serverXmlDoc, rootNode, contentRootNodes);
+
+            clientXmlDoc.Save(clientStaticWebAssetsPath);
+            serverXmlDoc.Save(serverStaticWebAssetsPath);
+        }
+
+        private static void ChangeHostPathsToContainerizedPaths(XmlDocument serverXmlDoc, XmlNode rootNode, XmlNodeList contentRootNodes)
+        {
             foreach (var contentRootNode in contentRootNodes.Cast<XmlNode>())
             {
                 var basePathAttr = contentRootNode?.Attributes?["BasePath"] ?? throw new NotSupportedException();
@@ -72,7 +80,7 @@ namespace TorrentGrease.Server
                     //Also add these to the server xml
                     var newNode = serverXmlDoc.CreateElement("ContentRoot");
                     newNode.SetAttribute("BasePath", basePathAttr.Value);
-                    newNode.SetAttribute("Path", pathAttr.Value);
+                    newNode.SetAttribute("Path", modifiedPath);
                     rootNode.AppendChild(newNode);
                 }
                 else
@@ -82,10 +90,8 @@ namespace TorrentGrease.Server
 
                 pathAttr.Value = modifiedPath;
             }
-
-            clientXmlDoc.Save(clientStaticWebAssetsPath);
-            serverXmlDoc.Save(serverStaticWebAssetsPath);
         }
+
         public static IHost BuildWebHost(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .UseSerilog((hostingContext, loggerConfiguration) => ConfigureSerilog(hostingContext, loggerConfiguration))

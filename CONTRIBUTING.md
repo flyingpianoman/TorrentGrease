@@ -1,5 +1,9 @@
 This section is a work in progress, for now I write down any 'special' steps that need to be taken to developer
 
+# docker-compose debug
+If you're getting the error 'A debug operation has started during container preparation' while trying to debug the docker-compose project, please see
+https://developercommunity.visualstudio.com/t/debugging-docker-compose-a-debug-operation-has-sta/1550044.
+
 # Specification testing
 To run our specification tests, you first will have to bring up a test environment. We use docker for that.
 

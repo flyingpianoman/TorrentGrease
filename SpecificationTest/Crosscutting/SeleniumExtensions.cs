@@ -9,15 +9,37 @@ namespace SpecificationTest.Crosscutting
 {
     static class SeleniumExtensions
     {
+        public static IWebElement GetParent(this IWebElement webElement)
+        {
+            return webElement.FindElement(By.XPath(".."));
+        }
+
+        public static IWebElement GetBootstrapCheckboxLabel(this IWebElement webElement)
+        {
+            return webElement
+                .GetParent()
+                .FindElement(By.CssSelector($"label[for=\"{webElement.GetAttribute("id")}\"]"));
+        }
+
         public static void ClickBootstrapCheckBox(this IWebElement webElement, IWebDriver webDriver)
         {
+            var isCheckedBeforeClick = webElement.Selected;
+
             //The bootstrap styling forces us to click the label instead the input
-            var elementToClick = webElement
-                .FindElement(By.XPath("..")) //parent element
-                .FindElement(By.CssSelector($"label[for=\"{webElement.GetAttribute("id")}\"]"));
+            var elementToClick = webElement.GetBootstrapCheckboxLabel();
 
             //We use JS because FF + Selenium have a bug that results in 'could not be scrolled into view'
             elementToClick.ClickViaJS(webDriver);
+
+            //Wait for checkbox state to change
+            PageHelper.WaitForWebElementPolicy
+                .Execute(() =>
+                {
+                    if(webElement.Selected == isCheckedBeforeClick)
+                    {
+                        throw new PageHelper.RetryException();
+                    }
+                });
         }
 
         public static void ClickViaJS(this IWebElement webElement, IWebDriver webDriver)

@@ -227,11 +227,9 @@ namespace SpecificationTest.Steps
             }
         }
 
-
-
         private static void AssertTorrents(IEnumerable<Pages.Components.TorrentOverview.TorrentComponent> actualTorrents,
-        IEnumerable<TorrentOverviewRowDto> expectedTorrents,
-        ICollection<string> propertiesToAssert)
+            IEnumerable<TorrentOverviewRowDto> expectedTorrents,
+            ICollection<string> propertiesToAssert)
         {
             actualTorrents.Count().Should().Be(expectedTorrents.Count());
 
@@ -422,6 +420,43 @@ namespace SpecificationTest.Steps
                 await page.RefreshTorrentsAsync().ConfigureAwait(false);
             }
         }
+
+        [Given(@"I see the following error filters")]
+        public void GivenISeeTheFollowingErrorFilters(Table table)
+        {
+            var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+            page.EnsureFilterAccordionIsCollapsed();
+
+            //Assert
+            page.FiltersPanel.ErrorFilterCheckboxes.Count().Should().Be(table.Rows.Count);
+
+            foreach (var expectedError in table.Rows.Select(r => r["Error filter"]))
+            {
+                page.FiltersPanel.ErrorFilterCheckboxes.Any(c => c.Label == expectedError).Should().BeTrue();
+            }
+        }
+
+        [When(@"I toggle the following error filter")]
+        public void WhenIToggleTheFollowingErrorFilter(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+                page.EnsureFilterAccordionIsCollapsed();
+
+                //Assert
+                page.FiltersPanel.ErrorFilterCheckboxes.Count().Should().Be(table.Rows.Count);
+
+                foreach (var expectedError in table.Rows.Select(r => r["Error filter"]))
+                {
+                    var errorFilter = page.FiltersPanel.ErrorFilterCheckboxes.First(c => c.Label == expectedError);
+                    await errorFilter.ToggleAsync();
+                }
+            }
+        }
+
 
     }
 }

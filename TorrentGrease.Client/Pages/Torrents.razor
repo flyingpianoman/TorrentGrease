@@ -5,18 +5,6 @@
 @inject ILogger<Torrents> _logger
 
 <h1>Torrents</h1>
-@if (_selectableTorrents == null)
-{
-    <div class="sk-wave">
-        <div class="sk-wave-rect"></div>
-        <div class="sk-wave-rect"></div>
-        <div class="sk-wave-rect"></div>
-        <div class="sk-wave-rect"></div>
-        <div class="sk-wave-rect"></div>
-    </div>
-}
-else
-{
     <div data-content="torrent-overview">
         <Accordion>
             <Collapse Visible="true">
@@ -31,12 +19,31 @@ else
                     </p>
                 </CollapseBody>
             </Collapse>
-            <Collapse Visible="@filtersVisible">
+            <Collapse data-content="filters-collapse" Visible="@filtersVisible">
                 <CollapseHeader data-content="filters-collapse-header" role="button" @onclick="@(()=> filtersVisible = !filtersVisible)">
                     Filters
                 </CollapseHeader>
-                <CollapseBody>
-                    <Check TValue="bool" data-content="only-show-torrents-without-data-checkbox" Checked="@IsOnlyShowingTorrentsWithoutData" IsDisabled="@_isInWaitMode" CheckedChanged="@ToggleOnlyShowTorrentsWithoutData">Only show torrents without data</Check>
+                <CollapseBody data-content="filters-collapse-body">
+                    <Row>
+                        <Column ColumnSize="ColumnSize.IsAuto">
+                            <b>Filters:</b>
+                            <Check TValue="bool" data-content="only-show-torrents-without-data-checkbox" Checked="@IsOnlyShowingTorrentsWithoutData" IsDisabled="@_isInWaitMode" CheckedChanged="@ToggleOnlyShowTorrentsWithoutData">Only show torrents without data</Check>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.IsAuto">
+                            <b>Only show torrents with errors:</b>
+                            @if (!(ErrorFilters?.Any() ?? false))
+                            {
+                                <p data-content="nop-error-filters-msg">Lucky you, it seems that there are no errors in your torrent client(s)!</p>
+                            }
+                            else
+                            {
+                                @foreach (var error in ErrorFilters)
+                                {
+                                    <Check TValue="bool" data-content="error-filter-checkbox" Checked="@error.IsSelected" IsDisabled="@_isInWaitMode" CheckedChanged="(e) => ToggleErrorFilter(error)">@error.Item</Check>
+                                }
+                            }
+                        </Column>
+                    </Row>
                 </CollapseBody>
             </Collapse>
         </Accordion>
@@ -57,35 +64,49 @@ else
                 </tr>
             </thead>
             <tbody>
-                <TorrentGrease.Client.Components.PagedList @ref="PagedTorrentList" TItem="SelectableItem<Torrent>" AllItems="_selectableTorrents" PageSize="50">
-                    @{
-                        var selectableTorrent = context;
-                        var torrent = selectableTorrent.Item;
-                    }
-                    <tr data-content="torrent">
-                        <td>
-                            <Blazorise.Check data-content="selector" IsDisabled="@_isInWaitMode" @bind-Checked="@selectableTorrent.IsSelected" />
-                        </td>
-                        <td data-content="name">@torrent.Name</td>
-                        <td><span data-content="percentage-available">@Math.Round((decimal)torrent.BytesOnDisk / torrent.SizeInBytes * 100, 2).ToString("N2")</span>%</td>
-                        <td><span data-content="data-on-disk-in-gb">@torrent.GBsOnDisk.ToString("N2")</span> GB</td>
-                        <td><span data-content="size-in-gb">@torrent.SizeInGB.ToString("N2")</span> GB</td>
-                        <td><span data-content="total-upload-in-gb">@torrent.TotalUploadInGB.ToString("N2")</span> GB</td>
-                        <td data-content="date-added">@torrent.AddedDateTime.ToLocalTime().ToString("g")</td>
-                        <td data-content="location">@torrent.Location</td>
-                        <td data-content="trackerUrls">@String.Join(", ", torrent.TrackerUrls)</td>
-                        <td data-content="error">@torrent.Error</td>
-                    </tr>
-                </TorrentGrease.Client.Components.PagedList>
+
+                @if (_selectableTorrents == null)
+                {
+                    <div class="sk-wave">
+                        <div class="sk-wave-rect"></div>
+                        <div class="sk-wave-rect"></div>
+                        <div class="sk-wave-rect"></div>
+                        <div class="sk-wave-rect"></div>
+                        <div class="sk-wave-rect"></div>
+                    </div>
+                }
+                else
+                {
+                    <TorrentGrease.Client.Components.PagedList @ref="PagedTorrentList" TItem="SelectableItem<Torrent>" AllItems="_selectableTorrents" PageSize="50">
+                        @{
+                            var selectableTorrent = context;
+                            var torrent = selectableTorrent.Item;
+                        }
+                        <tr data-content="torrent">
+                            <td>
+                                <Blazorise.Check data-content="selector" IsDisabled="@_isInWaitMode" @bind-Checked="@selectableTorrent.IsSelected" />
+                            </td>
+                            <td data-content="name">@torrent.Name</td>
+                            <td><span data-content="percentage-available">@Math.Round((decimal)torrent.BytesOnDisk / torrent.SizeInBytes * 100, 2).ToString("N2")</span>%</td>
+                            <td><span data-content="data-on-disk-in-gb">@torrent.GBsOnDisk.ToString("N2")</span> GB</td>
+                            <td><span data-content="size-in-gb">@torrent.SizeInGB.ToString("N2")</span> GB</td>
+                            <td><span data-content="total-upload-in-gb">@torrent.TotalUploadInGB.ToString("N2")</span> GB</td>
+                            <td data-content="date-added">@torrent.AddedDateTime.ToLocalTime().ToString("g")</td>
+                            <td data-content="location">@torrent.Location</td>
+                            <td data-content="trackerUrls">@String.Join(", ", torrent.TrackerUrls)</td>
+                            <td data-content="error">@torrent.Error</td>
+                        </tr>
+                    </TorrentGrease.Client.Components.PagedList>
+                }
             </tbody>
         </table>
 
         <TorrentGrease.Client.Components.PagedListPaginator TItem="SelectableItem<Torrent>" PagedList="PagedTorrentList" />
 
         <TorrentGrease.Client.Components.TorrentRelocator @ref="_torrentRelocator" Torrents="SelectedTorrents" />
-
     </div>
-}
+
+    <input type="hidden" data-content="is-in-wait-mode-value" value=@(_isInWaitMode ? "true" : "false") />
 
 @code {
     bool filtersVisible = false;
@@ -96,11 +117,14 @@ else
     IEnumerable<SelectableItem<Torrent>> _allTorrents;
     IEnumerable<SelectableItem<Torrent>> _selectableTorrents;
     TorrentGrease.Client.Components.TorrentRelocator _torrentRelocator;
-    bool _isInWaitMode => (_torrentRelocator?.IsInWaitMode ?? true) || _selectableTorrents == null;
+    int _busyCount = 0;
+    bool _isInWaitMode => (_torrentRelocator?.IsInWaitMode ?? true) || _busyCount != 0 || _selectableTorrents == null;
 
     public IEnumerable<Torrent> SelectedTorrents => _selectableTorrents
         ?.Where(st => st.IsSelected)
         ?.Select(st => st.Item) ?? new Torrent[] { };
+
+    public IEnumerable<SelectableItem<string>> ErrorFilters { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -119,25 +143,74 @@ else
 
     public async Task ReloadTorrents()
     {
+        _selectableTorrents = null;
         await LoadTorrentsAsync().ConfigureAwait(false);
     }
 
     private async Task LoadTorrentsAsync()
     {
+        _busyCount++;
         _allTorrents = (await TorrentService.GetAllTorrentsAsync())
-            .Select(i => new SelectableItem<Torrent>(i))
-            .ToArray();
+        .Select(i => new SelectableItem<Torrent>(i))
+        .ToArray();
 
-        SetSelectableTorrents();
+        SetErrorFilters();
+        ApplyFilters();
+        _busyCount--;
     }
 
-    private void SetSelectableTorrents()
+    private void SetErrorFilters()
+    {
+        var oldFilters = ErrorFilters;
+
+        ErrorFilters = _allTorrents
+            .Where(t => t.Item.Error != String.Empty)
+            .Select(t => t.Item.Error)
+            .Distinct()
+            .Select(error => new SelectableItem<string>(error))
+            .ToArray();
+
+        if (oldFilters == null)
+        {
+            return;
+        }
+
+        //Re-enable selected filters
+        foreach (var oldFilter in oldFilters.Where(f => f.IsSelected))
+        {
+            var currentFilter = ErrorFilters.FirstOrDefault(f => f.Item == oldFilter.Item);
+            if (currentFilter != null)
+            {
+                currentFilter.IsSelected = true;
+            }
+        }
+    }
+
+    private void ToggleErrorFilter(SelectableItem<string> errorRow)
+    {
+        _busyCount++;
+        errorRow.IsSelected = !errorRow.IsSelected;
+        ApplyFilters();
+        _busyCount--;
+    }
+
+    private void ApplyFilters()
     {
         var filteredResult = _allTorrents;
 
-        if(IsOnlyShowingTorrentsWithoutData)
+        if (IsOnlyShowingTorrentsWithoutData)
         {
             filteredResult = filteredResult.Where(t => t.Item.BytesOnDisk == 0);
+        }
+
+        if (this.ErrorFilters.Any(f => f.IsSelected))
+        {
+            var whitelistedErrors = ErrorFilters
+                .Where(f => f.IsSelected)
+                .Select(f => f.Item)
+                .ToArray();
+
+            filteredResult = filteredResult.Where(t => t.Item.Error != string.Empty && whitelistedErrors.Contains(t.Item.Error));
         }
 
         _selectableTorrents = filteredResult.ToArray();
@@ -153,8 +226,10 @@ else
 
     void ToggleOnlyShowTorrentsWithoutData(bool newValue)
     {
+        _busyCount++;
         IsOnlyShowingTorrentsWithoutData = newValue;
-        SetSelectableTorrents();
+        ApplyFilters();
+        _busyCount--;
     }
 
     public void ShowTorrentRelocator()

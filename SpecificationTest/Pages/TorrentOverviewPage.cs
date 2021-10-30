@@ -15,6 +15,7 @@ namespace SpecificationTest.Pages
     internal sealed class TorrentOverviewPage : PageBase
     {
         private IWebElement _rootElement;
+        public FiltersPanelComponent FiltersPanel { get; private set; }
 
         private IWebElement RefreshButton { get; set; }
         public IWebElement ShowRelocateTorrentsModalButton { get; set; }
@@ -33,6 +34,10 @@ namespace SpecificationTest.Pages
             await InitializeTorrentsAsync().ConfigureAwait(false);
             RefreshButton = _webDriver.FindElementByContentName("reload-torrents-button");
             ShowRelocateTorrentsModalButton = _webDriver.FindElementByContentName("show-relocate-torrents-button");
+
+            var filtersContainerEl = _rootElement.WaitForWebElementByContentName("filters-collapse");
+            FiltersPanel = new FiltersPanelComponent(filtersContainerEl, _webDriver, InitializeTorrentsAsync);
+            await FiltersPanel.InitializeAsync().ConfigureAwait(false);
         }
 
         private async Task InitializeTorrentsAsync()
@@ -45,6 +50,8 @@ namespace SpecificationTest.Pages
                 .ToList();
 
             await Torrents.InitializeAsync();
+
+            FiltersPanel?.UpdateFilters();
         }
 
         public async Task<ScanForRelocationCandidatesComponent> GetScanForRelocationCandidatesComponentAsync()
@@ -64,6 +71,14 @@ namespace SpecificationTest.Pages
             RefreshButton.Click();
             //Maybe we need to figure out how to first see the loading animation, but I think we don't
             await InitializeTorrentsAsync().ConfigureAwait(false);
+        }
+
+        internal void EnsureFilterAccordionIsCollapsed()
+        {
+            if(!FiltersPanel.IsExpanded)
+            {
+                FiltersPanel.Expand();
+            }
         }
     }
 }

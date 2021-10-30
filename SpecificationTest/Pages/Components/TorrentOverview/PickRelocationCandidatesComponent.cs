@@ -44,14 +44,14 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
         {
             _rootElement = _parentElement.WaitForWebElementByContentName(RootElementName);
 
-            VerifyTorrentsCheckBox = _rootElement.FindElementByContentName("verify-torrents-after-relocating");
-            var candidatesContainer = _rootElement.FindElementByContentName("relocate-candidates-container");
+            VerifyTorrentsCheckBox = SeleniumExtensions.FindElementByContentName(_rootElement, "verify-torrents-after-relocating");
+            var candidatesContainer = SeleniumExtensions.FindElementByContentName(_rootElement, "relocate-candidates-container");
 
             var initCandidatesQuery = candidatesContainer.FindElementsByContentName("relocate-candidate")
                 .Select(async e => await new TorrentRelocationCandidateComponent(e, _webDriver).InitializeAsync().ConfigureAwait(false));
             TorrentRelocationCandidates = await Task.WhenAll(initCandidatesQuery).ConfigureAwait(false);
 
-            RelocateCandidatesButton = _parentElement.FindElementByContentName("relocate-candidates-button");
+            RelocateCandidatesButton = SeleniumExtensions.FindElementByContentName(_parentElement, "relocate-candidates-button");
 
             return this;
         }

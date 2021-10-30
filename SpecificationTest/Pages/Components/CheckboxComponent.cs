@@ -13,16 +13,14 @@ namespace SpecificationTest.Pages.Components
         private readonly IWebDriver _webDriver;
         private readonly IWebElement _inputWebElement;
         private readonly IWebElement _labelWebElement;
-        private readonly Func<Task> _onChangeAsync;
 
         public string Label => _labelWebElement.Text;
 
-        public CheckboxComponent(IWebElement webElement, IWebDriver webDriver, Func<Task> onChangeAsync)
+        public CheckboxComponent(IWebElement webElement, IWebDriver webDriver)
         {
             _webDriver = webDriver;
             _inputWebElement = webElement;
             _labelWebElement = webElement.GetBootstrapCheckboxLabel();
-            _onChangeAsync = onChangeAsync;
         }
 
         public Task<CheckboxComponent> InitializeAsync()
@@ -30,10 +28,9 @@ namespace SpecificationTest.Pages.Components
             return Task.FromResult(this);
         }
 
-        internal async Task ToggleAsync()
+        internal void Toggle()
         {
             _inputWebElement.ClickBootstrapCheckBox(_webDriver);
-            await (_onChangeAsync?.Invoke() ?? Task.CompletedTask).ConfigureAwait(false);
         }
     }
 }

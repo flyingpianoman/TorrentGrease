@@ -10,10 +10,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - TORRENTCLIENT__USERNAME=usr
       - TORRENTCLIENT__PASSWORD=pwd
+      - TORRENTCLIENT__TORRENTFILEDIRMAPPING=/transmission/config/torrents
     volumes:
       - torrent-grease-data:/app/data
       - torrent-grease-logs:/app/logs
       - transmission-downloads:/downloads
+      - transmission-data:/transmission/config:ro #mount transmission config dir so we can access the torrent files
     ports:
       - 5656:5656
       - 5657:5657

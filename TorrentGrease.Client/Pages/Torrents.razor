@@ -13,9 +13,10 @@
                 </CollapseHeader>
                 <CollapseBody>
                     <p class="bs-component mb-0">
-                        <Button data-content="reload-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ReloadTorrents">Refresh</Button>
+                        <Button data-content="reload-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ReloadTorrentsAsync">Refresh</Button>
                         <Button data-content="select-all-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@SelectAllTorrents">Select all</Button>
                         <Button data-content="show-relocate-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ShowTorrentRelocator">Relocate torrent data</Button>
+                        <Button data-content="re-add-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ReAddTorrents">Re-add torrents</Button>
                     </p>
                 </CollapseBody>
             </Collapse>
@@ -67,13 +68,17 @@
 
                 @if (_selectableTorrents == null)
                 {
-                    <div class="sk-wave">
-                        <div class="sk-wave-rect"></div>
-                        <div class="sk-wave-rect"></div>
-                        <div class="sk-wave-rect"></div>
-                        <div class="sk-wave-rect"></div>
-                        <div class="sk-wave-rect"></div>
-                    </div>
+                    <tr>
+                        <td colspan="10">
+                            <div class="sk-wave">
+                                <div class="sk-wave-rect"></div>
+                                <div class="sk-wave-rect"></div>
+                                <div class="sk-wave-rect"></div>
+                                <div class="sk-wave-rect"></div>
+                                <div class="sk-wave-rect"></div>
+                            </div>
+                        </td>
+                    </tr>
                 }
                 else
                 {
@@ -141,7 +146,7 @@
         }
     }
 
-    public async Task ReloadTorrents()
+    public async Task ReloadTorrentsAsync()
     {
         _selectableTorrents = null;
         await LoadTorrentsAsync().ConfigureAwait(false);
@@ -214,6 +219,9 @@
         }
 
         _selectableTorrents = filteredResult.ToArray();
+
+        //Unselect items that are filtered away
+        _allTorrents.Except(_selectableTorrents).Where(t => t.IsSelected).ToList().ForEach(t => t.IsSelected = false);
     }
 
     private void SelectAllTorrents()
@@ -235,5 +243,18 @@
     public void ShowTorrentRelocator()
     {
         _torrentRelocator.Show();
+    }
+
+    public async Task ReAddTorrents()
+    {
+        _busyCount++;
+
+        await TorrentService.ReaddTorrentsAsync(new TorrentGrease.Shared.ReaddTorrents.ReaddTorrentsRequest
+        {
+            TorrentIDs = SelectedTorrents.Select(t => t.ID).ToArray()
+        });
+
+        await ReloadTorrentsAsync();
+        _busyCount--;
     }
 }

@@ -17,14 +17,11 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
     {
         private readonly IWebElement _filtersPanelWebElement;
         private readonly IWebDriver _webDriver;
-        private readonly Func<Task> _onFilterChangeAsync;
 
-        public FiltersPanelComponent(IWebElement filtersPanelWebElement, IWebDriver webDriver, 
-            Func<Task> onFilterChangeAsync)
+        public FiltersPanelComponent(IWebElement filtersPanelWebElement, IWebDriver webDriver)
         {
             _filtersPanelWebElement = filtersPanelWebElement;
             _webDriver = webDriver;
-            _onFilterChangeAsync = onFilterChangeAsync;
         }
 
         private IWebElement _collapseHeader;
@@ -62,7 +59,7 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
             {
                 ErrorFilterCheckboxes = _collapseBody
                     .FindElementsByContentName("error-filter-checkbox")
-                    .Select(el => new CheckboxComponent(el, _webDriver, _onFilterChangeAsync))
+                    .Select(el => new CheckboxComponent(el, _webDriver))
                     .ToArray();
             }
         }

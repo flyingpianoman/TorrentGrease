@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TorrentGrease.Shared.ReaddTorrents;
 using TorrentGrease.Shared.RelocateTorrent;
 using TorrentGrease.Shared.ServiceContracts;
 using TorrentGrease.Shared.ServiceContracts.TorrentRequests;
@@ -172,6 +173,39 @@ namespace TorrentGrease.Server.Services
             if(request.VerifyAfterMoving)
             {
                 await _torrentClient.VerifyTorrentsAsync(request.RelocateTorrentCommands.Select(c => c.TorrentID).ToArray());
+            }
+        }
+
+        public async Task ReaddTorrentsAsync(ReaddTorrentsRequest request)
+        {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request.TorrentIDs == null || !request.TorrentIDs.Any())
+            {
+                return;
+            }
+
+            var torrents = await _torrentClient.GetTorrentsByIDsAsync(request.TorrentIDs).ConfigureAwait(false);
+            ValidateReaddTorrentsRequest(request, torrents);
+
+            foreach (var torrent in torrents)
+            {
+                _logger.LogDebug("Readding torrent with ID {0} and name '{1}'", torrent.ID, torrent.Name);
+                var torrentFileStream = await _torrentClient.DownloadTorrentFileAsync(torrent).ConfigureAwait(false);
+                await _torrentClient.ReAddTorrentAsync(torrentFileStream, torrent.ID).ConfigureAwait(false);
+            }
+        }
+
+        private static void ValidateReaddTorrentsRequest(ReaddTorrentsRequest request, IEnumerable<Torrent> torrents)
+        {
+            if (torrents.Count() != request.TorrentIDs.Count)
+            {
+                throw new InvalidOperationException("Could not find every torrent");
+            }
+
+            var torrentsWithoutTorrentFile = torrents.Where(t => string.IsNullOrEmpty(t.TorrentFilePath));
+            if (torrentsWithoutTorrentFile.Any())
+            {
+                throw new InvalidOperationException($"The following torrents don't have a torrent file (could be because they're added via magnet?): {string.Join(", ", torrentsWithoutTorrentFile.Select(t => t.Name))}");
             }
         }
     }

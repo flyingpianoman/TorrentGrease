@@ -33,5 +33,7 @@ namespace TorrentGrease.Shared.TorrentClient
         public TorrentFile[] Files { get; set; }
         [ProtoMember(11)]
         public string Error { get; set; }
+        [ProtoMember(12)]
+        public string TorrentFilePath { get; set; }
     }
 }

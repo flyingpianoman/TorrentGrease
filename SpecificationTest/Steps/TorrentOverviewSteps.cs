@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
@@ -31,7 +32,8 @@ namespace SpecificationTest.Steps
             {
                 var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
                 await page.InitializeAsync().ConfigureAwait(false);
-                page.Torrents.Count.Should().Be(0);
+                var torrentComps = await page.GetTorrentComponentsAsync().ConfigureAwait(false);
+                torrentComps.Count().Should().Be(0);
             }
         }
 
@@ -131,27 +133,39 @@ namespace SpecificationTest.Steps
         [Then(@"I see an overview of the following torrents")]
         public void ThenISeeAnOverviewOfTheFollowingTorrents(Table table)
         {
-            var propertiesToAssert = table.Header;
+            InnerAsync().GetAwaiter().GetResult();
 
-            var expectedTorrents = table.CreateSet<TorrentOverviewRowDto>().ToList();
-            var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
-            var actualTorrents = page.Torrents;
+            async Task InnerAsync()
+            {
+                var propertiesToAssert = table.Header;
 
-            AssertTorrents(actualTorrents, expectedTorrents, propertiesToAssert);
+                var expectedTorrents = table.CreateSet<TorrentOverviewRowDto>().ToList();
+                var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+                var actualTorrents = await page.GetTorrentComponentsAsync().ConfigureAwait(false);
+
+                AssertTorrents(actualTorrents, expectedTorrents, propertiesToAssert);
+            }
         }
 
         [When(@"I select the following torrents")]
         public void WhenISelectTheFollowingTorrents(Table table)
         {
-            var torrentNames = table.Rows.Select(r => r.Values.First()).ToList();
-            var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
-            var torrents = page.Torrents.Where(t => torrentNames.Contains(t.Name)).ToArray();
+            InnerAsync().GetAwaiter().GetResult();
 
-            torrents.Length.Should().Be(torrentNames.Count);
-
-            foreach (var torrent in torrents)
+            async Task InnerAsync()
             {
-                torrent.IsSelected = true;
+                var torrentNames = table.Rows.Select(r => r.Values.First()).ToList();
+                var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+                var torrents = (await page.GetTorrentComponentsAsync().ConfigureAwait(false))
+                    .Where(t => torrentNames.Contains(t.Name))
+                    .ToArray();
+
+                torrents.Length.Should().Be(torrentNames.Count);
+
+                foreach (var torrent in torrents)
+                {
+                    torrent.IsSelected = true;
+                }
             }
         }
 
@@ -417,22 +431,27 @@ namespace SpecificationTest.Steps
                 modal.RelocateCandidatesButton.Click();
                 modal.WaitUntilClosed();
 
-                await page.RefreshTorrentsAsync().ConfigureAwait(false);
+                page.RefreshButton.Click();
             }
         }
 
         [Given(@"I see the following error filters")]
         public void GivenISeeTheFollowingErrorFilters(Table table)
         {
-            var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
-            page.EnsureFilterAccordionIsCollapsed();
+            InnerAsync().GetAwaiter().GetResult();
 
-            //Assert
-            page.FiltersPanel.ErrorFilterCheckboxes.Count().Should().Be(table.Rows.Count);
-
-            foreach (var expectedError in table.Rows.Select(r => r["Error filter"]))
+            async Task InnerAsync()
             {
-                page.FiltersPanel.ErrorFilterCheckboxes.Any(c => c.Label == expectedError).Should().BeTrue();
+                var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+                var filtersPanel = await page.EnsureFilterAccordionIsCollapsedAsync().ConfigureAwait(false);
+
+                //Assert
+                filtersPanel.ErrorFilterCheckboxes.Count().Should().Be(table.Rows.Count);
+
+                foreach (var expectedError in table.Rows.Select(r => r["Error filter"]))
+                {
+                    filtersPanel.ErrorFilterCheckboxes.Any(c => c.Label == expectedError).Should().BeTrue();
+                }
             }
         }
 
@@ -444,19 +463,25 @@ namespace SpecificationTest.Steps
             async Task InnerAsync()
             {
                 var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
-                page.EnsureFilterAccordionIsCollapsed();
+                var filtersPanel = await page.EnsureFilterAccordionIsCollapsedAsync().ConfigureAwait(false);
 
                 //Assert
-                page.FiltersPanel.ErrorFilterCheckboxes.Count().Should().Be(table.Rows.Count);
+                filtersPanel.ErrorFilterCheckboxes.Count().Should().Be(table.Rows.Count);
 
                 foreach (var expectedError in table.Rows.Select(r => r["Error filter"]))
                 {
-                    var errorFilter = page.FiltersPanel.ErrorFilterCheckboxes.First(c => c.Label == expectedError);
-                    await errorFilter.ToggleAsync();
+                    var errorFilter = filtersPanel.ErrorFilterCheckboxes.First(c => c.Label == expectedError);
+                    errorFilter.Toggle();
                 }
             }
         }
 
-
+        [When(@"I readd the selected torrents")]
+        public void WhenIReaddTheSelectedTorrents()
+        {
+            var page = WebDriver.CurrentPageAs<TorrentOverviewPage>();
+            page.ReAddButton.Click();
+            page.WaitUntilNotInWaitMode();
+        }
     }
 }

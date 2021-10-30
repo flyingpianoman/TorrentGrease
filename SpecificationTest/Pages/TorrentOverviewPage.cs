@@ -15,11 +15,11 @@ namespace SpecificationTest.Pages
     internal sealed class TorrentOverviewPage : PageBase
     {
         private IWebElement _rootElement;
-        public FiltersPanelComponent FiltersPanel { get; private set; }
 
-        private IWebElement RefreshButton { get; set; }
+        public IWebElement RefreshButton { get; private set; }
         public IWebElement ShowRelocateTorrentsModalButton { get; set; }
-        public IList<TorrentComponent> Torrents { get; private set; }
+        public IWebElement ReAddButton { get; private set; }
+        private IWebElement IsInWaitModeInput { get; set; }
 
         public TorrentOverviewPage(IWebDriver webDriver)
             : base(webDriver)
@@ -31,27 +31,31 @@ namespace SpecificationTest.Pages
             await base.InitializeAsync().ConfigureAwait(false);
             _rootElement = _webDriver.WaitForWebElementByContentName("torrent-overview");
 
-            await InitializeTorrentsAsync().ConfigureAwait(false);
             RefreshButton = _webDriver.FindElementByContentName("reload-torrents-button");
             ShowRelocateTorrentsModalButton = _webDriver.FindElementByContentName("show-relocate-torrents-button");
-
-            var filtersContainerEl = _rootElement.WaitForWebElementByContentName("filters-collapse");
-            FiltersPanel = new FiltersPanelComponent(filtersContainerEl, _webDriver, InitializeTorrentsAsync);
-            await FiltersPanel.InitializeAsync().ConfigureAwait(false);
+            ReAddButton = _webDriver.FindElementByContentName("re-add-button");
+            IsInWaitModeInput = _webDriver.FindElementByContentName("is-in-wait-mode-value");
         }
 
-        private async Task InitializeTorrentsAsync()
+        public async Task<FiltersPanelComponent> GetFiltersPanelComponentAsync()
+        {
+            var filtersContainerEl = _rootElement.WaitForWebElementByContentName("filters-collapse");
+            var filtersPanel = new FiltersPanelComponent(filtersContainerEl, _webDriver);
+            await filtersPanel.InitializeAsync().ConfigureAwait(false);
+            return filtersPanel;
+        }
+
+        public async Task<IEnumerable<TorrentComponent>> GetTorrentComponentsAsync()
         {
             var torrentsContainer = _rootElement.WaitForWebElementByContentName("torrents-container");
             var torrents = torrentsContainer.FindElementsByContentName("torrent");
 
-            Torrents = torrents
+            var torrentsComp = torrents
                 .Select(torrent => new TorrentComponent(torrent, _webDriver))
                 .ToList();
 
-            await Torrents.InitializeAsync();
-
-            FiltersPanel?.UpdateFilters();
+            await torrentsComp.InitializeAsync();
+            return torrentsComp;
         }
 
         public async Task<ScanForRelocationCandidatesComponent> GetScanForRelocationCandidatesComponentAsync()
@@ -66,19 +70,26 @@ namespace SpecificationTest.Pages
             return await dialog.InitializeAsync().ConfigureAwait(false);
         }
 
-        public async Task RefreshTorrentsAsync()
+        internal async Task<FiltersPanelComponent> EnsureFilterAccordionIsCollapsedAsync()
         {
-            RefreshButton.Click();
-            //Maybe we need to figure out how to first see the loading animation, but I think we don't
-            await InitializeTorrentsAsync().ConfigureAwait(false);
+            var filtersPanel = await GetFiltersPanelComponentAsync().ConfigureAwait(false);
+            if(!filtersPanel.IsExpanded)
+            {
+                filtersPanel.Expand();
+            }
+
+            return filtersPanel;
         }
 
-        internal void EnsureFilterAccordionIsCollapsed()
+        internal void WaitUntilNotInWaitMode()
         {
-            if(!FiltersPanel.IsExpanded)
+            PageHelper.WaitForWebElementPolicy.Execute(() =>
             {
-                FiltersPanel.Expand();
-            }
+                if (this.IsInWaitModeInput.GetAttribute("value") != "false")
+                {
+                    throw new PageHelper.RetryException();
+                }
+            });
         }
     }
 }

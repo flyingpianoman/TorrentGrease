@@ -11,5 +11,6 @@ namespace TorrentGrease.TorrentClient
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Client { get; set; } = string.Empty;
+        public string TorrentFileDirMapping { get; set; } = string.Empty;
     }
 }

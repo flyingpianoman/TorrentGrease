@@ -18,13 +18,13 @@ namespace SpecificationTest.Pages
             .Handle<RetryException>()
             .WaitAndRetryUntilTimeout(
                 retryDelay: TimeSpan.FromMilliseconds(10),
-                timeout: TimeSpan.FromSeconds(15));
+                timeout: TimeSpan.FromSeconds(20));
 
         internal static readonly AsyncPolicyWrap WaitForWebElementPolicyAsync = Policy
             .Handle<RetryException>()
             .WaitAndRetryUntilTimeoutAsync(
                 retryDelay: TimeSpan.FromMilliseconds(10),
-                timeout: TimeSpan.FromSeconds(15));
+                timeout: TimeSpan.FromSeconds(20));
 
         public sealed class RetryException : Exception
         {

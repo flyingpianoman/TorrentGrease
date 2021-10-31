@@ -162,6 +162,19 @@ namespace TorrentGrease.TorrentClient.Transmission
             _logger.LogDebug("Mapped torrent file location from '{0}' to {1}", torrent.TorrentFilePath, updatedTorrentFilePath);
             try
             {
+                if(!File.Exists(updatedTorrentFilePath))
+                {
+                    var fileName = Path.GetFileName(updatedTorrentFilePath);
+                    var fileNameParts = fileName.Split('.');
+                    if(fileNameParts.Length > 1)
+                    {
+                        //This could be from transmission changing the way they store torrent files over the past few versions
+                        var newPath = updatedTorrentFilePath.Replace(fileName, $"{fileNameParts[fileNameParts.Length - 2]}.{fileNameParts[fileNameParts.Length - 1]}");
+                        _logger.LogDebug("Could not find torrent at {0}, might be stale info - trying {1}", updatedTorrentFilePath, newPath);
+                        updatedTorrentFilePath = newPath;
+                    }
+                }
+
                 return Task.FromResult((Stream)File.OpenRead(updatedTorrentFilePath));
             }
             catch (FileNotFoundException e)

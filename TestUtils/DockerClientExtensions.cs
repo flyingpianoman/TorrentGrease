@@ -1,5 +1,6 @@
 ﻿using Docker.DotNet;
 using Docker.DotNet.Models;
+using Polly;
 using SpecificationTest.Crosscutting;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TestUtils
@@ -74,11 +76,22 @@ namespace TestUtils
             var targetDirParts = fullPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
             var mkDirCommands = new List<string>();
             var dir = "";
+            var structureExists = true;
 
             foreach (var targetDirPart in targetDirParts)
             {
+                var parentDir = String.IsNullOrEmpty(dir)? "/" : dir;
                 dir += "/" + targetDirPart;
-                mkDirCommands.Add($"mkdir {dir}");
+
+                if (structureExists)
+                {
+                    structureExists = await ExecuteSHCommandAsync(dockerClient, containerId, $"ls '{parentDir}' | grep -wc '{targetDirPart}'") == "1";
+                }
+
+                if (!structureExists)
+                {
+                    mkDirCommands.Add($"mkdir {dir}");
+                }
             }
 
             var commandToExecute = string.Join(" || ", mkDirCommands);
@@ -132,10 +145,20 @@ namespace TestUtils
             await ExecuteSHCommandAsync(dockerClient, containerId, commandToExecute).ConfigureAwait(false);
         }
 
-        private static async Task ExecuteSHCommandAsync(DockerClient dockerClient, string containerId, string commandToExecute)
+        private static async Task<string> ExecuteSHCommandAsync(DockerClient dockerClient, string containerId, string commandToExecute)
         {
             var execCommandResponse = await CreateSHExecCommandAsync(dockerClient, containerId, commandToExecute).ConfigureAwait(false);
-            await dockerClient.Exec.StartContainerExecAsync(execCommandResponse.ID).ConfigureAwait(false);
+            using var multiplexStream = await dockerClient.Exec.StartAndAttachContainerExecAsync(execCommandResponse.ID, tty: false).ConfigureAwait(false);
+            (string output, string stderr) = await Policy
+                .TimeoutAsync(seconds: 30)
+                .ExecuteAsync<(string output, string stderr)>(async (CancellationToken ct) => await multiplexStream.ReadOutputToEndAsync(ct).ConfigureAwait(false), new CancellationToken()).ConfigureAwait(false);
+
+            if(!string.IsNullOrEmpty(stderr))
+            {
+                throw new InvalidOperationException("The command returned the following error: " + stderr);
+            }
+
+            return output.EndsWith("\n")? output[0..^1] : output;
         }
 
         private static async Task<string> ExecuteSHCommandWithResponseAsync(DockerClient dockerClient, string containerId, string commandToExecute)

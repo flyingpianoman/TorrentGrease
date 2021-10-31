@@ -446,11 +446,12 @@ namespace SpecificationTest.Steps
                 var filtersPanel = await page.EnsureFilterAccordionIsCollapsedAsync().ConfigureAwait(false);
 
                 //Assert
-                filtersPanel.ErrorFilterCheckboxes.Count().Should().Be(table.Rows.Count);
+                var errorFilters = filtersPanel.GetErrorFilters();
+                errorFilters.Count().Should().Be(table.Rows.Count);
 
                 foreach (var expectedError in table.Rows.Select(r => r["Error filter"]))
                 {
-                    filtersPanel.ErrorFilterCheckboxes.Any(c => c.Label == expectedError).Should().BeTrue();
+                    errorFilters.Any(c => c.Label == expectedError).Should().BeTrue();
                 }
             }
         }
@@ -466,11 +467,12 @@ namespace SpecificationTest.Steps
                 var filtersPanel = await page.EnsureFilterAccordionIsCollapsedAsync().ConfigureAwait(false);
 
                 //Assert
-                filtersPanel.ErrorFilterCheckboxes.Count().Should().Be(table.Rows.Count);
+                var errorFilters = filtersPanel.GetErrorFilters();
+                errorFilters.Count().Should().Be(table.Rows.Count);
 
                 foreach (var expectedError in table.Rows.Select(r => r["Error filter"]))
                 {
-                    var errorFilter = filtersPanel.ErrorFilterCheckboxes.First(c => c.Label == expectedError);
+                    var errorFilter = errorFilters.First(c => c.Label == expectedError);
                     errorFilter.Toggle();
                 }
             }

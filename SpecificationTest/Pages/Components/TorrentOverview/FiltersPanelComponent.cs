@@ -26,7 +26,6 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
 
         private IWebElement _collapseHeader;
         private IWebElement _collapseBody;
-        public IEnumerable<CheckboxComponent> ErrorFilterCheckboxes { get; private set; }
 
         public bool IsExpanded
         {
@@ -43,25 +42,24 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
 
             PageHelper.WaitForWebElementPolicy.Execute(() =>
             {
-                UpdateFilters();
+                var errorFilterCheckboxes = GetErrorFilters();
 
                 //If no checkboxes, we should have a no errors msg - else retry until either one of them is there
-                if (!ErrorFilterCheckboxes.Any() && _collapseBody.FindElementByContentName("no-error-filters-msg") == null)
+                if (!errorFilterCheckboxes.Any() && _collapseBody.FindElementByContentName("no-error-filters-msg") == null)
                 {
                     throw new RetryException();
                 }
             });
         }
 
-        public void UpdateFilters()
+        public IEnumerable<CheckboxComponent> GetErrorFilters()
         {
-            if (IsExpanded)
-            {
-                ErrorFilterCheckboxes = _collapseBody
-                    .FindElementsByContentName("error-filter-checkbox")
-                    .Select(el => new CheckboxComponent(el, _webDriver))
-                    .ToArray();
-            }
+            return IsExpanded
+                    ? _collapseBody
+                        .FindElementsByContentName("error-filter-checkbox")
+                        .Select(el => new CheckboxComponent(el, _webDriver))
+                        .ToArray()
+                    : null;
         }
 
         public Task<FiltersPanelComponent> InitializeAsync()

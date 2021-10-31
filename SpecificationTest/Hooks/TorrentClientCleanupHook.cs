@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Docker.DotNet;
 using SpecificationTest.Crosscutting;
 using TechTalk.SpecFlow;
 using TestUtils;
@@ -22,6 +23,13 @@ namespace SpecificationTest.Hooks
                 .ToArray();
 
             await torrentClient.RemoveTorrentsByIDsAsync(torrentIDs, deleteData: true).ConfigureAwait(false);
+
+            var dockerClient = DIContainer.Default.Get<DockerClient>();
+            var transmissionContainerId = await dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TransmissionContainerName).ConfigureAwait(false);
+            await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/downloads/completed").ConfigureAwait(false);
+            await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/downloads/incomplete").ConfigureAwait(false);
+
+
         }
     }
 }

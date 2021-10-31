@@ -169,7 +169,7 @@ namespace TorrentGrease.TorrentClient.Transmission
                     if(fileNameParts.Length > 1)
                     {
                         //This could be from transmission changing the way they store torrent files over the past few versions
-                        var newPath = updatedTorrentFilePath.Replace(fileName, $"{fileNameParts[fileNameParts.Length - 2]}.{fileNameParts[fileNameParts.Length - 1]}");
+                        var newPath = updatedTorrentFilePath.Replace(fileName, $"{torrent.InfoHash}.{fileNameParts[^1]}");
                         _logger.LogDebug("Could not find torrent at {0}, might be stale info - trying {1}", updatedTorrentFilePath, newPath);
                         updatedTorrentFilePath = newPath;
                     }

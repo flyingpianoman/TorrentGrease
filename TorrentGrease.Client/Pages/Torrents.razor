@@ -5,113 +5,116 @@
 @inject ILogger<Torrents> _logger
 
 <h1>Torrents</h1>
-    <div data-content="torrent-overview">
-        <Accordion>
-            <Collapse Visible="true">
-                <CollapseHeader data-content="actions-collapse-header">
-                    Actions
-                </CollapseHeader>
-                <CollapseBody>
-                    <p class="bs-component mb-0">
-                        <Button data-content="reload-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ReloadTorrentsAsync">Refresh</Button>
-                        <Button data-content="select-all-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@SelectAllTorrents">Select all</Button>
-                        <Button data-content="show-relocate-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ShowTorrentRelocator">Relocate torrent data</Button>
-                        <Button data-content="re-add-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ReAddTorrents">Re-add torrents</Button>
-                    </p>
-                </CollapseBody>
-            </Collapse>
-            <Collapse data-content="filters-collapse" Visible="@filtersVisible">
-                <CollapseHeader data-content="filters-collapse-header" role="button" @onclick="@(()=> filtersVisible = !filtersVisible)">
-                    Filters
-                </CollapseHeader>
-                <CollapseBody data-content="filters-collapse-body">
-                    <Row>
-                        <Column ColumnSize="ColumnSize.IsAuto">
-                            <b>Filters:</b>
-                            <Check TValue="bool" data-content="only-show-torrents-without-data-checkbox" Checked="@IsOnlyShowingTorrentsWithoutData" IsDisabled="@_isInWaitMode" CheckedChanged="@ToggleOnlyShowTorrentsWithoutData">Only show torrents without data</Check>
-                        </Column>
-                        <Column ColumnSize="ColumnSize.IsAuto">
-                            <b>Only show torrents with errors:</b>
-                            @if (!(ErrorFilters?.Any() ?? false))
-                            {
-                                <p data-content="nop-error-filters-msg">Lucky you, it seems that there are no errors in your torrent client(s)!</p>
-                            }
-                            else
-                            {
-                                @foreach (var error in ErrorFilters)
-                                {
-                                    <Check TValue="bool" data-content="error-filter-checkbox" Checked="@error.IsSelected" IsDisabled="@_isInWaitMode" CheckedChanged="(e) => ToggleErrorFilter(error)">@error.Item</Check>
-                                }
-                            }
-                        </Column>
-                    </Row>
-                </CollapseBody>
-            </Collapse>
-        </Accordion>
-
-        <table class="table" data-content="torrents-container">
-            <thead>
-                <tr>
-                    <th>&nbsp;</th>
-                    <th>Name</th>
-                    <th>% available</th>
-                    <th>Downloaded</th>
-                    <th>Total size</th>
-                    <th>Total uploaded</th>
-                    <th>Date added</th>
-                    <th>Location on disk</th>
-                    <th>Tracker urls</th>
-                    <th>Error</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                @if (_selectableTorrents == null)
-                {
-                    <tr>
-                        <td colspan="10">
-                            <div class="sk-wave">
-                                <div class="sk-wave-rect"></div>
-                                <div class="sk-wave-rect"></div>
-                                <div class="sk-wave-rect"></div>
-                                <div class="sk-wave-rect"></div>
-                                <div class="sk-wave-rect"></div>
-                            </div>
-                        </td>
-                    </tr>
-                }
-                else
-                {
-                    <TorrentGrease.Client.Components.PagedList @ref="PagedTorrentList" TItem="SelectableItem<Torrent>" AllItems="_selectableTorrents" PageSize="50">
-                        @{
-                            var selectableTorrent = context;
-                            var torrent = selectableTorrent.Item;
+<div data-content="torrent-overview">
+    <Accordion>
+        <Collapse Visible="true">
+            <CollapseHeader data-content="actions-collapse-header">
+                Actions
+            </CollapseHeader>
+            <CollapseBody>
+                <p class="bs-component mb-0">
+                    <Button data-content="reload-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ReloadTorrentsAsync">Refresh</Button>
+                    <Button data-content="select-all-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@SelectAllTorrents">Select all</Button>
+                    <Button data-content="show-relocate-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ShowTorrentRelocator">Relocate torrent data</Button>
+                    <Button data-content="re-add-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ReAddTorrents">Re-add torrents</Button>
+                </p>
+            </CollapseBody>
+        </Collapse>
+        <Collapse data-content="filters-collapse" Visible="@filtersVisible">
+            <CollapseHeader data-content="filters-collapse-header" role="button" @onclick="@(()=> filtersVisible = !filtersVisible)">
+                Filters
+            </CollapseHeader>
+            <CollapseBody data-content="filters-collapse-body">
+                <Row>
+                    <Column ColumnSize="ColumnSize.IsAuto">
+                        <b>Filters:</b>
+                        <Check TValue="bool" data-content="only-show-torrents-without-data-checkbox" Checked="@IsOnlyShowingTorrentsWithoutData" IsDisabled="@_isInWaitMode" CheckedChanged="@ToggleOnlyShowTorrentsWithoutData">Only show torrents without data</Check>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsAuto">
+                        <b>Only show torrents with errors:</b>
+                        @if (!(ErrorFilters?.Any() ?? false))
+                        {
+                            <p data-content="nop-error-filters-msg">Lucky you, it seems that there are no errors in your torrent client(s)!</p>
                         }
-                        <tr data-content="torrent">
-                            <td>
-                                <Blazorise.Check data-content="selector" IsDisabled="@_isInWaitMode" @bind-Checked="@selectableTorrent.IsSelected" />
-                            </td>
-                            <td data-content="name">@torrent.Name</td>
-                            <td><span data-content="percentage-available">@Math.Round((decimal)torrent.BytesOnDisk / torrent.SizeInBytes * 100, 2).ToString("N2")</span>%</td>
-                            <td><span data-content="data-on-disk-in-gb">@torrent.GBsOnDisk.ToString("N2")</span> GB</td>
-                            <td><span data-content="size-in-gb">@torrent.SizeInGB.ToString("N2")</span> GB</td>
-                            <td><span data-content="total-upload-in-gb">@torrent.TotalUploadInGB.ToString("N2")</span> GB</td>
-                            <td data-content="date-added">@torrent.AddedDateTime.ToLocalTime().ToString("g")</td>
-                            <td data-content="location">@torrent.Location</td>
-                            <td data-content="trackerUrls">@String.Join(", ", torrent.TrackerUrls)</td>
-                            <td data-content="error">@torrent.Error</td>
-                        </tr>
-                    </TorrentGrease.Client.Components.PagedList>
-                }
-            </tbody>
-        </table>
+                        else
+                        {
+                            @foreach (var error in ErrorFilters)
+                            {
+                                <Check TValue="bool" data-content="error-filter-checkbox" Checked="@error.IsSelected" IsDisabled="@_isInWaitMode" CheckedChanged="(e) => ToggleErrorFilter(error)">@error.Item</Check>
+                            }
+                        }
+                    </Column>
+                </Row>
+            </CollapseBody>
+        </Collapse>
+    </Accordion>
 
+    <table class="table" data-content="torrents-container">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Name</th>
+                <th>% available</th>
+                <th>Downloaded</th>
+                <th>Total size</th>
+                <th>Total uploaded</th>
+                <th>Date added</th>
+                <th>Location on disk</th>
+                <th>Tracker urls</th>
+                <th>Error</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (_selectableTorrents == null)
+            {
+                <tr>
+                    <td colspan="10">
+                        <div class="sk-wave">
+                            <div class="sk-wave-rect"></div>
+                            <div class="sk-wave-rect"></div>
+                            <div class="sk-wave-rect"></div>
+                            <div class="sk-wave-rect"></div>
+                            <div class="sk-wave-rect"></div>
+                        </div>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <TorrentGrease.Client.Components.PagedList @ref="PagedTorrentList" TItem="SelectableItem<Torrent>" AllItems="_selectableTorrents" PageSize="50">
+                    @{
+                        var selectableTorrent = context;
+                        var torrent = selectableTorrent.Item;
+                    }
+                    <tr data-content="torrent">
+                        <td>
+                            <Blazorise.Check data-content="selector" IsDisabled="@_isInWaitMode" @bind-Checked="@selectableTorrent.IsSelected" />
+                        </td>
+                        <td data-content="name">@torrent.Name</td>
+                        <td><span data-content="percentage-available">@Math.Round((decimal)torrent.BytesOnDisk / torrent.SizeInBytes * 100, 2).ToString("N2")</span>%</td>
+                        <td><span data-content="data-on-disk-in-gb">@torrent.GBsOnDisk.ToString("N2")</span> GB</td>
+                        <td><span data-content="size-in-gb">@torrent.SizeInGB.ToString("N2")</span> GB</td>
+                        <td><span data-content="total-upload-in-gb">@torrent.TotalUploadInGB.ToString("N2")</span> GB</td>
+                        <td data-content="date-added">@torrent.AddedDateTime.ToLocalTime().ToString("g")</td>
+                        <td data-content="location">@torrent.Location</td>
+                        <td data-content="trackerUrls">@String.Join(", ", torrent.TrackerUrls)</td>
+                        <td data-content="error">@torrent.Error</td>
+                    </tr>
+                </TorrentGrease.Client.Components.PagedList>
+            }
+        </tbody>
+    </table>
+
+    @if (_selectableTorrents != null)
+    {
         <TorrentGrease.Client.Components.PagedListPaginator TItem="SelectableItem<Torrent>" PagedList="PagedTorrentList" />
 
         <TorrentGrease.Client.Components.TorrentRelocator @ref="_torrentRelocator" Torrents="SelectedTorrents" />
-    </div>
+    }
+</div>
 
-    <input type="hidden" data-content="is-in-wait-mode-value" value=@(_isInWaitMode ? "true" : "false") />
+<input type="hidden" data-content="is-in-wait-mode-value" value=@(_isInWaitMode ? "true" : "false") />
 
 @code {
     bool filtersVisible = false;

@@ -1,0 +1,117 @@
+﻿@using Blazorise
+@using TorrentGrease.Shared.ServiceContracts.FileManagement;
+@inject IFileManagementService FileManagementService
+@inject ILogger<TorrentRelocator> _logger
+
+<Modal data-content="file-removal-selector-torrents-modal" @ref="_fileRemovalSelectorModal" Closing="@OnFileRemovalSelectorModal">
+    <ModalBackdrop />
+    <ModalContent Size="ModalSize.ExtraLarge" IsCentered="true">
+        <ModalHeader>
+            <ModalTitle>File removal candidates</ModalTitle>
+            <CloseButton IsDisabled="@IsInWaitMode" Clicked="@CloseFileRemovalSelectorModal" />
+        </ModalHeader>
+        <ModalBody data-content="file-removal-candidate-picker">
+            <table class="table" data-content="relocate-candidates-container">
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Filepath</th>
+                        <th>Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <TorrentGrease.Client.Components.PagedList @ref="PagedFileRemovalCandidateList" TItem="SelectableItem<FileRemovalCandidate>" AllItems="_fileRemovalCandidates" PageSize="50">
+                        @{
+                            var selectableRelocatableTorrentCandidate = context;
+                            var relocatableTorrentCandidate = selectableRelocatableTorrentCandidate.Item;
+                        }
+                        <tr data-content="relocate-candidate">
+                            <td>
+                                <Blazorise.Check data-content="selector" IsDisabled="@(IsInWaitMode)" @bind-Checked="@selectableRelocatableTorrentCandidate.IsSelected" />
+                            </td>
+                            <td data-content="filepath">@relocatableTorrentCandidate.FilePath</td>
+                            <td data-content="filesize">@(FormatFileSize(relocatableTorrentCandidate.FileSizeInBytes))</td>
+                        </tr>
+                    </TorrentGrease.Client.Components.PagedList>
+                </tbody>
+            </table>
+            <TorrentGrease.Client.Components.PagedListPaginator TItem="SelectableItem<FileRemovalCandidate>" PagedList="PagedFileRemovalCandidateList" />
+
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" IsDisabled="@IsInWaitMode" Clicked="@CloseFileRemovalSelectorModal">Close</Button>
+            <Button data-content="relocate-candidates-button" Color="Color.Primary" IsLoading="@_isRemovingFiles" IsDisabled="@IsInWaitMode" Clicked="@RemoveSelectedFilesAsync">Remove selected files</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+@code {
+
+    [Parameter]
+    public IEnumerable<FileRemovalCandidate> FileRemovalCandidates { get; set; }
+
+    public bool IsInWaitMode => _isRemovingFiles;
+
+    Modal _fileRemovalSelectorModal;
+
+    IEnumerable<SelectableItem<FileRemovalCandidate>> _fileRemovalCandidates;
+    TorrentGrease.Client.Components.PagedList<SelectableItem<FileRemovalCandidate>> PagedFileRemovalCandidateList;
+
+    bool _isRemovingFiles = false;
+
+    void ResetFileRemovalSelectorModal()
+    {
+        _fileRemovalCandidates = FileRemovalCandidates.Select(x => new SelectableItem<FileRemovalCandidate>(x)).ToArray();
+        _isRemovingFiles = false;
+    }
+
+    string FormatFileSize(long bytes)
+    {
+        if (bytes > (1024 * 1024 * 1024))
+        {
+            return bytes / (1024 * 1024 * 1024) + " GB";
+        }
+
+        if (bytes > (1024 * 1024))
+        {
+            return bytes / (1024 * 1024) + " MB";
+        }
+
+        if (bytes > 1024)
+        {
+            return bytes / 1024 + " KB";
+        }
+
+        return bytes + " B";
+    }
+
+    async Task RemoveSelectedFilesAsync()
+    {
+        var filesToRemove = _fileRemovalCandidates
+            .Where(s => s.IsSelected)
+            .Select(s => s.Item.FilePath)
+            .ToList();
+
+        _isRemovingFiles = true;
+        await FileManagementService.RemoveFilesAsync(filesToRemove);
+        _isRemovingFiles = false;
+
+        CloseFileRemovalSelectorModal();
+    }
+
+    public void Show()
+    {
+        ResetFileRemovalSelectorModal();
+        _fileRemovalSelectorModal.Show();
+    }
+
+    void CloseFileRemovalSelectorModal()
+    {
+        _fileRemovalSelectorModal.Hide();
+    }
+
+    void OnFileRemovalSelectorModal(CancelEventArgs e)
+    {
+        e.Cancel = IsInWaitMode;
+    }
+}

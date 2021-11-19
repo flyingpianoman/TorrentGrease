@@ -1,47 +1,119 @@
 ﻿@page "/file-management"
-
-<div>
-    <Row>
-        <Column>
-            <Card>
+@using TorrentGrease.Shared.ServiceContracts.FileManagement
+@inject IFileManagementService FileManagementService
+<Row>
+    <Column>
+        <Card>
+            <CardHeader>
                 <CardTitle>FileManagement</CardTitle>
-                <CardBody>
-                    <CardText>
-                        Please supply one or more paths scan files
-                    </CardText>
-                    <Row>
-                        <Column>
-                            <Inline>
-                                <Field Horizontal="true">
-                                    <FieldLabel>Minimal file size</FieldLabel>
-                                    <TextEdit />
-                                </Field>
-                                <RadioGroup TValue="string" Name="minimalFileSizeUnit" Buttons="true">
-                                    <Radio TValue="string" Value="@("B")">B</Radio>
-                                    <Radio TValue="string" Value="@("KB")">KB</Radio>
-                                    <Radio TValue="string" Value="@("MB")">MB</Radio>
-                                    <Radio TValue="string" Value="@("GB")">GB</Radio>
-                                </RadioGroup>
-                            </Inline>
-                            <Field Horizontal="true">
-                                <FieldLabel>Dir 1</FieldLabel>
-                                <TextEdit />
-                            </Field>
-                            <Field Horizontal="true">
-                                <FieldLabel>Dir 2</FieldLabel>
-                                <TextEdit />
-                            </Field>
-                            <Field>
-                                <Button Color="Color.Primary">Scan</Button>
-                            </Field>
+            </CardHeader>
+            <CardBody>
+                <CardText>
+                    Filemanagement will scan for files that are:
+                    <ol>
+                        <li>in a 'completed torrent' dir, but not used in your torrent client (orphan)</li>
+                    </ol>
+                </CardText>
+            </CardBody>
+            <CardBody>
+                <Inline>
+                    <Field ColumnSize="ColumnSize.IsFull" Horizontal="true">
+                        <FieldLabel Class="mr-1">Minimal file size</FieldLabel>
+                        <FieldBody>
+                            <NumericEdit data-content="min-file-size" @bind-Value="MinFileSize" />
+                        </FieldBody>
+                        <RadioGroup data-content="min-file-size-unit-type" @bind-CheckedValue="@MinFileSizeUnitType" TValue="string" Name="minimalFileSizeUnit" Buttons="true">
+                            <Radio TValue="string" Value="@("B")">B</Radio>
+                            <Radio TValue="string" Value="@("KB")">KB</Radio>
+                            <Radio TValue="string" Value="@("MB")">MB</Radio>
+                            <Radio TValue="string" Value="@("GB")">GB</Radio>
+                        </RadioGroup>
+                    </Field>
+                </Inline>
+            </CardBody>
+            <CardBody>
+                <CardText>
+                    <h4>Completed torrent dir mapping(s)</h4>
+                </CardText>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is2"><FieldLabel>#</FieldLabel></Column>
+                    <Column ColumnSize="ColumnSize.Is5"><FieldLabel>Torrent client dir</FieldLabel></Column>
+                    <Column ColumnSize="ColumnSize.Is5"><FieldLabel>Torrent grease dir</FieldLabel></Column>
+                </Row>
+                @for (var i = 0; i < CompletedTorrentDirMappings.Count; i++)
+                {
+                    var local = i;
+                    var dirMapping = CompletedTorrentDirMappings[local];
+                    <Row Class="form-group">
+                        <Column ColumnSize="ColumnSize.Is2">Directory mapping @(local + 1)</Column>
+                        <Column ColumnSize="ColumnSize.Is5">
+                            <TextEdit data-content="completed-torrent-torrent-client-dir" @bind-Text="@dirMapping.TorrentClientDir" />
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is5">
+                            <TextEdit data-content="completed-torrent-torrent-grease-dir" @bind-Text="@dirMapping.TorrentGreaseDir" />
                         </Column>
                     </Row>
-                </CardBody>
-            </Card>
-        </Column>
-    </Row>
-</div>
+                }
+            </CardBody>
+            <CardFooter>
+                <Field>
+                    <Button data-content="add-completed-torrent-dir-mapping-button" Color="Color.Secondary" Disabled="IsLoading" Clicked="AddCompletedDirMapping">Add completed torrent dir mapping</Button>
+                    <Button data-content="scan-button" Color="Color.Primary" Loading="_isScanning" Disabled="IsLoading" Clicked="ScanAsync">Scan</Button>
+                </Field>
+            </CardFooter>
+        </Card>
+    </Column>
+</Row>
+
+<TorrentGrease.Client.Components.FileRemovalSelector @ref="_fileRemovalSelector" FileRemovalCandidates="_fileRemovalCandidates" />
 
 @code {
+    List<MappedDirectory> CompletedTorrentDirMappings { get; } = new List<MappedDirectory>() { new MappedDirectory() };
+    int MinFileSize = 0;
+    string MinFileSizeUnitType = "MB";
+    TorrentGrease.Client.Components.FileRemovalSelector _fileRemovalSelector;
+    IEnumerable<FileRemovalCandidate> _fileRemovalCandidates = null;
+    bool _isScanning = false;
+    bool IsLoading => _isScanning;
 
+    void AddCompletedDirMapping()
+    {
+        CompletedTorrentDirMappings.Add(new MappedDirectory());
+    }
+
+    async Task ScanAsync()
+    {
+        long minFileSize = 0;
+        switch (MinFileSizeUnitType)
+        {
+            case "B":
+                minFileSize = MinFileSize;
+                break;
+            case "KB":
+                minFileSize = MinFileSize * 1024;
+                break;
+            case "MB":
+                minFileSize = MinFileSize * (1024 ^ 2);
+                break;
+            case "GB":
+                minFileSize = MinFileSize * (1024 ^ 3);
+                break;
+
+            default:
+                throw new NotSupportedException();
+        }
+
+        _isScanning = true;
+        _fileRemovalCandidates = await FileManagementService.ScanForFilesToRemoveAsync(new ScanForFilesToRemoveRequest
+        {
+            CompletedTorrentPathsToScan = CompletedTorrentDirMappings
+                .Where(m => !string.IsNullOrWhiteSpace(m.TorrentClientDir) && !string.IsNullOrWhiteSpace(m.TorrentGreaseDir)) //filter out empty rows
+                .ToList(),
+            MinFileSizeInBytes = minFileSize
+        });
+        StateHasChanged();
+        _isScanning = false;
+
+        _fileRemovalSelector.Show();
+    }
 }

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TorrentGrease.Shared.RelocateTorrent
+namespace TorrentGrease.Shared.ServiceContracts.RelocateTorrent
 {
     [ProtoContract]
     public class RelocateTorrentCommand

@@ -7,23 +7,23 @@
 }
 else
 { 
-<Pagination Alignment="Alignment.Center">
-    <PaginationItem>
-        <PaginationLink Clicked="GoToPreviousPage">
-            <span aria-hidden="true">«</span>
-        </PaginationLink>
-    </PaginationItem>
-    <PaginationItem IsActive="true">
-        <PaginationLink>
-            @(PagedList.PageIndex + 1)
-        </PaginationLink>
-    </PaginationItem>
-    <PaginationItem>
-        <PaginationLink Clicked="GoToNextPage">
-            <span aria-hidden="true">»</span>
-        </PaginationLink>
-    </PaginationItem>
-</Pagination>
+    <Pagination Alignment="Alignment.Center">
+        <PaginationItem>
+            <PaginationLink Clicked="GoToPreviousPage">
+                <span aria-hidden="true">«</span>
+            </PaginationLink>
+        </PaginationItem>
+        <PaginationItem IsActive="true">
+            <PaginationLink>
+                @(PagedList.PageIndex + 1)
+            </PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+            <PaginationLink Clicked="GoToNextPage">
+                <span aria-hidden="true">»</span>
+            </PaginationLink>
+        </PaginationItem>
+    </Pagination>
 }
 
 @code {

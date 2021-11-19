@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
-using TorrentGrease.Shared.ReaddTorrents;
-using TorrentGrease.Shared.RelocateTorrent;
+using TorrentGrease.Shared.ServiceContracts.ReaddTorrents;
+using TorrentGrease.Shared.ServiceContracts.RelocateTorrent;
 using TorrentGrease.Shared.ServiceContracts.TorrentRequests;
 
 namespace TorrentGrease.Shared.ServiceContracts

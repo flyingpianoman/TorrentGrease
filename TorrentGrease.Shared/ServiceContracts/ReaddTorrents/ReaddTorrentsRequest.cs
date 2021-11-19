@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TorrentGrease.Shared.ReaddTorrents
+namespace TorrentGrease.Shared.ServiceContracts.ReaddTorrents
 {
     [ProtoContract]
     public class ReaddTorrentsRequest

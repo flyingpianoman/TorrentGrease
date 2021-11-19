@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using TorrentGrease.Shared.ReaddTorrents;
-using TorrentGrease.Shared.RelocateTorrent;
 using TorrentGrease.Shared.ServiceContracts;
+using TorrentGrease.Shared.ServiceContracts.ReaddTorrents;
+using TorrentGrease.Shared.ServiceContracts.RelocateTorrent;
 using TorrentGrease.Shared.ServiceContracts.TorrentRequests;
 using TorrentGrease.Shared.TorrentClient;
 using TorrentGrease.TorrentClient;
@@ -139,7 +139,6 @@ namespace TorrentGrease.Server.Services
                 return torrentPathCandidate ?? throw new InvalidDataException();
             }).ToArray();
         }
-
 
         private static ILookup<string, string> GetFilePathsByFileNameLookup(IEnumerable<string> pathsToScan, string[] extensionsWhitelist)
         {

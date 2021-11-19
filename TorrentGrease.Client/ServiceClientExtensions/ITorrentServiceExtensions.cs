@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TorrentGrease.Shared.RelocateTorrent;
+using TorrentGrease.Shared.ServiceContracts.RelocateTorrent;
 using TorrentGrease.Shared.ServiceContracts;
 using TorrentGrease.Shared.ServiceContracts.TorrentRequests;
 

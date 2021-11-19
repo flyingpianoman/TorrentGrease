@@ -1,6 +1,6 @@
 ﻿@page "/torrents"
 @using TorrentGrease.Shared.TorrentClient
-@using TorrentGrease.Shared.RelocateTorrent;
+@using TorrentGrease.Shared.ServiceContracts.RelocateTorrent;
 @inject ITorrentService TorrentService
 @inject ILogger<Torrents> _logger
 
@@ -252,7 +252,7 @@
     {
         _busyCount++;
 
-        await TorrentService.ReaddTorrentsAsync(new TorrentGrease.Shared.ReaddTorrents.ReaddTorrentsRequest
+        await TorrentService.ReaddTorrentsAsync(new TorrentGrease.Shared.ServiceContracts.ReaddTorrents.ReaddTorrentsRequest
         {
             TorrentIDs = SelectedTorrents.Select(t => t.ID).ToArray()
         });

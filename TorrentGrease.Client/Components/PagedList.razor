@@ -1,16 +1,18 @@
 ﻿@typeparam TItem
 @using Blazorise
 
-@foreach (var item in CurrentPageItems)
+@if (AllItems != null)
 {
-    @ChildContent(item)
+    foreach (var item in CurrentPageItems)
+    {
+        @ChildContent(item)
+    }
 }
 
 @code {
 
     [Parameter]
     public RenderFragment<TItem> ChildContent { get; set; }
-
 
     private IEnumerable<TItem> _allItems;
     [Parameter]
@@ -34,8 +36,8 @@
         set { _pageIndex = value; StateHasChanged(); }
     }
 
-    public int TotalNrOfPages => (int)Math.Ceiling((double)AllItems.Count() / PageSize);
+    public int TotalNrOfPages => AllItems == null? 0 : (int) Math.Ceiling((double) AllItems.Count() / PageSize);
     public int RowsToSkipToGetToCurrentPage => PageIndex == 0 ? 0 : PageIndex * PageSize;
 
-    public IEnumerable<TItem> CurrentPageItems => AllItems.Skip(RowsToSkipToGetToCurrentPage).Take(PageSize);
+    public IEnumerable<TItem> CurrentPageItems => AllItems?.Skip(RowsToSkipToGetToCurrentPage)?.Take(PageSize);
 }

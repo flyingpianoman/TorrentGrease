@@ -10,18 +10,18 @@ Scenario: View empty torrents page
 Scenario: View filled torrents page
 	Given the following torrents are staged
 		| Name                | Location             | TrackerAnnounceUrl1             | TrackerAnnounceUrl2                      | TorrentFile1Path | TorrentFile1SizeInKB | TorrentFile2Path | TorrentFile2SizeInKB |
-		| TorrentA            | /downloads/completed | http://my-tracker:6969/announce |                                          | file1.txt        | 10240                |                  |                      |
-		| TorrentWithTwoFiles | /downloads/completed | http://my-tracker:6969/announce | http://nonexisting-tracker:12345/annouce | file1.txt        | 10240                | file2.txt        | 10240                |
+		| TorrentA            | /downloads/complete | http://my-tracker:6969/announce |                                          | file1.txt        | 10240                |                  |                      |
+		| TorrentWithTwoFiles | /downloads/complete | http://my-tracker:6969/announce | http://nonexisting-tracker:12345/annouce | file1.txt        | 10240                | file2.txt        | 10240                |
 	When I navigate to the torrent overview
 	Then I see an overview of the following torrents
 		| Name                | GBsOnDisk | TotalSizeInGB | TotalUploadedInGB | LocationOnDisk                           | TrackerAnnounceUrl1 | TrackerAnnounceUrl2       |
-		| TorrentA            | 0         | 0.01          | 0                 | /downloads/completed                     | my-tracker:6969     |                           |
-		| TorrentWithTwoFiles | 0         | 0.02          | 0                 | /downloads/completed/TorrentWithTwoFiles | my-tracker:6969     | nonexisting-tracker:12345 |
+		| TorrentA            | 0         | 0.01          | 0                 | /downloads/complete                     | my-tracker:6969     |                           |
+		| TorrentWithTwoFiles | 0         | 0.02          | 0                 | /downloads/complete/TorrentWithTwoFiles | my-tracker:6969     | nonexisting-tracker:12345 |
         
 Scenario: Relocate torrent data
 	Given the following torrents are staged
 		| Name               | Location             | TrackerAnnounceUrl1             | TorrentFile1Path | TorrentFile1SizeInKB | TorrentFile2Path | TorrentFile2SizeInKB |
-		| TorrentWithOneFile | /downloads/completed | http://my-tracker:6969/announce | file1.txt        | 128                  |                  |                      |
+		| TorrentWithOneFile | /downloads/complete | http://my-tracker:6969/announce | file1.txt        | 128                  |                  |                      |
 	And the data of the following torrents is sent to the torrent client
 		| TorrentName        | TargetLocation      |
 		| TorrentWithOneFile | /downloads/unmapped |
@@ -42,8 +42,8 @@ Scenario: Relocate torrent data
 Scenario: Relocate torrent data with different extensions
 	Given the following torrents are staged
 		| Name               | Location             | TrackerAnnounceUrl1             | TorrentFile1Path | TorrentFile1SizeInKB | TorrentFile2Path | TorrentFile2SizeInKB |
-		| TorrentWithOneFile | /downloads/completed | http://my-tracker:6969/announce | file1.txt        | 128                  |                  |                      |
-		| TorrentWithDifferentExtension | /downloads/completed | http://my-tracker:6969/announce | file1.pdf        | 128                  |                  |                      |
+		| TorrentWithOneFile | /downloads/complete | http://my-tracker:6969/announce | file1.txt        | 128                  |                  |                      |
+		| TorrentWithDifferentExtension | /downloads/complete | http://my-tracker:6969/announce | file1.pdf        | 128                  |                  |                      |
 	And the data of the following torrents is sent to the torrent client
 		| TorrentName        | TargetLocation      |
 		| TorrentWithOneFile | /downloads/unmapped |
@@ -68,7 +68,7 @@ Scenario: Relocate torrent data with different extensions
 Scenario: Relocate torrent data - no data found
 	Given the following torrents are staged
 		| Name               | Location             | TrackerAnnounceUrl1             | TorrentFile1Path | TorrentFile1SizeInKB | TorrentFile2Path | TorrentFile2SizeInKB |
-		| TorrentWithOneFile | /downloads/completed | http://my-tracker:6969/announce | filenotfound.txt        | 128                  |                  |                      |
+		| TorrentWithOneFile | /downloads/complete | http://my-tracker:6969/announce | filenotfound.txt        | 128                  |                  |                      |
 	And I navigate to the torrent overview
 	When I open the relocate data dialog for the following torrents
 		| Name               |
@@ -84,10 +84,10 @@ Scenario: Relocate torrent data - no data found
 Scenario: Relocate torrent data with multi dir torrents
 	Given the following torrents are staged
 		| Name                               | Location             | TrackerAnnounceUrl1             | TorrentFile1Path    | TorrentFile1SizeInKB | TorrentFile2Path    | TorrentFile2SizeInKB |
-		| TorrentWithOneFile                 | /downloads/completed | http://my-tracker:6969/announce | file1.txt           | 128                  |                     |                      |
-		| TorrentWithTwoFiles                | /downloads/completed | http://my-tracker:6969/announce | file1.txt           | 128                  | file2.txt           | 256                  |
-		| TorrentWithTwoFilesInADir          | /downloads/completed | http://my-tracker:6969/announce | dir1/dir2/file1.txt | 128                  | dir1/dir2/file2.txt | 256                  |
-		| TorrentWithTwoFilesInDifferentDirs | /downloads/completed | http://my-tracker:6969/announce | dir1/file1.txt      | 128                  | dir2/file2.txt      | 256                  |
+		| TorrentWithOneFile                 | /downloads/complete | http://my-tracker:6969/announce | file1.txt           | 128                  |                     |                      |
+		| TorrentWithTwoFiles                | /downloads/complete | http://my-tracker:6969/announce | file1.txt           | 128                  | file2.txt           | 256                  |
+		| TorrentWithTwoFilesInADir          | /downloads/complete | http://my-tracker:6969/announce | dir1/dir2/file1.txt | 128                  | dir1/dir2/file2.txt | 256                  |
+		| TorrentWithTwoFilesInDifferentDirs | /downloads/complete | http://my-tracker:6969/announce | dir1/file1.txt      | 128                  | dir2/file2.txt      | 256                  |
 	And the data of the following torrents is sent to the torrent client
 		| TorrentName                        | TargetLocation       |
 		| TorrentWithOneFile                 | /downloads/unmapped  |

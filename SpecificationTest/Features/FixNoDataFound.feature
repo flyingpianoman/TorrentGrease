@@ -6,25 +6,25 @@
 Background:
 	Given the following torrents are staged
 		| Name     | Location             | TrackerAnnounceUrl1             | TorrentFile1Path | TorrentFile1SizeInKB |
-		| TorrentA | /downloads/completed | http://my-tracker:6969/announce | file1.txt        | 10240                |
-		| TorrentB | /downloads/completed | http://my-tracker:6969/announce | file2.txt        | 10480                |
-		| TorrentC | /downloads/completed | http://my-tracker:6969/announce | file3.txt        | 20480                |
+		| TorrentA | /downloads/complete | http://my-tracker:6969/announce | file1.txt        | 10240                |
+		| TorrentB | /downloads/complete | http://my-tracker:6969/announce | file2.txt        | 10480                |
+		| TorrentC | /downloads/complete | http://my-tracker:6969/announce | file3.txt        | 20480                |
 	And the data of the following torrents is sent to the torrent client
 		| TorrentName | TargetLocation       | VerifyTorrent |
-		| TorrentA    | /downloads/completed | true          |
-		| TorrentB    | /downloads/completed | true          |
+		| TorrentA    | /downloads/complete | true          |
+		| TorrentB    | /downloads/complete | true          |
 	And the following torrent data files are moved
 		| From                                    | To                                          |
-		| /downloads/completed/TorrentA/file1.txt | /downloads/completed/TorrentA/file1.txt.bak |
-		| /downloads/completed/TorrentB/file2.txt | /downloads/completed/TorrentB/file2.txt.bak |
+		| /downloads/complete/TorrentA/file1.txt | /downloads/complete/TorrentA/file1.txt.bak |
+		| /downloads/complete/TorrentB/file2.txt | /downloads/complete/TorrentB/file2.txt.bak |
 	And the following torrents are (re)verified by the torrent client
 		| TorrentName |
 		| TorrentA    |
 		| TorrentB    |
 	And the following torrent data files are moved
 		| From                                        | To                                      |
-		| /downloads/completed/TorrentA/file1.txt.bak | /downloads/completed/TorrentA/file1.txt |
-		| /downloads/completed/TorrentB/file2.txt.bak | /downloads/completed/TorrentB/file2.txt |
+		| /downloads/complete/TorrentA/file1.txt.bak | /downloads/complete/TorrentA/file1.txt |
+		| /downloads/complete/TorrentB/file2.txt.bak | /downloads/complete/TorrentB/file2.txt |
 
 Scenario: View no data found error on torrents page
 	When I navigate to the torrent overview

@@ -26,7 +26,7 @@ namespace SpecificationTest.Hooks
 
             var dockerClient = DIContainer.Default.Get<DockerClient>();
             var transmissionContainerId = await dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TransmissionContainerName).ConfigureAwait(false);
-            await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/downloads/completed").ConfigureAwait(false);
+            await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/downloads/complete").ConfigureAwait(false);
             await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/downloads/incomplete").ConfigureAwait(false);
 
 

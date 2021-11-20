@@ -37,7 +37,7 @@
                 </CardText>
                 <Row>
                     <Column ColumnSize="ColumnSize.Is2"><FieldLabel>#</FieldLabel></Column>
-                    <Column ColumnSize="ColumnSize.Is5"><FieldLabel>Torrent client dir</FieldLabel></Column>
+                    <Column ColumnSize="ColumnSize.Is5"><FieldLabel>Torrent client dirs (csv)</FieldLabel></Column>
                     <Column ColumnSize="ColumnSize.Is5"><FieldLabel>Torrent grease dir</FieldLabel></Column>
                 </Row>
                 @for (var i = 0; i < CompletedTorrentDirMappings.Count; i++)
@@ -47,7 +47,7 @@
                     <Row Class="form-group">
                         <Column ColumnSize="ColumnSize.Is2">Directory mapping @(local + 1)</Column>
                         <Column ColumnSize="ColumnSize.Is5">
-                            <TextEdit data-content="completed-torrent-torrent-client-dir" @bind-Text="@dirMapping.TorrentClientDir" />
+                            <TextEdit data-content="completed-torrent-torrent-client-dir" @bind-Text="@dirMapping.TorrentClientDirsCsv" />
                         </Column>
                         <Column ColumnSize="ColumnSize.Is5">
                             <TextEdit data-content="completed-torrent-torrent-grease-dir" @bind-Text="@dirMapping.TorrentGreaseDir" />
@@ -68,7 +68,7 @@
 <TorrentGrease.Client.Components.FileRemovalSelector @ref="_fileRemovalSelector" FileRemovalCandidates="_fileRemovalCandidates" />
 
 @code {
-    List<MappedDirectory> CompletedTorrentDirMappings { get; } = new List<MappedDirectory>() { new MappedDirectory() };
+    List<MappedDirectoryRow> CompletedTorrentDirMappings { get; } = new List<MappedDirectoryRow>() { new MappedDirectoryRow() };
     int MinFileSize = 0;
     string MinFileSizeUnitType = "MB";
     TorrentGrease.Client.Components.FileRemovalSelector _fileRemovalSelector;
@@ -78,7 +78,7 @@
 
     void AddCompletedDirMapping()
     {
-        CompletedTorrentDirMappings.Add(new MappedDirectory());
+        CompletedTorrentDirMappings.Add(new MappedDirectoryRow());
     }
 
     async Task ScanAsync()
@@ -107,7 +107,8 @@
         _fileRemovalCandidates = await FileManagementService.ScanForFilesToRemoveAsync(new ScanForFilesToRemoveRequest
         {
             CompletedTorrentPathsToScan = CompletedTorrentDirMappings
-                .Where(m => !string.IsNullOrWhiteSpace(m.TorrentClientDir) && !string.IsNullOrWhiteSpace(m.TorrentGreaseDir)) //filter out empty rows
+                .Where(m => !string.IsNullOrWhiteSpace(m.TorrentClientDirsCsv) && !string.IsNullOrWhiteSpace(m.TorrentGreaseDir)) //filter out empty rows
+                .Select(x => new MappedDirectory { TorrentClientDirs = x.TorrentClientDirsCsv.Split(','), TorrentGreaseDir = x.TorrentGreaseDir })
                 .ToList(),
             MinFileSizeInBytes = minFileSize
         });

@@ -11,7 +11,7 @@ namespace TorrentGrease.Shared.ServiceContracts.FileManagement
     public class MappedDirectory
     {
         [ProtoMember(1)]
-        public string TorrentClientDir { get; set; }
+        public virtual IEnumerable<string> TorrentClientDirs { get; set; }
         [ProtoMember(2)]
         public string TorrentGreaseDir { get; set; }
     }

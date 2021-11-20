@@ -47,12 +47,16 @@ namespace TorrentGrease.Server.Services
                 throw new ArgumentException($"Directory '{dirToScan.TorrentGreaseDir}' was not found.");
             }
 
-            var torrentClientDir = dirToScan.TorrentClientDir;
+            var torrentClientDirs = dirToScan.TorrentClientDirs.ToArray();
 
-            if (!torrentClientDir.EndsWith(Path.DirectorySeparatorChar) &&
-                !torrentClientDir.EndsWith(Path.AltDirectorySeparatorChar))
+            for(var i = 0; i < torrentClientDirs.Length; i++)
             {
-                torrentClientDir += Path.DirectorySeparatorChar;
+                var torrentClientDir = torrentClientDirs[i];
+                if (!torrentClientDir.EndsWith(Path.DirectorySeparatorChar) &&
+                    !torrentClientDir.EndsWith(Path.AltDirectorySeparatorChar))
+                {
+                    torrentClientDirs[i] += Path.DirectorySeparatorChar;
+                }
             }
 
             var torrentGreaseDir = dirToScan.TorrentGreaseDir;
@@ -68,11 +72,12 @@ namespace TorrentGrease.Server.Services
 
             foreach (var filePath in files)
             {
-                AddCandidateIfFitForRemoval(filesWithoutTorrents, filesThatHaveTorrents, minBytes, torrentClientDir, torrentGreaseDir, filePath);
+                AddCandidateIfFitForRemoval(filesWithoutTorrents, filesThatHaveTorrents, minBytes, torrentClientDirs, torrentGreaseDir, filePath);
             }
         }
 
-        private static void AddCandidateIfFitForRemoval(List<FileRemovalCandidate> filesWithoutTorrents, HashSet<string> filesThatHaveTorrents, long minBytes, string torrentClientDir, string torrentGreaseDir, string filePath)
+        private static void AddCandidateIfFitForRemoval(List<FileRemovalCandidate> filesWithoutTorrents, HashSet<string> filesThatHaveTorrents, long minBytes, 
+            IEnumerable<string> torrentClientDirs, string torrentGreaseDir, string filePath)
         {
             var fileLengthInBytes = new FileInfo(filePath).Length;
             if (fileLengthInBytes < minBytes)
@@ -80,8 +85,8 @@ namespace TorrentGrease.Server.Services
                 return;
             }
 
-            var mappedFilePath = Path.Combine(torrentClientDir, filePath[torrentGreaseDir.Length..]);
-            if (!filesThatHaveTorrents.Contains(mappedFilePath))
+            var mappedFilePaths = torrentClientDirs.Select(torrentClientDir => Path.Combine(torrentClientDir, filePath[torrentGreaseDir.Length..]));
+            if (mappedFilePaths.All(mappedFilePath => !filesThatHaveTorrents.Contains(mappedFilePath)))
             {
                 filesWithoutTorrents.Add(new FileRemovalCandidate
                 {

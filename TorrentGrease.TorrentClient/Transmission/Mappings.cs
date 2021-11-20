@@ -16,7 +16,7 @@ namespace TorrentGrease.TorrentClient.Transmission
                 SizeInBytes = torrentInfo.TotalSize,
                 BytesOnDisk = torrentInfo.TotalSize - torrentInfo.LeftUntilDone,
                 InfoHash = torrentInfo.HashString,
-                Location = GetRealLocation(torrentInfo),
+                Location = torrentInfo.DownloadDir,
                 TotalUploadInBytes = torrentInfo.UploadedEver,
                 TrackerUrls = torrentInfo.Trackers
                     .Select(t => new Uri(t.announce).Authority)
@@ -27,18 +27,6 @@ namespace TorrentGrease.TorrentClient.Transmission
                 TorrentFilePath = torrentInfo.TorrentFile
             };
         }
-
-        private static string GetRealLocation(RpcEntity.TorrentInfo torrentInfo)
-        {
-            var pathSeperator = torrentInfo.DownloadDir.Contains('/')
-                ? "/"
-                : "\\";
-
-            return torrentInfo.Files.Length > 1
-                ? torrentInfo.DownloadDir + pathSeperator + torrentInfo.Name
-                : torrentInfo.DownloadDir;
-        }
-
 
         internal static Shared.TorrentClient.TorrentFile[] ToSharedModel(this RpcEntity.TransmissionTorrentFiles[] torrentFiles)
         {

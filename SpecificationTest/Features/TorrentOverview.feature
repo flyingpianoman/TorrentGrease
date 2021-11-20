@@ -80,7 +80,6 @@ Scenario: Relocate torrent data - no data found
 		| TorrentName        |
 		| TorrentWithOneFile |
 
-@Ignore
 Scenario: Relocate torrent data with multi dir torrents
 	Given the following torrents are staged
 		| Name                               | Location             | TrackerAnnounceUrl1             | TorrentFile1Path    | TorrentFile1SizeInKB | TorrentFile2Path    | TorrentFile2SizeInKB |

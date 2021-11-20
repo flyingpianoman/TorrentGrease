@@ -48,6 +48,11 @@ namespace SpecificationTest.Crosscutting
             ((IJavaScriptExecutor)webDriver).ExecuteScript(jsClickCode, webElement);
         }
 
+        internal static string GetContentName(this IWebElement webElement)
+        {
+            return webElement.GetAttribute("data-content");
+        }
+
         public static IWebElement FindElementByContentName(this ISearchContext searchContext, string contentName)
         {
             return searchContext.FindElement(By.CssSelector($"*[data-content='{contentName}']"));
@@ -57,6 +62,26 @@ namespace SpecificationTest.Crosscutting
         {
             return searchContext.FindElements(By.CssSelector($"*[data-content='{contentName}']"));
         }
+
+        internal static IWebElement WaitForAnyWebElementByContentName(this ISearchContext searchContext, params string[] elementContentNames)
+        {
+            return PageHelper.WaitForWebElementPolicy
+                .Execute(() =>
+                {
+                    foreach (var elementContentName in elementContentNames)
+                    {
+                        var elements = searchContext.FindElementsByContentName(elementContentName);
+                        
+                        if(elements.Any())
+                        {
+                            return elements.First();
+                        }
+                    }
+
+                    throw new PageHelper.RetryException();
+                });
+        }
+
 
         internal static IWebElement WaitForWebElementByContentName(this ISearchContext searchContext, string elementContentName)
         {

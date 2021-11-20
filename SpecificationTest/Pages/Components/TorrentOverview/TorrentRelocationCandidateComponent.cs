@@ -51,16 +51,32 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
         {
             TorrentName = _rootElement.FindElementByContentName("torrent-name").Text;
             RelocateOptionsCount = int.Parse(_rootElement.FindElementByContentName("relocate-options-count").Text);
-            _isSelectedWebElement = _rootElement.FindElementsByContentName("selector").FirstOrDefault();
+            SetSelectorWebElement();
+            SetRelocateOptions();
 
-            _relocateOptionsSelectorElement = _rootElement.FindElementsByContentName("relocate-options").FirstOrDefault();
+            return Task.FromResult(this);
+        }
+
+        private void SetRelocateOptions()
+        {
+            var relocateOptionsSelectorEl = _rootElement.WaitForAnyWebElementByContentName("relocate-options", "no-relocate-options");
+            _relocateOptionsSelectorElement = relocateOptionsSelectorEl.GetContentName() == "relocate-options"
+                ? relocateOptionsSelectorEl
+                : null;
+
             RelocateOptions = _relocateOptionsSelectorElement == null
                 ? Array.Empty<string>()
                 : _relocateOptionsSelectorElement.FindElementsByContentName("relocate-option")
                     .Select(e => e.Text)
                     .ToArray();
+        }
 
-            return Task.FromResult(this);
+        private void SetSelectorWebElement()
+        {
+            var selectorOrNoSelectorEl = _rootElement.WaitForAnyWebElementByContentName("selector", "no-selector");
+            _isSelectedWebElement = selectorOrNoSelectorEl.GetContentName() == "selector"
+                ? selectorOrNoSelectorEl
+                : null;
         }
     }
 }

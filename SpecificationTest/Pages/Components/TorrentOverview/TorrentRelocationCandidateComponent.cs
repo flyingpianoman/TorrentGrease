@@ -20,6 +20,11 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
             get => _isSelectedWebElement.Selected;
             set
             {
+                if(_isSelectedWebElement == null)
+                {
+                    throw new InvalidOperationException($"Tried to set selected value but checkbox was missing, {RelocateOptionsCount} RelocateOptions found");
+                }
+
                 if(IsSelected != value)
                 {
                     _isSelectedWebElement.ClickBootstrapCheckBox(_webDriver);

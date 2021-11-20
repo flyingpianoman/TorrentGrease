@@ -63,7 +63,8 @@ namespace SpecificationTest.Crosscutting
 
         public async Task UploadCleanDBToContainerAsync()
         {
-            await _dockerClient.Containers.UploadTarredFileToContainerAsync(_CleanDBTarMemoryStream, TestSettings.TorrentGreaseContainerName, ContainerDBDirPath).ConfigureAwait(false);
+            var containerId = await _dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TorrentGreaseContainerName);
+            await _dockerClient.UploadTarredFileToContainerAsync(_CleanDBTarMemoryStream, containerId, ContainerDBDirPath).ConfigureAwait(false);
         }
 
         private static TorrentGreaseDbContext LoadCleanDBAsDBContext()
@@ -97,7 +98,8 @@ namespace SpecificationTest.Crosscutting
             await DbContext.DisposeAsync();
 
             using var tarStream = ArchiveHelper.CreateSingleFileTarStream(_PrepDBPath, ContainerDBFileName);
-            await _dockerClient.Containers.UploadTarredFileToContainerAsync(tarStream, TestSettings.TorrentGreaseContainerName, ContainerDBDirPath).ConfigureAwait(false);
+            var containerId = await _dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TorrentGreaseContainerName);
+            await _dockerClient.UploadTarredFileToContainerAsync(tarStream, containerId, ContainerDBDirPath).ConfigureAwait(false);
 
             DbContext = CreateDBContext();
         }

@@ -59,15 +59,19 @@ namespace TestUtils
             return await containerOperations.GetArchiveFromContainerAsync(sourcePath, containerId).ConfigureAwait(false);
         }
 
-        public static async Task UploadTarredFileToContainerAsync(this IContainerOperations containerOperations,
-            MemoryStream tarredFileStream, string containerName, string destinationPath)
+        public static async Task UploadTarredFileToContainerAsync(this DockerClient dockerClient,
+            MemoryStream tarredFileStream, string containerId, string destinationPath)
         {
-            var id = await containerOperations.GetContainerIdByNameAsync(containerName).ConfigureAwait(false);
             tarredFileStream.Position = 0;
-            await containerOperations.ExtractArchiveToContainerAsync(
-                id,
+            await dockerClient.Containers.ExtractArchiveToContainerAsync(
+                containerId,
                 new ContainerPathStatParameters { AllowOverwriteDirWithFile = true, Path = destinationPath },
                 tarredFileStream).ConfigureAwait(false);
+        }
+
+        public static async Task<bool> DoesFileSystemObjectExistAsync(this DockerClient dockerClient, string containerId, string path)
+        {
+            return await ExecuteSHCommandAsync(dockerClient, containerId, $"! test -e '{path}'; echo $?") == "1";
         }
 
         public static async Task CreateDirectoryStructureInContainerAsync(this DockerClient dockerClient,

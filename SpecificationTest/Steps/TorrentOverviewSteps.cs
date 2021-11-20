@@ -315,7 +315,8 @@ namespace SpecificationTest.Steps
                     var tarStream = ArchiveHelper.CreateDirectoryTarStream(dataDirPath);
 
                     await dockerClient.CreateDirectoryStructureInContainerAsync(transmissionContainerId, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
-                    await dockerClient.Containers.UploadTarredFileToContainerAsync(tarStream, TestSettings.TransmissionContainerName, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
+                    await dockerClient.UploadTarredFileToContainerAsync(tarStream, transmissionContainerId, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
+                    await WaitUntilFilesExistInContainerAsync(dockerClient, transmissionContainerId, copyTorrentDataRequest, dataDirPath);
 
                     if (copyTorrentDataRequest.VerifyTorrent)
                     {
@@ -330,6 +331,28 @@ namespace SpecificationTest.Steps
                 {
                     await WaitForTorrentsToBeMarkedAsDownloadedAsync(torrentsIDsToVerify).ConfigureAwait(false);
                 }
+            }
+        }
+
+        private static async Task WaitUntilFilesExistInContainerAsync(DockerClient dockerClient, string transmissionContainerId, CopyTorrentDataDto copyTorrentDataRequest, string dataDirPath)
+        {
+            var basePath = Directory.GetParent(dataDirPath).FullName;
+            foreach (var filePath in Directory.GetFiles(dataDirPath, "*", SearchOption.AllDirectories))
+            {
+                var filePathInContainer = Path.Combine(copyTorrentDataRequest.TargetLocation + "/" + Path.GetRelativePath(basePath, filePath).Replace('\\', '/'));
+
+                await Polly
+                    .Policy
+                    .Handle<PageHelper.RetryException>()
+                    .WaitAndRetryUntilTimeoutAsync(TimeSpan.FromMilliseconds(10), TimeSpan.FromSeconds(30))
+                    .ExecuteAsync(async () =>
+                    {
+                        var fileExists = await dockerClient.DoesFileSystemObjectExistAsync(transmissionContainerId, filePathInContainer);
+                        if (!fileExists)
+                        {
+                            throw new PageHelper.RetryException();
+                        }
+                    });
             }
         }
 

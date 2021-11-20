@@ -49,9 +49,9 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
 
         public Task<TorrentRelocationCandidateComponent> InitializeAsync()
         {
-            _isSelectedWebElement = _rootElement.FindElementsByContentName("selector").FirstOrDefault();
-            TorrentName = SeleniumExtensions.FindElementByContentName(_rootElement, "torrent-name").Text;
-            RelocateOptionsCount = int.Parse(SeleniumExtensions.FindElementByContentName(_rootElement, "relocate-options-count").Text);
+            _isSelectedWebElement = _rootElement.WaitForWebElementByContentName("selector");
+            TorrentName = _rootElement.FindElementByContentName("torrent-name").Text;
+            RelocateOptionsCount = int.Parse(_rootElement.FindElementByContentName("relocate-options-count").Text);
 
             _relocateOptionsSelectorElement = _rootElement.FindElementsByContentName("relocate-options").FirstOrDefault();
             RelocateOptions = _relocateOptionsSelectorElement == null

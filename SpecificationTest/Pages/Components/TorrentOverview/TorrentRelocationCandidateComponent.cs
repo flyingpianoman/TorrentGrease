@@ -49,7 +49,7 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
 
         public Task<TorrentRelocationCandidateComponent> InitializeAsync()
         {
-            _isSelectedWebElement = _rootElement.WaitForWebElementByContentName("selector");
+            _isSelectedWebElement = _rootElement.FindElementsByContentName("selector").FirstOrDefault();
             TorrentName = _rootElement.FindElementByContentName("torrent-name").Text;
             RelocateOptionsCount = int.Parse(_rootElement.FindElementByContentName("relocate-options-count").Text);
 

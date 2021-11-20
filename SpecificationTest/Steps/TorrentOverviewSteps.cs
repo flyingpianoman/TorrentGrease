@@ -340,7 +340,7 @@ namespace SpecificationTest.Steps
             foreach (var filePath in Directory.GetFiles(dataDirPath, "*", SearchOption.AllDirectories))
             {
                 var filePathInContainer = Path.Combine(copyTorrentDataRequest.TargetLocation + "/" + Path.GetRelativePath(basePath, filePath).Replace('\\', '/'));
-
+                Thread.Sleep(1000);
                 await Polly
                     .Policy
                     .Handle<PageHelper.RetryException>()

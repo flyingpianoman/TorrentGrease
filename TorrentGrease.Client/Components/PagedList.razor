@@ -21,6 +21,11 @@
         get => _allItems;
         set
         {
+            if(_allItems == value)
+            {
+                return;
+            }
+
             _allItems = value;
             PageIndex = 0;
         }
@@ -37,7 +42,7 @@
     }
 
     public int TotalNrOfPages => AllItems == null? 0 : (int) Math.Ceiling((double) AllItems.Count() / PageSize);
-    public int RowsToSkipToGetToCurrentPage => PageIndex == 0 ? 0 : PageIndex * PageSize;
+    public int RowsToSkipToGetToCurrentPage => PageIndex * PageSize;
 
     public IEnumerable<TItem> CurrentPageItems => AllItems?.Skip(RowsToSkipToGetToCurrentPage)?.Take(PageSize);
 }

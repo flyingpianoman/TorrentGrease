@@ -1,29 +1,45 @@
 ﻿@typeparam TItem
 @using Blazorise
 
-@if(PagedList == null)
+@if (PagedList == null)
 {
     <span>nulled</span>
 }
 else
-{ 
-    <Pagination Alignment="Alignment.Center">
+{
+<Pagination Alignment="Alignment.Center">
+    <PaginationItem>
+        <PaginationLink Clicked="GoToPreviousPage">
+            <span aria-hidden="true">«</span>
+        </PaginationLink>
+    </PaginationItem>
+    @if (PagedList.PageIndex > 0)
+    {
         <PaginationItem>
             <PaginationLink Clicked="GoToPreviousPage">
-                <span aria-hidden="true">«</span>
+                @(PagedList.PageIndex)
             </PaginationLink>
         </PaginationItem>
-        <PaginationItem IsActive="true">
-            <PaginationLink>
-                @(PagedList.PageIndex + 1)
-            </PaginationLink>
-        </PaginationItem>
+    }
+    <PaginationItem IsActive="true" Class="active">
+        <PaginationLink>
+            @(PagedList.PageIndex + 1)
+        </PaginationLink>
+    </PaginationItem>
+    @if (PagedList.PageIndex + 1 < PagedList.TotalNrOfPages)
+    {
         <PaginationItem>
             <PaginationLink Clicked="GoToNextPage">
-                <span aria-hidden="true">»</span>
+                @(PagedList.PageIndex + 2)
             </PaginationLink>
         </PaginationItem>
-    </Pagination>
+    }
+    <PaginationItem>
+        <PaginationLink Clicked="GoToNextPage">
+            <span aria-hidden="true">»</span>
+        </PaginationLink>
+    </PaginationItem>
+</Pagination>
 }
 
 @code {
@@ -38,7 +54,7 @@ else
 
     void GoToNextPage()
     {
-        if(PagedList.TotalNrOfPages == 0)
+        if (PagedList.TotalNrOfPages == 0)
         {
             return;
         }

@@ -46,8 +46,7 @@ namespace TorrentGrease.Client.ServiceClientExtensions
 
                 return GrpcChannel.ForAddress(backendUrl, new GrpcChannelOptions
                 {
-                    HttpHandler = gRpcWebHttpHandler,
-                    MaxReceiveMessageSize = null
+                    HttpHandler = gRpcWebHttpHandler
                 });
             });
         }

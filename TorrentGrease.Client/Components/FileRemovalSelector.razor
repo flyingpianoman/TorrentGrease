@@ -61,7 +61,7 @@
 
     void ResetFileRemovalSelectorModal()
     {
-        _fileRemovalCandidates = FileRemovalCandidates.Select(x => new SelectableItem<FileRemovalCandidate>(x)).ToArray();
+        _fileRemovalCandidates = FileRemovalCandidates.Select(x => new SelectableItem<FileRemovalCandidate>(x) { IsSelected = true }).ToArray();
         _isRemovingFiles = false;
     }
 
@@ -93,6 +93,7 @@
             .ToList();
 
         _isRemovingFiles = true;
+        StateHasChanged();
         await FileManagementService.RemoveFilesAsync(filesToRemove);
         _isRemovingFiles = false;
 

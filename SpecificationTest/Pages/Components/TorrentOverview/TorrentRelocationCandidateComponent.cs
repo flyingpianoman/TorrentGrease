@@ -15,17 +15,12 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
         private readonly IWebElement _rootElement;
         private readonly IWebDriver _webDriver;
         private IWebElement _isSelectedWebElement;
-        public bool IsSelected 
+        public bool IsSelected
         {
             get => _isSelectedWebElement.Selected;
             set
             {
-                if(_isSelectedWebElement == null)
-                {
-                    throw new InvalidOperationException($"Tried to set selected value but checkbox was missing, {RelocateOptionsCount} RelocateOptions found");
-                }
-
-                if(IsSelected != value)
+                if (IsSelected != value)
                 {
                     _isSelectedWebElement.ClickBootstrapCheckBox(_webDriver);
                 }
@@ -48,40 +43,24 @@ namespace SpecificationTest.Pages.Components.TorrentOverview
 
         public TorrentRelocationCandidateComponent(IWebElement rootElement, IWebDriver webDriver)
         {
-            this._rootElement = rootElement;
+            _rootElement = rootElement;
             _webDriver = webDriver;
         }
 
         public Task<TorrentRelocationCandidateComponent> InitializeAsync()
         {
+            _isSelectedWebElement = _rootElement.FindElementsByContentName("selector").FirstOrDefault();
             TorrentName = _rootElement.FindElementByContentName("torrent-name").Text;
             RelocateOptionsCount = int.Parse(_rootElement.FindElementByContentName("relocate-options-count").Text);
-            SetSelectorWebElement();
-            SetRelocateOptions();
 
-            return Task.FromResult(this);
-        }
-
-        private void SetRelocateOptions()
-        {
-            var relocateOptionsSelectorEl = _rootElement.WaitForAnyWebElementByContentName("relocate-options", "no-relocate-options");
-            _relocateOptionsSelectorElement = relocateOptionsSelectorEl.GetContentName() == "relocate-options"
-                ? relocateOptionsSelectorEl
-                : null;
-
+            _relocateOptionsSelectorElement = _rootElement.FindElementsByContentName("relocate-options").FirstOrDefault();
             RelocateOptions = _relocateOptionsSelectorElement == null
                 ? Array.Empty<string>()
                 : _relocateOptionsSelectorElement.FindElementsByContentName("relocate-option")
                     .Select(e => e.Text)
                     .ToArray();
-        }
 
-        private void SetSelectorWebElement()
-        {
-            var selectorOrNoSelectorEl = _rootElement.WaitForAnyWebElementByContentName("selector", "no-selector");
-            _isSelectedWebElement = selectorOrNoSelectorEl.GetContentName() == "selector"
-                ? selectorOrNoSelectorEl
-                : null;
+            return Task.FromResult(this);
         }
     }
 }

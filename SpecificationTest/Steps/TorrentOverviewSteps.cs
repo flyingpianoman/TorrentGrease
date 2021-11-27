@@ -123,7 +123,9 @@ namespace SpecificationTest.Steps
                 torrentFileMappings.Add(new CreateTorrentFileMapping
                 {
                     FileLocOnDisk = torrentFilePath,
-                    FileLocInTorrent = torrentFile.FilePath.Replace('/', '\\')
+                    FileLocInTorrent = OperatingSystem.IsWindows()
+                        ? torrentFile.FilePath.Replace('/', '\\') 
+                        : torrentFile.FilePath
                 });
             }
 
@@ -316,6 +318,7 @@ namespace SpecificationTest.Steps
 
                     await dockerClient.CreateDirectoryStructureInContainerAsync(transmissionContainerId, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
                     await dockerClient.UploadTarredFileToContainerAsync(tarStream, transmissionContainerId, copyTorrentDataRequest.TargetLocation).ConfigureAwait(false);
+                    
                     await WaitUntilFilesExistInContainerAsync(dockerClient, transmissionContainerId, copyTorrentDataRequest, dataDirPath);
 
                     if (copyTorrentDataRequest.VerifyTorrent)

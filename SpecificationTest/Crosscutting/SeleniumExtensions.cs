@@ -35,11 +35,34 @@ namespace SpecificationTest.Crosscutting
             PageHelper.WaitForWebElementPolicy
                 .Execute(() =>
                 {
-                    if(webElement.Selected == isCheckedBeforeClick)
+                    if (webElement.Selected == isCheckedBeforeClick)
                     {
                         throw new PageHelper.RetryException();
                     }
                 });
+        }
+
+        public static void ClickBootstrapRadio(this IWebElement radioElement, IWebDriver webDriver)
+        {
+            var radioLabelElement = radioElement.GetParent();
+            var wasAlreadyActive = radioLabelElement.GetAttribute("class").Split(" ").Contains("active");
+
+            //We use JS because FF + Selenium have a bug that results in 'could not be scrolled into view'
+            radioLabelElement.ClickViaJS(webDriver);
+
+            //Wait for radio state to change, if it wasn't active
+            if(wasAlreadyActive)
+            { 
+                PageHelper.WaitForWebElementPolicy
+                    .Execute(() =>
+                    {
+                        var isActive = radioLabelElement.GetAttribute("class").Split(" ").Contains("active");
+                        if (!isActive)
+                        {
+                            throw new PageHelper.RetryException();
+                        }
+                    });
+            }
         }
 
         public static void ClickViaJS(this IWebElement webElement, IWebDriver webDriver)

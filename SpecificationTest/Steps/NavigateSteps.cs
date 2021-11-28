@@ -17,9 +17,14 @@ namespace SpecificationTest.Steps
     {
         [When(@"I navigate to the root url")]
         [When(@"I navigate to the policy overview")]
-        public async Task NavigateToTheRootUrl()
+        public void NavigateToTheRootUrl()
         {
-            await NavigateToRootUrlAsync().ConfigureAwait(false);
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                await NavigateToRootUrlAsync().ConfigureAwait(false);
+            }
         }
 
         private async Task<PoliciesOverviewPage> NavigateToRootUrlAsync()
@@ -30,13 +35,33 @@ namespace SpecificationTest.Steps
 
         [Given(@"I navigate to the torrent overview")]
         [When(@"I navigate to the torrent overview")]
-        public async Task NavigateToTheTorrentOverview()
+        public void NavigateToTheTorrentOverview()
         {
-            await (await NavigateToRootUrlAsync().ConfigureAwait(false))
-                .NavigationMenu
-                .TorrentsNavMenuLink
-                .NavigateAsync<TorrentOverviewPage>()
-                .ConfigureAwait(false);
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                await (await NavigateToRootUrlAsync().ConfigureAwait(false))
+                    .NavigationMenu
+                    .TorrentsNavMenuLink
+                    .NavigateAsync<TorrentOverviewPage>()
+                    .ConfigureAwait(false);
+            }
+        }
+
+        [Given(@"I navigate to file management")]
+        public void GivenINavigateToFileManagement()
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                await (await NavigateToRootUrlAsync().ConfigureAwait(false))
+                    .NavigationMenu
+                    .FileManagementNavMenuLink
+                    .NavigateAsync<FileManagementPage>()
+                    .ConfigureAwait(false);
+            }
         }
 
         [Then(@"I can see the navigation menu")]

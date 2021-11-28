@@ -47,5 +47,6 @@ namespace SpecificationTest.Pages.Components
 
         public NavMenuLinkComponent PoliciesNaveMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.Policies);
         public NavMenuLinkComponent TorrentsNavMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.Torrents);
+        public NavMenuLinkComponent FileManagementNavMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.FileManagement);
     }
 }

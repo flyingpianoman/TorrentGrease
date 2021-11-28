@@ -3,7 +3,7 @@
 @inject IFileManagementService FileManagementService
 <Row>
     <Column>
-        <Card>
+        <Card data-content="file-management">
             <CardHeader>
                 <CardTitle>FileManagement</CardTitle>
             </CardHeader>
@@ -44,7 +44,7 @@
                 {
                     var local = i;
                     var dirMapping = CompletedTorrentDirMappings[local];
-                    <Row Class="form-group">
+                    <Row data-content="completed-torrent-dir-mapping-row" Class="form-group">
                         <Column ColumnSize="ColumnSize.Is2">Directory mapping @(local + 1)</Column>
                         <Column ColumnSize="ColumnSize.Is5">
                             <TextEdit data-content="completed-torrent-torrent-client-dir" @bind-Text="@dirMapping.TorrentClientDirsCsv" />

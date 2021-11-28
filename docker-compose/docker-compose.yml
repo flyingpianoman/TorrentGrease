@@ -15,6 +15,7 @@ services:
       - torrent-grease-data:/app/data
       - torrent-grease-logs:/app/logs
       - transmission-downloads:/downloads
+      - transmission-secondary-downloads:/secondary-downloads
       - transmission-data:/transmission/config:ro #mount transmission config dir so we can access the torrent files
     ports:
       - 5656:5656
@@ -30,6 +31,7 @@ services:
     volumes:
       - transmission-data:/config
       - transmission-downloads:/downloads
+      - transmission-secondary-downloads:/second-downloads
       - ./transmission/settings.json:/config/settings.json
     ports:
       - 9091:9091
@@ -62,5 +64,6 @@ volumes:
   torrent-grease-data:
   torrent-grease-logs:
   transmission-data:
+  transmission-secondary-downloads:
   transmission-downloads:
   transmission-downloader-data:

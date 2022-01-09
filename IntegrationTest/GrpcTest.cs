@@ -6,6 +6,7 @@ using ProtoBuf.Grpc.Client;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using TestUtils.FileLink;
 using TorrentGrease.Shared.ServiceContracts;
 
 namespace IntegrationTest

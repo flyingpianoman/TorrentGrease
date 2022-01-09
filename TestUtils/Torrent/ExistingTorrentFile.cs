@@ -6,9 +6,9 @@ namespace TestUtils.Torrent
 {
     public class ExistingTorrentFile
     {
-        public string Name { get; set; }
-        public IEnumerable<InnerTorrentFileInfo> InnerTorrentFiles { get; set; }
-        public string TrackerAnnounceUrl { get; set; }
-        public bool IsPrivate { get; set; } = true;
+        public string Name { get; init; }
+        public IEnumerable<InnerTorrentFileInfo> InnerTorrentFiles { get; init; }
+        public string TrackerAnnounceUrl { get; init; }
+        public bool IsPrivate { get; init; } = true;
     }
 }

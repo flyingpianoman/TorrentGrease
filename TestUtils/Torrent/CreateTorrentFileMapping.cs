@@ -6,7 +6,7 @@ namespace TestUtils.Torrent
 {
     public class CreateTorrentFileMapping
     {
-        public string FileLocOnDisk { get; set; }
-        public string FileLocInTorrent { get; set; }
+        public string FileLocOnDisk { get; init; }
+        public string FileLocInTorrent { get; init; }
     }
 }

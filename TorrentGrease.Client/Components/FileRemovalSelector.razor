@@ -61,7 +61,10 @@
 
     void ResetFileRemovalSelectorModal()
     {
-        _fileRemovalCandidates = FileRemovalCandidates.Select(x => new SelectableItem<FileRemovalCandidate>(x) { IsSelected = true }).ToArray();
+        _fileRemovalCandidates = FileRemovalCandidates
+            .OrderBy(x => x.FilePath)
+            .Select(x => new SelectableItem<FileRemovalCandidate>(x) { IsSelected = true })
+            .ToArray();
         _isRemovingFiles = false;
     }
 

@@ -4,16 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenQA.Selenium;
+using SpecificationTest.Crosscutting;
 
 namespace SpecificationTest.Pages.Components
 {
     class RadioComponent : IComponent<RadioComponent>
     {
         private readonly IWebElement _rootElement;
+        private readonly IWebDriver _webDriver;
 
-        public RadioComponent(IWebElement element)
+        public RadioComponent(IWebElement element, IWebDriver webDriver)
         {
             _rootElement = element;
+            _webDriver = webDriver;
         }
 
         public Task<RadioComponent> InitializeAsync()
@@ -42,7 +45,7 @@ namespace SpecificationTest.Pages.Components
         {
             GetRadios()
                 .First(e => e.GetAttribute("value") == value)
-                .Click();
+                .ClickBootstrapRadio(_webDriver);
         }
     }
 }

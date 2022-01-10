@@ -47,25 +47,31 @@ namespace TorrentGrease.Server
             const string serverStaticWebAssetsPath = @"/app/bin/Debug/net5.0/TorrentGrease.Server.StaticWebAssets.xml";
             var serverXmlDoc = new XmlDocument();
             serverXmlDoc.Load(serverStaticWebAssetsPath);
-            var rootNode = serverXmlDoc.SelectSingleNode("StaticWebAssets") ?? throw new InvalidDataException();
 
             const string clientStaticWebAssetsPath = @"/app/bin/Debug/net5.0/TorrentGrease.Client.StaticWebAssets.xml";
             var clientXmlDoc = new XmlDocument();
             clientXmlDoc.Load(clientStaticWebAssetsPath);
-            var contentRootNodes = clientXmlDoc.SelectNodes("StaticWebAssets/ContentRoot") ?? throw new InvalidDataException();
+            var clientContentRootNodes = clientXmlDoc.SelectNodes("StaticWebAssets/ContentRoot") ?? throw new InvalidDataException();
 
-            ChangeHostPathsToContainerizedPaths(serverXmlDoc, rootNode, contentRootNodes);
+            ChangeHostPathsToContainerizedPaths(clientContentRootNodes, serverXmlDoc);
 
             clientXmlDoc.Save(clientStaticWebAssetsPath);
             serverXmlDoc.Save(serverStaticWebAssetsPath);
         }
 
-        private static void ChangeHostPathsToContainerizedPaths(XmlDocument serverXmlDoc, XmlNode rootNode, XmlNodeList contentRootNodes)
+        private static void ChangeHostPathsToContainerizedPaths(XmlNodeList clientContentRootNodes, XmlDocument serverXmlDoc)
         {
-            foreach (var contentRootNode in contentRootNodes.Cast<XmlNode>())
+            var serverXmlRootNode = serverXmlDoc.SelectSingleNode("StaticWebAssets") ?? throw new InvalidDataException();
+            foreach (var contentRootNode in clientContentRootNodes
+                .Cast<XmlNode>()
+                .Select(x => new { IsClientNode = true, XmlNode = x })
+                .Union((serverXmlRootNode
+                    .SelectNodes("ContentRoot") ?? throw new InvalidDataException())
+                    .Cast<XmlNode>()
+                    .Select(x => new { IsClientNode = false, XmlNode = x })))
             {
-                var basePathAttr = contentRootNode?.Attributes?["BasePath"] ?? throw new NotSupportedException();
-                var pathAttr = contentRootNode.Attributes["Path"];
+                var basePathAttr = contentRootNode.XmlNode.Attributes?["BasePath"] ?? throw new NotSupportedException();
+                var pathAttr = contentRootNode.XmlNode.Attributes["Path"];
                 var modifiedPath = pathAttr?.Value.Replace('\\', '/') ?? throw new NotSupportedException();
 
                 if (basePathAttr.Value == "/")
@@ -77,10 +83,13 @@ namespace TorrentGrease.Server
                     modifiedPath = Regex.Replace(modifiedPath, @"[a-zA-Z]:\/.+?\/\.nuget\/", "/root/.nuget/");
 
                     //Also add these to the server xml
-                    var newNode = serverXmlDoc.CreateElement("ContentRoot");
-                    newNode.SetAttribute("BasePath", basePathAttr.Value);
-                    newNode.SetAttribute("Path", modifiedPath);
-                    rootNode.AppendChild(newNode);
+                    if (contentRootNode.IsClientNode)
+                    {
+                        var newNode = serverXmlDoc.CreateElement("ContentRoot");
+                        newNode.SetAttribute("BasePath", basePathAttr.Value);
+                        newNode.SetAttribute("Path", modifiedPath);
+                        serverXmlRootNode.AppendChild(newNode);
+                    }
                 }
                 else
                 {

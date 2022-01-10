@@ -89,7 +89,7 @@ namespace TestUtils
 
                 if (structureExists)
                 {
-                    structureExists = await ExecuteSHCommandAsync(dockerClient, containerId, $"ls '{parentDir}' | grep -wc '{targetDirPart}'") == "1";
+                    structureExists = await ExecuteSHCommandAsync(dockerClient, containerId, $"ls '{parentDir}' | grep -wc '^{targetDirPart}$'") == "1";
                 }
 
                 if (!structureExists)

@@ -106,13 +106,14 @@ namespace SpecificationTest.Crosscutting
         }
 
 
-        internal static IWebElement WaitForWebElementByContentName(this ISearchContext searchContext, string elementContentName)
+        internal static IWebElement WaitForWebElementByContentName(this ISearchContext searchContext, 
+            string elementContentName, bool mustBeDisplayed = false)
         {
             return PageHelper.WaitForWebElementPolicy
                 .Execute(() =>
                 {
                     var elements = searchContext.FindElementsByContentName(elementContentName);
-                    return elements.FirstOrDefault() ?? throw new PageHelper.RetryException();
+                    return elements.FirstOrDefault(e => !mustBeDisplayed || e.Displayed) ?? throw new PageHelper.RetryException();
                 });
         }
 

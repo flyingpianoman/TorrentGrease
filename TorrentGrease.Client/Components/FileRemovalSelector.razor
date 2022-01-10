@@ -40,7 +40,7 @@
         </ModalBody>
         <ModalFooter>
             <Button Color="Color.Secondary" IsDisabled="@IsInWaitMode" Clicked="@CloseFileRemovalSelectorModal">Close</Button>
-            <Button data-content="relocate-candidates-button" Color="Color.Primary" IsLoading="@_isRemovingFiles" IsDisabled="@IsInWaitMode" Clicked="@RemoveSelectedFilesAsync">Remove selected files</Button>
+            <Button data-content="remove-selected-orphan-files-button" Color="Color.Primary" IsLoading="@_isRemovingFiles" IsDisabled="@IsInWaitMode" Clicked="@RemoveSelectedFilesAsync">Remove selected files</Button>
         </ModalFooter>
     </ModalContent>
 </Modal>
@@ -67,17 +67,17 @@
 
     string FormatFileSize(long bytes)
     {
-        if (bytes > (1024 * 1024 * 1024))
+        if (bytes >= (1024 * 1024 * 1024))
         {
             return bytes / (1024 * 1024 * 1024) + " GB";
         }
 
-        if (bytes > (1024 * 1024))
+        if (bytes >= (1024 * 1024))
         {
             return bytes / (1024 * 1024) + " MB";
         }
 
-        if (bytes > 1024)
+        if (bytes >= 1024)
         {
             return bytes / 1024 + " KB";
         }

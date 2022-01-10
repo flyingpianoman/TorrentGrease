@@ -186,14 +186,16 @@ namespace SpecificationTest.Steps
                 foreach (var fileDto in fileDtos)
                 {
                     var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+                    Directory.CreateDirectory(tempDir);
                     var filename = Path.GetFileName(fileDto.FilePath);
                     var fileOnHost = Path.Combine(tempDir, filename);
-                    await torrentFileHelper.CreateTextFileAsync(fileOnHost, (int)fileDto.FileSizeInKB);
+                    await torrentFileHelper.CreateTextFileAsync(fileOnHost, (int)fileDto.FileSizeInKB * 1024);
 
                     var tarStream = ArchiveHelper.CreateSingleFileTarStream(fileOnHost, filename);
 
-                    await _dockerClient.CreateDirectoryStructureInContainerAsync(torrentClientContainerId, Path.GetFullPath(fileDto.FilePath)).ConfigureAwait(false);
-                    await _dockerClient.UploadTarredFileToContainerAsync(tarStream, torrentClientContainerId, Path.GetFullPath(fileDto.FilePath)).ConfigureAwait(false);
+                    var fileDir = fileDto.FilePath[..^filename.Length];
+                    await _dockerClient.CreateDirectoryStructureInContainerAsync(torrentClientContainerId, fileDir).ConfigureAwait(false);
+                    await _dockerClient.UploadTarredFileToContainerAsync(tarStream, torrentClientContainerId, fileDir).ConfigureAwait(false);
 
                     await WaitUntilFileExistsInContainerAsync(torrentClientContainerId, fileDto.FilePath);
                 }

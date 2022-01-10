@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using OpenQA.Selenium;
 using SpecificationTest.Crosscutting;
 using SpecificationTest.Pages.Components;
+using SpecificationTest.Pages.Components.FileManagement;
 using SpecificationTest.Pages.Components.PolicyOverview;
 
 namespace SpecificationTest.Pages
 {
     class FileManagementPage : PageBase
     {
+        private IWebElement _rootElement;
         private IWebElement _fileMngmtContainer;
         private IWebElement _minFileSizeNr;
         private RadioComponent _minFileSizeUnit;
@@ -37,13 +39,14 @@ namespace SpecificationTest.Pages
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync().ConfigureAwait(false);
-            _fileMngmtContainer = _webDriver.WaitForWebElementByContentName("file-management");
+            _rootElement = _webDriver.WaitForWebElementByContentName("file-management");
+            _fileMngmtContainer = _rootElement.WaitForWebElementByContentName("file-management-container");
 
             _minFileSizeNr = _fileMngmtContainer.WaitForAnyWebElementByContentName("min-file-size");
             var fileSizeUnitWebEl = _fileMngmtContainer.WaitForAnyWebElementByContentName("min-file-size-unit-type");
-            _minFileSizeUnit = await new RadioComponent(fileSizeUnitWebEl).InitializeAsync();
+            _minFileSizeUnit = await new RadioComponent(fileSizeUnitWebEl, _webDriver).InitializeAsync();
             AddCompletedTorrentDirMappingButton = _fileMngmtContainer.WaitForAnyWebElementByContentName("add-completed-torrent-dir-mapping-button");
-            _scanButton = _fileMngmtContainer.WaitForAnyWebElementByContentName("scan-button");
+            ScanButton = _fileMngmtContainer.WaitForAnyWebElementByContentName("scan-button");
         }
 
         public async Task<IList<CompletedDirMappingComponent>> GetCompletedDirMappingsAsync()
@@ -51,6 +54,12 @@ namespace SpecificationTest.Pages
             return (await Task.WhenAll(_fileMngmtContainer.FindElementsByContentName("completed-torrent-dir-mapping-row")
                     .Select(el => new CompletedDirMappingComponent(el).InitializeAsync())).ConfigureAwait(false))
                 .ToList();
+        }
+
+        internal async Task<FileRemovalSelectorComponent> GetFileRemovalSelectorComponentAsync()
+        {
+            var c = new FileRemovalSelectorComponent(_rootElement, _webDriver);
+            return await c.InitializeAsync().ConfigureAwait(false);
         }
     }
 }

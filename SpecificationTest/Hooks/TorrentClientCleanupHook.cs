@@ -28,10 +28,12 @@ namespace SpecificationTest.Hooks
             var transmissionContainerId = await dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TransmissionContainerName).ConfigureAwait(false);
             await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/downloads/complete").ConfigureAwait(false);
             await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/downloads/incomplete").ConfigureAwait(false);
-            await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/downloads/unmapped").ConfigureAwait(false);
+            if(await dockerClient.DoesFileSystemObjectExistAsync(transmissionContainerId, "/downloads/unmapped").ConfigureAwait(false))
+            { 
+                await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/downloads/unmapped").ConfigureAwait(false);
+            }
+            
             await dockerClient.EmptyDirInContainerAsync(transmissionContainerId, "/second-downloads").ConfigureAwait(false);
-
-
         }
     }
 }

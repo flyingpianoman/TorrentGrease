@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using TorrentGrease.Server.Services;
 
-namespace TorrentGrease.Server.Grpc
+namespace TorrentGrease.Server.CrossCutting
 {
     public static class EndpointRouteBuilderGrpcExtensions
     {

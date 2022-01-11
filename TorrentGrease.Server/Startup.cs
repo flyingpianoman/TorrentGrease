@@ -13,12 +13,12 @@ using TorrentGrease.TorrentClient.Hosting;
 using System.IO;
 using ProtoBuf.Grpc.Server;
 using TorrentGrease.Server.Services;
-using TorrentGrease.Server.Grpc;
 using Microsoft.AspNetCore.DataProtection;
 using System.Collections.Generic;
 using TorrentGrease.TorrentStatisticsHarvester.Hosting;
 using TorrentGrease.Hangfire.Hosting;
 using Serilog;
+using TorrentGrease.Server.CrossCutting;
 
 namespace TorrentGrease.Server
 {

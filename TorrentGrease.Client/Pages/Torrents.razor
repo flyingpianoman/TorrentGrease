@@ -15,7 +15,7 @@
                 <p class="bs-component mb-0">
                     <Button data-content="reload-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ReloadTorrentsAsync">Refresh</Button>
                     <Button data-content="select-all-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@SelectAllTorrents">Select all</Button>
-                    <Button data-content="show-relocate-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ShowTorrentRelocator">Relocate torrent data</Button>
+                    <Button data-content="show-relocate-torrents-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ShowTorrentRelocatorAsync">Relocate torrent data</Button>
                     <Button data-content="re-add-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@ReAddTorrents">Re-add torrents</Button>
                 </p>
             </CollapseBody>
@@ -243,9 +243,9 @@
         _busyCount--;
     }
 
-    public void ShowTorrentRelocator()
+    public async Task ShowTorrentRelocatorAsync()
     {
-        _torrentRelocator.Show();
+        await _torrentRelocator.ShowAsync();
     }
 
     public async Task ReAddTorrents()

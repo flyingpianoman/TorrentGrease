@@ -11,6 +11,7 @@ services:
       - TORRENTCLIENT__USERNAME=usr
       - TORRENTCLIENT__PASSWORD=pwd
       - TORRENTCLIENT__TORRENTFILEDIRMAPPING=/transmission/config/torrents
+      - CONNECTIONSTRINGS__DEFAULTCONNECTION=Filename=/app/data/TorrentGrease.db;Pooling=false #disable pooling so that we can swap out the sqlite file during testing
     volumes:
       - torrent-grease-data:/app/data
       - torrent-grease-logs:/app/logs

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using SpecificationTest.Crosscutting;

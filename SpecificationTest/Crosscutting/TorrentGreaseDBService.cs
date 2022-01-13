@@ -47,15 +47,10 @@ namespace SpecificationTest.Crosscutting
                 File.Delete(_PrepDBPath);
             }
 
-            using var dbContext = CreateDBContext();
-            try
+            await using (var dbContext = CreateDBContext())
             {
                 var dbInitializer = new TorrentGreaseDbInitializer(dbContext);
                 await dbInitializer.InitializeAsync().ConfigureAwait(false);
-            }
-            finally
-            {
-                await dbContext.DisposeAsync(); //make sure that everything is written to disk
             }
 
             _CleanDBTarMemoryStream = ArchiveHelper.CreateSingleFileTarStream(_PrepDBPath, ContainerDBFileName);
@@ -79,7 +74,8 @@ namespace SpecificationTest.Crosscutting
         private static TorrentGreaseDbContext CreateDBContext()
         {
             var optionsBuilder = new DbContextOptionsBuilder<TorrentGreaseDbContext>();
-            optionsBuilder.UseSqlite("Data Source=" + _PrepDBPath);
+            //disable pooling since it will keep the sqlite file locked even after disposing of the dbcontext and connection
+            optionsBuilder.UseSqlite("Data Source=" + _PrepDBPath + ";Pooling=False");
             return new TorrentGreaseDbContext(optionsBuilder.Options);
         }
 

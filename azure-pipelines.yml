@@ -10,14 +10,6 @@ steps:
     runtime: 'core'
     configFilePath: './GitVersion.yml'
     
-#todo see if we can remove this
-- task: UseDotNet@2
-  displayName: Install dotnet 5.0 sdk
-  inputs:
-    packageType: 'sdk'
-    version: '5.0.x'
-    includePreviewVersions: false
-    
 - task: UseDotNet@2
   displayName: Install dotnet 6.0 sdk
   inputs:

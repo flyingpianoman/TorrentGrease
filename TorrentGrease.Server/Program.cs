@@ -111,12 +111,10 @@ namespace TorrentGrease.Server
 
         private static async Task MigrageDBAsync(WebApplication app)
         {
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var dbInitializer = services.GetRequiredService<TorrentGreaseDbInitializer>();
-                await dbInitializer.InitializeAsync();
-            }
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            var dbInitializer = services.GetRequiredService<TorrentGreaseDbInitializer>();
+            await dbInitializer.InitializeAsync();
         }
 
         private static LoggerConfiguration ConfigureSerilog(HostBuilderContext hostingContext, LoggerConfiguration loggerConfiguration)

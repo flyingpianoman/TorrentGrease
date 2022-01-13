@@ -24,7 +24,7 @@ services:
       
   transmission: #username = usr, password = pwd
     container_name: transmission
-    image: linuxserver/transmission:2.94-r1-ls14
+    image: linuxserver/transmission:latest
     environment:
       - PUID=1000
       - PGID=1000
@@ -55,7 +55,7 @@ services:
 
   #for ui testing. see also https://github.com/SeleniumHQ/docker-selenium#debugging
   selenium-firefox-standalone:
-    image: selenium/standalone-firefox:4.0.0-beta-1-prerelease-20201208
+    image: selenium/standalone-firefox:4.1
     shm_size: '2gb'
     ports:
       - 4444:4444

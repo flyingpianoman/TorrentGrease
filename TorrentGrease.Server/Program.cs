@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
@@ -7,16 +7,15 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Core;
 using Serilog.Filters;
-using System;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
 using TorrentGrease.Data.Hosting;
 using TorrentGrease.Hangfire.Hosting;
 using TorrentGrease.TorrentStatisticsHarvester;
+using TorrentGrease.TorrentClient.Hosting;
+using ProtoBuf.Grpc.Server;
+using TorrentGrease.Server.Grpc;
+using TorrentGrease.TorrentStatisticsHarvester.Hosting;
+
 
 namespace TorrentGrease.Server
 {
@@ -27,103 +26,96 @@ namespace TorrentGrease.Server
 
         public static async Task Main(string[] args)
         {
+            var builder = CreateAppBuilder(args);
+            ConfigureServices(builder);
 
-#if DEBUG
-            CorrectPathsInStaticWebAssets();
-#endif
+            var app = builder.Build();
+            ConfigureApp(app);
 
-            var host = BuildWebHost(args);
-            using (var scope = host.Services.CreateScope())
+            await MigrageDBAsync(app);
+
+            await app.RunAsync();
+        }
+
+        private static void ConfigureApp(WebApplication app)
+        {
+            if (app.Environment.IsDevelopment())
             {
-                var services = scope.ServiceProvider;
-                var dbInitializer = services.GetRequiredService<TorrentGreaseDbInitializer>();
-                await dbInitializer.InitializeAsync();
+                app.UseDeveloperExceptionPage();
+                app.UseWebAssemblyDebugging();
             }
-            await host.RunAsync();
-        }
 
-        private static void CorrectPathsInStaticWebAssets()
-        {
-            const string serverStaticWebAssetsPath = @"/app/bin/Debug/net5.0/TorrentGrease.Server.StaticWebAssets.xml";
-            var serverXmlDoc = new XmlDocument();
-            serverXmlDoc.Load(serverStaticWebAssetsPath);
+            app.UseBlazorFrameworkFiles();
+            app.UseStaticFiles();
+            app.UseSerilogRequestLogging();
+            app.UseRouting();
 
-            const string clientStaticWebAssetsPath = @"/app/bin/Debug/net5.0/TorrentGrease.Client.StaticWebAssets.xml";
-            var clientXmlDoc = new XmlDocument();
-            clientXmlDoc.Load(clientStaticWebAssetsPath);
-            var clientContentRootNodes = clientXmlDoc.SelectNodes("StaticWebAssets/ContentRoot") ?? throw new InvalidDataException();
+            app.UseHangfire();
+            app.UseGrpcWeb(new GrpcWebOptions() { DefaultEnabled = true });
+            //not yet
+            //app.UseTorrentStatisticsHarvester(serviceProvider);
 
-            ChangeHostPathsToContainerizedPaths(clientContentRootNodes, serverXmlDoc);
+            app.UseHealthChecks("/health");
 
-            clientXmlDoc.Save(clientStaticWebAssetsPath);
-            serverXmlDoc.Save(serverStaticWebAssetsPath);
-        }
-
-        private static void ChangeHostPathsToContainerizedPaths(XmlNodeList clientContentRootNodes, XmlDocument serverXmlDoc)
-        {
-            var serverXmlRootNode = serverXmlDoc.SelectSingleNode("StaticWebAssets") ?? throw new InvalidDataException();
-            foreach (var contentRootNode in clientContentRootNodes
-                .Cast<XmlNode>()
-                .Select(x => new { IsClientNode = true, XmlNode = x })
-                .Union((serverXmlRootNode
-                    .SelectNodes("ContentRoot") ?? throw new InvalidDataException())
-                    .Cast<XmlNode>()
-                    .Select(x => new { IsClientNode = false, XmlNode = x })))
+            app.UseEndpoints(endpoints =>
             {
-                var basePathAttr = contentRootNode.XmlNode.Attributes?["BasePath"] ?? throw new NotSupportedException();
-                var pathAttr = contentRootNode.XmlNode.Attributes["Path"];
-                var modifiedPath = pathAttr?.Value.Replace('\\', '/') ?? throw new NotSupportedException();
+                endpoints.MapGrpcServices();
+                endpoints.MapFallbackToFile("index.html");
+            });
+        }
 
-                if (basePathAttr.Value == "/")
-                {
-                    modifiedPath = Regex.Replace(modifiedPath, @"[a-zA-Z]:[\/].+?[\/]TorrentGrease.Client[\/]", "/src/TorrentGrease.Client/");
-                }
-                else if (basePathAttr.Value.StartsWith("_content/"))
-                {
-                    modifiedPath = Regex.Replace(modifiedPath, @"[a-zA-Z]:\/.+?\/\.nuget\/", "/root/.nuget/");
+        private static WebApplicationBuilder CreateAppBuilder(string[] args)
+        {
+            var builder = WebApplication
+                            .CreateBuilder(args);
 
-                    //Also add these to the server xml
-                    if (contentRootNode.IsClientNode)
+            builder.Host
+                .UseSerilog((hostingContext, loggerConfiguration) => ConfigureSerilog(hostingContext, loggerConfiguration));
+                
+            builder.WebHost
+                .UseConfiguration(new ConfigurationBuilder()
+                    .AddCommandLine(args)
+                    .AddEnvironmentVariables()
+                    .Build())
+                .ConfigureKestrel(options =>
+                {
+                    options.ListenAnyIP(port: 5656, listenOptions => //For Blazor, health endpoint & gRPC-web
                     {
-                        var newNode = serverXmlDoc.CreateElement("ContentRoot");
-                        newNode.SetAttribute("BasePath", basePathAttr.Value);
-                        newNode.SetAttribute("Path", modifiedPath);
-                        serverXmlRootNode.AppendChild(newNode);
-                    }
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
+                        listenOptions.Protocols = HttpProtocols.Http1;
+                    });
+                    options.ListenAnyIP(port: 5657, listenOptions => //For gRPC
+                    {
+                        listenOptions.Protocols = HttpProtocols.Http2;
+                    });
+                });
 
-                pathAttr.Value = modifiedPath;
-            }
+            return builder;
         }
 
-        public static IHost BuildWebHost(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog((hostingContext, loggerConfiguration) => ConfigureSerilog(hostingContext, loggerConfiguration))
-                .ConfigureWebHostDefaults(webHostBuilder =>
-                {
-                    webHostBuilder
-                        .UseConfiguration(new ConfigurationBuilder()
-                            .AddCommandLine(args)
-                            .AddEnvironmentVariables()
-                            .Build())
-                        .UseStartup<Startup>()
-                        .ConfigureKestrel(options =>
-                        {
-                            options.ListenAnyIP(port: 5656, listenOptions => //For Blazor, health endpoint & gRPC-web
-                            {
-                                listenOptions.Protocols = HttpProtocols.Http1;
-                            });
-                            options.ListenAnyIP(port: 5657, listenOptions => //For gRPC
-                            {
-                                listenOptions.Protocols = HttpProtocols.Http2;
-                            });
-                        });
-                })
-                .Build();
+        private static void ConfigureServices(WebApplicationBuilder builder)
+        {
+            var configuration = builder.Configuration;
+            var services = builder.Services;
+
+            services.AddCodeFirstGrpc(cfg => { cfg.ResponseCompressionLevel = System.IO.Compression.CompressionLevel.Optimal; });
+
+            services.AddTorrentGreaseData(configuration.GetConnectionString("DefaultConnection"));
+            services.AddTorrentClient(configuration.GetSection("torrentClient"));
+
+            services.AddHangfire(configuration);
+            services.AddTorrentStatisticsHarvester();
+
+            services.AddHealthChecks()
+                .AddTorrentGreaseDataCheck();
+        }
+
+        private static async Task MigrageDBAsync(WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            var dbInitializer = services.GetRequiredService<TorrentGreaseDbInitializer>();
+            await dbInitializer.InitializeAsync();
+        }
 
         private static LoggerConfiguration ConfigureSerilog(HostBuilderContext hostingContext, LoggerConfiguration loggerConfiguration)
         {

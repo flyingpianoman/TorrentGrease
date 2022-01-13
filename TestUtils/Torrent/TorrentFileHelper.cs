@@ -50,10 +50,7 @@ namespace TestUtils.Torrent
 
             foreach (var announceUrl in torrentFile.TrackerAnnounceUrls)
             {
-                tc.Announces.Add(new RawTrackerTier(new BEncodedList(new BEncodedValue[]
-                {
-                    new BEncodedString(announceUrl)
-                })));
+                tc.Announces.Add(new List<string> { announceUrl });
             }
 
             await tc.CreateAsync(new CustomTorrentFileSource(torrentFile.Name, torrentFile.FileMappings), torrentFileLocation);

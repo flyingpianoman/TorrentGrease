@@ -8,34 +8,25 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http;
 using TorrentGrease.Client.ServiceClientExtensions;
+using Microsoft.AspNetCore.Components.Web;
+using TorrentGrease.Client;
 
-namespace TorrentGrease.Client
-{
-    public class Program
+var builder = WebAssemblyHostBuilder.CreateDefault();
+
+GrpcClientFactory.AllowUnencryptedHttp2 = true;
+
+builder.Services
+    .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
+    .AddGrpcClients()
+    .AddBlazorise(options =>
     {
-        public static async Task Main()
-        {
-            var builder = WebAssemblyHostBuilder.CreateDefault();
-            builder.RootComponents.Add<App>("#app");
+        options.ChangeTextOnKeyPress = true; // optional
+    })
+    .AddBootstrapProviders()
+    .AddFontAwesomeIcons();
 
-            GrpcClientFactory.AllowUnencryptedHttp2 = true;
-            builder.Services
-                .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
-                .AddGrpcClients()
-                .AddBlazorise(options =>
-                {
-                    options.ChangeTextOnKeyPress = true; // optional
-                })
-                .AddBootstrapProviders()
-                .AddFontAwesomeIcons();
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
 
-            var host = builder.Build();
-
-            host.Services
-               .UseBootstrapProviders()
-               .UseFontAwesomeIcons();
-
-            await host.RunAsync();
-        }
-    }
-}
+var host = builder.Build();
+await host.RunAsync();

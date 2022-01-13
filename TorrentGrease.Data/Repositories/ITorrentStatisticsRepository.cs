@@ -9,7 +9,7 @@ namespace TorrentGrease.Data.Repositories
         Task<IList<Torrent>> GetTorrentsByInfoHashAsync(IEnumerable<string> infoHashes);
         Task<IList<Torrent>> GetTorrentsThatWereInLastScanAsync(IEnumerable<int> exlcudedIds);
         Task<Torrent> GetTorrentByInfoHashAsync(string infoHash);
-        Task<TorrentUploadDeltaSnapshot> GetLastTorrentUploadDeltaSnapshotByTorrentIdAsync(int torrentId, bool tracking = true);
+        Task<TorrentUploadDeltaSnapshot?> GetLastTorrentUploadDeltaSnapshotByTorrentIdAsync(int torrentId, bool tracking = true);
         Task<IList<TrackerUrlCollection>> GetAllTrackerUrlCollectionsAsync(bool tracking = true);
     }
 }

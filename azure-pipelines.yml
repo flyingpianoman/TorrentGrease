@@ -9,12 +9,12 @@ steps:
   inputs:
     runtime: 'core'
     configFilePath: './GitVersion.yml'
-
+    
 - task: UseDotNet@2
-  displayName: Install dotnet 5.0 sdk
+  displayName: Install dotnet 6.0 sdk
   inputs:
     packageType: 'sdk'
-    version: '5.0.x'
+    version: '6.0.x'
     includePreviewVersions: false
     
 - task: Docker@2

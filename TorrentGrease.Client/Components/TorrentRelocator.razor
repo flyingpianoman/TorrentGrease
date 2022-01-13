@@ -4,12 +4,11 @@
 @inject ITorrentService TorrentService
 @inject ILogger<TorrentRelocator> _logger
 
-<Modal data-content="relocate-torrents-modal" @ref="_relocateTorrentsModal" Closing="@OnRelocateTorrentsModalClosing">
-    <ModalBackdrop />
+<Modal data-content="relocate-torrents-modal" @ref="_relocateTorrentsModal" Closing="@OnRelocateTorrentsModalClosingAsync">
     <ModalContent Size="ModalSize.ExtraLarge" IsCentered="true">
         <ModalHeader>
             <ModalTitle>Relocate torrent data</ModalTitle>
-            <CloseButton IsDisabled="@IsInWaitMode" Clicked="@CloseRelocateTorrentsModal" />
+            <CloseButton IsDisabled="@IsInWaitMode" Clicked="@CloseRelocateTorrentsModalAsync" />
         </ModalHeader>
         @if (RelocateTorrentsStage == RelocateTorrentsStages.FindCandidates)
         {
@@ -86,7 +85,7 @@
             </ModalBody>
         }
         <ModalFooter>
-            <Button Color="Color.Secondary" IsDisabled="@IsInWaitMode" Clicked="@CloseRelocateTorrentsModal">Close</Button>
+            <Button Color="Color.Secondary" IsDisabled="@IsInWaitMode" Clicked="@CloseRelocateTorrentsModalAsync">Close</Button>
             @if (RelocateTorrentsStage == RelocateTorrentsStages.FindCandidates)
             {
                 <Button data-content="scan-for-candidates-button" Color="Color.Primary" IsLoading="@_isScanningForRelocatableTorrents" IsDisabled="@IsInWaitMode" Clicked="@ScanForRelocatableTorrentsAsync">Scan for relocatable torrents</Button>
@@ -186,22 +185,23 @@
         await TorrentService.RelocateTorrentsAsync(relocateTorrentCommands, _verifyTorrentsAfterRelocating).ConfigureAwait(false);
         _isRelocatingTorrents = false;
 
-        CloseRelocateTorrentsModal();
+        await CloseRelocateTorrentsModalAsync();
     }
 
-    public void Show()
+    public async Task ShowAsync()
     {
         ResetRelocateTorrentsModel();
-        _relocateTorrentsModal.Show();
+        await _relocateTorrentsModal.Show();
     }
 
-    void CloseRelocateTorrentsModal()
+    async Task CloseRelocateTorrentsModalAsync()
     {
-        _relocateTorrentsModal.Hide();
+        await _relocateTorrentsModal.Hide();
     }
 
-    void OnRelocateTorrentsModalClosing(CancelEventArgs e)
+    Task OnRelocateTorrentsModalClosingAsync(ModalClosingEventArgs e)
     {
         e.Cancel = IsInWaitMode;
+        return Task.CompletedTask;
     }
 }

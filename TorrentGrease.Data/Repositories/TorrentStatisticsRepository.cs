@@ -25,7 +25,7 @@ namespace TorrentGrease.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<TorrentUploadDeltaSnapshot> GetLastTorrentUploadDeltaSnapshotByTorrentIdAsync(int torrentId, bool tracking = true)
+        public async Task<TorrentUploadDeltaSnapshot?> GetLastTorrentUploadDeltaSnapshotByTorrentIdAsync(int torrentId, bool tracking = true)
         {
             var source = tracking
                 ? _dbContext.TorrentUploadDeltaSnapshots
@@ -34,7 +34,7 @@ namespace TorrentGrease.Data.Repositories
             return await source
                 .Where(x => x.TorrentId == torrentId)
                 .OrderByDescending(x => x.DateTime)
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Torrent> GetTorrentByInfoHashAsync(string infoHash)

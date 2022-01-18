@@ -29,7 +29,7 @@ namespace TorrentGrease.Server.Services
 
         public Task<IEnumerable<FileLinkCandidate>> ScanForFilesToLinkAsync(ScanForPossibleFileLinksRequest request)
         {
-            if(request.PathsToScan == null || !request.PathsToScan.Any())
+            if (request.PathsToScan == null || !request.PathsToScan.Any())
             {
                 return Task.FromResult(Enumerable.Empty<FileLinkCandidate>());
             }
@@ -54,12 +54,12 @@ namespace TorrentGrease.Server.Services
                     var fileSizeInBytes = unixFileInfo.Length;
                     if (fileSizeInBytes > minBytes)
                     {
-                        _logger.LogTrace("Skpping '{0}', it doesn't meet the size criteria", file);
+                        _logger.LogTrace("Skpping '{file}', it doesn't meet the size criteria", file);
                         continue;
                     }
                     if (UnixFileSystemInfo.GetFileSystemEntry(file).IsSymbolicLink)
                     {
-                        _logger.LogTrace("Skpping '{0}', it's a symlink which we don't support atm", file);
+                        _logger.LogTrace("Skpping '{file}', it's a symlink which we don't support atm", file);
                         continue;
                     }
 
@@ -88,9 +88,9 @@ namespace TorrentGrease.Server.Services
                 for (int i = 0; i < filesWithSameSize.Count; i++)
                 {
                     var file1 = filesWithSameSize[i];
-                    
+
                     //Skip if this path is already added, or is already a hardlink
-                    if(skipList.Contains(i))
+                    if (skipList.Contains(i))
                     {
                         continue;
                     }
@@ -107,7 +107,7 @@ namespace TorrentGrease.Server.Services
                         var file2 = filesWithSameSize[j];
 
                         //Check if the two files are already hardlink to the same inode
-                        if(file1.Device == file2.Device &&
+                        if (file1.Device == file2.Device &&
                            file1.Inode == file2.Inode)
                         {
                             _logger.LogTrace($"Skpping '{file2.FullName}', it's already sharing the inode of '{file1.FullName}'");
@@ -141,7 +141,7 @@ namespace TorrentGrease.Server.Services
             });
 
             _logger.LogInformation($"Found {fileLinkCandidates.Sum(c => c.FilePaths.Count)} files which can be reduced to {fileLinkCandidates.Count} file links.");
-            return Task.FromResult((IEnumerable<FileLinkCandidate>) fileLinkCandidates);
+            return Task.FromResult((IEnumerable<FileLinkCandidate>)fileLinkCandidates);
         }
 
 

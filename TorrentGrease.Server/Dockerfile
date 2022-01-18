@@ -1,6 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine AS base
-RUN apk add curl
-
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS base
 WORKDIR /app
 
 EXPOSE 5656
@@ -10,7 +8,7 @@ ENV ASPNETCORE_URLS=
 
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --fail http://localhost:5656/health || exit 1
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal AS build
 ARG VERSION=0.1.0-devbuild
 WORKDIR /src
 # Copy the main source project files

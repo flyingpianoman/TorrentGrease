@@ -46,3 +46,8 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+/*smaller pagination*/
+.pagination.small > .page-item > a.page-link {
+    padding: .1rem .3rem;
+}

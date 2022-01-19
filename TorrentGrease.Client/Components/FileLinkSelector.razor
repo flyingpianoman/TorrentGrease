@@ -1,0 +1,139 @@
+﻿@using Blazorise
+@using TorrentGrease.Shared.ServiceContracts.FileLink;
+@using TorrentGrease.Client.Components;
+@inject IFileLinkService FileLinkService
+@inject ILogger<FileLinkSelector> _logger
+
+<Modal data-content="file-link-selector-modal" @ref="_fileLinkSelectorModal" Closing="@OnClosingAsync">
+    <ModalContent Size="ModalSize.ExtraLarge" IsCentered="true">
+        <ModalHeader>
+            <ModalTitle>File link candidates</ModalTitle>
+            <CloseButton IsDisabled="@IsInWaitMode" Clicked="@CloseAsync" />
+        </ModalHeader>
+        <ModalBody data-content="file-link-candidate-picker">
+            <table class="table" data-content="file-link-candidate-container">
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Filepaths</th>
+                        <th>Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <PagedList @ref="PagedFileLinkCandidateList" TItem="SelectableItem<FileLinkCandidate>" AllItems="_fileLinkCandidates" PageSize="NrOfCandidatesPerPage">
+                        @{
+                            var selectableCandidate = context;
+                            var index = PagedFileLinkCandidateList.CurrentPageItems.TakeWhile(x => x != selectableCandidate).Count();
+                            var candidate = selectableCandidate.Item;
+                        }
+                        <tr data-content="link-candidate">
+                            <td>
+                                <Blazorise.Check data-content="selector" IsDisabled="@(IsInWaitMode)" @bind-Checked="@selectableCandidate.IsSelected" />
+                            </td>
+                            <td data-content="link-candidate-filepaths-container">
+                                <ul>
+                                    <PagedList @ref="CandidateFilePathLists[index]" TItem="string" AllItems="candidate.FilePaths" PageSize="NrOfFileListsPerCandidateRowPage">
+                                        <ChildContent Context="filePath">
+                                            <li data-content="filepath">@filePath</li>
+                                        </ChildContent>
+                                    </PagedList>
+                                </ul>
+                                @if (candidate.FilePaths.Count > NrOfFileListsPerCandidateRowPage)
+                                {
+                                    <PagedListPaginator Size="PagedListPaginatorSize.Small" TItem="string" PagedList="CandidateFilePathLists[index]" />
+                                }
+                            </td>
+                            <td data-content="filesize">@(FormatFileSize(candidate.FileSizeInBytes))</td>
+                        </tr>
+                    </PagedList>
+                </tbody>
+            </table>
+            <PagedListPaginator TItem="SelectableItem<FileLinkCandidate>" PagedList="PagedFileLinkCandidateList" />
+
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" IsDisabled="@IsInWaitMode" Clicked="@CloseAsync">Close</Button>
+            <Button data-content="create-file-lnks-button" Color="Color.Primary" IsLoading="@_isBusy" IsDisabled="@IsInWaitMode" Clicked="@CreateFileLinksAsync">Create file links for selected files</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+@code {
+
+    [Parameter]
+    public IEnumerable<FileLinkCandidate> FileLinkCandidates { get; set; }
+    
+    public const int NrOfCandidatesPerPage = 25;
+    public const int NrOfFileListsPerCandidateRowPage = 5;
+
+    public bool IsInWaitMode => _isBusy;
+
+    Modal _fileLinkSelectorModal;
+
+    IEnumerable<SelectableItem<FileLinkCandidate>> _fileLinkCandidates;
+    PagedList<SelectableItem<FileLinkCandidate>> PagedFileLinkCandidateList;
+    PagedList<string>[] CandidateFilePathLists = new PagedList<string>[NrOfCandidatesPerPage];
+
+    bool _isBusy = false;
+
+    void ResetModal()
+    {
+        _fileLinkCandidates = FileLinkCandidates
+            .OrderBy(x => x.FilePaths.OrderBy(f => f).First())
+            .Select(x => new SelectableItem<FileLinkCandidate>(x) { IsSelected = true })
+            .ToArray();
+        _isBusy = false;
+    }
+
+    string FormatFileSize(long bytes)
+    {
+        if (bytes >= (1024 * 1024 * 1024))
+        {
+            return bytes / (1024 * 1024 * 1024) + " GB";
+        }
+
+        if (bytes >= (1024 * 1024))
+        {
+            return bytes / (1024 * 1024) + " MB";
+        }
+
+        if (bytes >= 1024)
+        {
+            return bytes / 1024 + " KB";
+        }
+
+        return bytes + " B";
+    }
+
+    async Task CreateFileLinksAsync()
+    {
+        var fileLinksToCreate = _fileLinkCandidates
+            .Where(s => s.IsSelected)
+            .Select(s => s.Item)
+            .ToList();
+
+        _isBusy = true;
+        StateHasChanged();
+        await FileLinkService.CreateFileLinksAsync(fileLinksToCreate);
+        _isBusy = false;
+
+        await CloseAsync();
+    }
+
+    public async Task ShowAsync()
+    {
+        ResetModal();
+        await _fileLinkSelectorModal.Show();
+    }
+
+    async Task CloseAsync()
+    {
+        await _fileLinkSelectorModal.Hide();
+    }
+
+    Task OnClosingAsync(ModalClosingEventArgs e)
+    {
+        e.Cancel = IsInWaitMode;
+        return Task.CompletedTask;
+    }
+}

@@ -42,17 +42,17 @@ namespace TorrentGrease.Server.Services
             var filesBySizeLookup = new Dictionary<long, List<UnixFileSystemInfo>>();
             var minBytes = request.MinFileSizeInBytes;
 
-            _logger.LogInformation($"Scanning {request.PathsToScan.Count()} paths for files to analyze for possible file links later");
+            _logger.LogInformation("Scanning {nrOfPathsToScan} paths for files to analyze for possible file links later", request.PathsToScan.Count());
             foreach (var pathToScan in request.PathsToScan)
             {
                 var files = Directory.GetFiles(pathToScan, "*", SearchOption.AllDirectories);
-                _logger.LogInformation($"Found {files.Length} files on path '{pathToScan}'");
+                _logger.LogInformation("Found {nrOfFiles} files on path '{pathToScan}'", files.Length, pathToScan);
 
                 foreach (var file in files)
                 {
                     var unixFileInfo = UnixFileSystemInfo.GetFileSystemEntry(file);
                     var fileSizeInBytes = unixFileInfo.Length;
-                    if (fileSizeInBytes > minBytes)
+                    if (fileSizeInBytes < minBytes)
                     {
                         _logger.LogTrace("Skpping '{file}', it doesn't meet the size criteria", file);
                         continue;
@@ -72,17 +72,19 @@ namespace TorrentGrease.Server.Services
                         filesBySizeLookup.Add(fileSizeInBytes, new List<UnixFileSystemInfo> { unixFileInfo });
                     }
 
-                    _logger.LogDebug($"Current inventory contains {filesBySizeLookup.Count} unique file sizes and {filesBySizeLookup.Sum(x => x.Value.Count)} total file paths");
+                    _logger.LogDebug("Current inventory contains {nrOfSizes} unique file sizes and {totalNrOfFiles} total file paths", filesBySizeLookup.Count, filesBySizeLookup.Sum(x => x.Value.Count));
                 }
-                _logger.LogInformation($"Done scanning '{pathToScan}' for files");
+                _logger.LogInformation("Done scanning '{pathToScan}' for files", pathToScan);
             }
+
+            filesBySizeLookup = filesBySizeLookup.Where(kv => kv.Value.Count > 1).ToDictionary(kv => kv.Key, kv => kv.Value);
+            _logger.LogInformation("Removed file sizes that had only 1 entry, {nrOfSizes} unique file sizes and {totalNrOfFiles} file paths left", filesBySizeLookup.Count, filesBySizeLookup.Sum(x => x.Value.Count));
 
             _logger.LogInformation($"Compare files of same size to look for file link candidates");
             var fileLinkCandidates = new ConcurrentBag<FileLinkCandidate>();
 
             Parallel.ForEach(filesBySizeLookup.Values, filesWithSameSize =>
             {
-                var fileLinkCandidates = new List<FileLinkCandidate>();
                 var skipList = new List<int>();
 
                 for (int i = 0; i < filesWithSameSize.Count; i++)
@@ -110,7 +112,7 @@ namespace TorrentGrease.Server.Services
                         if (file1.Device == file2.Device &&
                            file1.Inode == file2.Inode)
                         {
-                            _logger.LogTrace($"Skpping '{file2.FullName}', it's already sharing the inode of '{file1.FullName}'");
+                            _logger.LogTrace("Skpping '{fileToSkip}', it's already sharing the inode of '{fileItSharesWith}'", file2.FullName, file1.FullName);
                             skipList.Add(j);
                             continue;
                         }
@@ -140,7 +142,7 @@ namespace TorrentGrease.Server.Services
                 }
             });
 
-            _logger.LogInformation($"Found {fileLinkCandidates.Sum(c => c.FilePaths.Count)} files which can be reduced to {fileLinkCandidates.Count} file links.");
+            _logger.LogInformation("Found {nrOfPaths} files which can be reduced to {nrOfFileLinks} file links.", fileLinkCandidates.Sum(c => c.FilePaths.Count), fileLinkCandidates.Count);
             return Task.FromResult((IEnumerable<FileLinkCandidate>)fileLinkCandidates);
         }
 
@@ -156,7 +158,7 @@ namespace TorrentGrease.Server.Services
                 var byteBuffer1 = new byte[bufferSize];
                 var byteBuffer2 = new byte[bufferSize];
                 var memBuffer1 = byteBuffer1.AsMemory();
-                var memBuffer2 = byteBuffer1.AsMemory();
+                var memBuffer2 = byteBuffer2.AsMemory();
 
                 for (int i = 0; i < iterations; i++)
                 {

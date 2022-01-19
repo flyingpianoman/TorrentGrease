@@ -1,0 +1,111 @@
+﻿@page "/file-links"
+@using TorrentGrease.Shared.ServiceContracts.FileLink
+@inject IFileLinkService FileLinkService
+
+<div data-content="file-links">
+    <Row>
+        <Column>
+            <Card data-content="file-links-container">
+                <CardHeader>
+                    <CardTitle>File links</CardTitle>
+                </CardHeader>
+                <CardBody>
+                    <CardText>
+                        Will scan for possible hard links (files that are equal but aren't sym- or hardlinks)
+                    </CardText>
+                </CardBody>
+                <CardBody>
+                    <Inline>
+                        <Field ColumnSize="ColumnSize.IsFull" Horizontal="true">
+                            <FieldLabel Class="mr-1">Minimal file size</FieldLabel>
+                            <FieldBody>
+                                <NumericEdit data-content="min-file-size" @bind-Value="MinFileSize" />
+                            </FieldBody>
+                            <RadioGroup data-content="min-file-size-unit-type" @bind-CheckedValue="@MinFileSizeUnitType" TValue="string" Name="minimalFileSizeUnit" Buttons="true">
+                                <Radio TValue="string" Value="@("B")">B</Radio>
+                                <Radio TValue="string" Value="@("KB")">KB</Radio>
+                                <Radio TValue="string" Value="@("MB")">MB</Radio>
+                                <Radio TValue="string" Value="@("GB")">GB</Radio>
+                            </RadioGroup>
+                        </Field>
+                    </Inline>
+                </CardBody>
+                <CardBody>
+                    <CardText>
+                        <h4>Dirs to scan</h4>
+                    </CardText>
+                    @for (var i = 0; i < DirsToScan.Count; i++)
+                    {
+                        var local = i;
+                        var dir = DirsToScan[local];
+                        <Row data-content="dir-row" Class="form-group">
+                            <Column ColumnSize="ColumnSize.Is2">Dir @(local + 1)</Column>
+                            <Column ColumnSize="ColumnSize.Is10">
+                                <TextEdit data-content="dir" @bind-Text="@DirsToScan[local]" />
+                            </Column>
+                        </Row>
+                    }
+                </CardBody>
+                <CardFooter>
+                    <Field>
+                        <Button data-content="add-dir-button" Color="Color.Secondary" Disabled="IsLoading" Clicked="AddDir">Add dir</Button>
+                        <Button data-content="scan-button" Color="Color.Primary" Loading="_isScanning" Disabled="IsLoading" Clicked="ScanAsync">Scan</Button>
+                    </Field>
+                </CardFooter>
+            </Card>
+        </Column>
+    </Row>
+
+    <TorrentGrease.Client.Components.FileLinkSelector @ref="_fileLinkSelector" FileLinkCandidates="_fileLinkCandidates" />
+</div>
+
+@code {
+    List<string> DirsToScan { get; } = new List<string>() { string.Empty };
+    int MinFileSize = 0;
+    string MinFileSizeUnitType = "MB";
+    TorrentGrease.Client.Components.FileLinkSelector _fileLinkSelector;
+    IEnumerable<FileLinkCandidate> _fileLinkCandidates = null;
+    bool _isScanning = false;
+    bool IsLoading => _isScanning;
+
+    void AddDir()
+    {
+        DirsToScan.Add(string.Empty);
+    }
+
+    async Task ScanAsync()
+    {
+        long minFileSize = 0;
+        switch (MinFileSizeUnitType)
+        {
+            case "B":
+                minFileSize = MinFileSize;
+                break;
+            case "KB":
+                minFileSize = MinFileSize * 1024;
+                break;
+            case "MB":
+                minFileSize = MinFileSize * 1024 * 1024;
+                break;
+            case "GB":
+                minFileSize = MinFileSize * 1024 * 1024 * 1024;
+                break;
+
+            default:
+                throw new NotSupportedException();
+        }
+
+        _isScanning = true;
+        _fileLinkCandidates = await FileLinkService.ScanForFilesToLinkAsync(new ScanForPossibleFileLinksRequest
+        {
+            PathsToScan = DirsToScan
+                .Where(dir => !string.IsNullOrWhiteSpace(dir) && !string.IsNullOrWhiteSpace(dir)) //filter out empty rows
+                .ToList(),
+            MinFileSizeInBytes = minFileSize
+        });
+        StateHasChanged();
+        _isScanning = false;
+
+        await _fileLinkSelector.ShowAsync();
+    }
+}

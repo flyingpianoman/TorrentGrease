@@ -20,17 +20,20 @@ namespace SpecificationTest.Pages.Components
             _webDriver = webDriver?? throw new ArgumentNullException(nameof(webDriver));
         }
 
+        public bool IsActive { get; private set; }
         public NavMenuItemTarget Target { get; private set; }
 
         public Task<NavMenuLinkComponent> InitializeAsync()
         {
             var href = _webElement.GetAttribute("href").Split('/').Last();
 
+            IsActive = _webElement.GetAttribute("class").Split(' ').Any(x => x == "active");
             Target = href switch
             {
                 "" => NavMenuItemTarget.Policies,
                 "torrents" => NavMenuItemTarget.Torrents,
                 "file-management" => NavMenuItemTarget.FileManagement,
+                "file-links" => NavMenuItemTarget.FileLinks,
                 _ => throw new InvalidOperationException($"Unknown nav item target href '{href}'"),
             };
             return Task.FromResult(this);

@@ -10,5 +10,6 @@ namespace SpecificationTest.Steps.Models
     {
         public string FilePath { get; set; }
         public int FileSizeInKB { get; set; }
+        public char? Char { get; set; }
     }
 }

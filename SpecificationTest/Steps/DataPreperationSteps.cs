@@ -189,7 +189,7 @@ namespace SpecificationTest.Steps
                     Directory.CreateDirectory(tempDir);
                     var filename = Path.GetFileName(fileDto.FilePath);
                     var fileOnHost = Path.Combine(tempDir, filename);
-                    await torrentFileHelper.CreateTextFileAsync(fileOnHost, (int)fileDto.FileSizeInKB * 1024);
+                    await torrentFileHelper.CreateTextFileAsync(fileOnHost, (int)fileDto.FileSizeInKB * 1024, fileDto.Char ?? '*');
 
                     var tarStream = ArchiveHelper.CreateSingleFileTarStream(fileOnHost, filename);
 

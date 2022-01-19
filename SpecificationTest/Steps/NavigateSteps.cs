@@ -64,6 +64,21 @@ namespace SpecificationTest.Steps
             }
         }
 
+        [Given(@"I navigate to file links")]
+        public void GivenINavigateToFileLinks()
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                await (await NavigateToRootUrlAsync().ConfigureAwait(false))
+                    .NavigationMenu
+                    .FileLinksNavMenuLink
+                    .NavigateAsync<FileLinksPage>()
+                    .ConfigureAwait(false);
+            }
+        }
+
         [Then(@"I can see the navigation menu")]
         public void ThenICanSeeTheNavigationMenu()
         {

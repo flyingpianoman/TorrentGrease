@@ -13,6 +13,7 @@ steps:
   inputs:
     useConfigFile: true
     configFilePath: '$(Build.SourcesDirectory)/GitVersion.yml'
+    updateAssemblyInfo: true
     
 - task: UseDotNet@2
   displayName: Install dotnet 6.0 sdk

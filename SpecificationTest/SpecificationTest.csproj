@@ -37,6 +37,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Features\FileLinks.feature.cs">
+      <DependentUpon>FileLinks.feature</DependentUpon>
+    </Compile>
     <Compile Update="Features\RemoveOrphanedFiles.feature.cs">
       <DependentUpon>RemoveOrphanedFiles.feature</DependentUpon>
     </Compile>
@@ -46,6 +49,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <SpecFlowFeatureFiles Update="Features\FileLinks.feature">
+      <Visible>$(UsingMicrosoftNETSdk)</Visible>
+      <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
+    </SpecFlowFeatureFiles>
     <SpecFlowFeatureFiles Update="Features\RemoveOrphanedFiles.feature">
       <Visible>$(UsingMicrosoftNETSdk)</Visible>
       <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>

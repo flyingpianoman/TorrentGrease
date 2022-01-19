@@ -118,7 +118,7 @@ namespace SpecificationTest.Steps
                 }
 
                 var torrentFilePath = Path.Combine(tempDir, torrentFile.FilePath);
-                await torrentFileHelper.CreateTextFileAsync(torrentFilePath, (int)torrentFile.SizeInBytes);
+                await torrentFileHelper.CreateTextFileAsync(torrentFilePath, (int)torrentFile.SizeInBytes, '*');
 
                 torrentFileMappings.Add(new CreateTorrentFileMapping
                 {

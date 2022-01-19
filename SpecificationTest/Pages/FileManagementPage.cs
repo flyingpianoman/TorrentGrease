@@ -11,7 +11,7 @@ using SpecificationTest.Pages.Components.PolicyOverview;
 
 namespace SpecificationTest.Pages
 {
-    class FileManagementPage : PageBase
+    class FileManagementPage : PageBase, IPageWithMinFileSize
     {
         private IWebElement _rootElement;
         private IWebElement _fileMngmtContainer;

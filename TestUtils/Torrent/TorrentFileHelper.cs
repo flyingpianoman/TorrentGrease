@@ -10,7 +10,7 @@ namespace TestUtils.Torrent
 {
     public class TorrentFileHelper
     {
-        public async ValueTask CreateTextFileAsync(string fileLoc, int bytes)
+        public async ValueTask CreateTextFileAsync(string fileLoc, int bytes, char charToUser)
         {
             using var sw = File.CreateText(fileLoc);
             var remainingBytes = bytes; //Each char = 1 byte
@@ -21,7 +21,7 @@ namespace TestUtils.Torrent
                     ? remainingBytes
                     : 1024; //Write 1 KB at a time
 
-                await sw.WriteAsync(new string('*', charsToWriteThisIteration));
+                await sw.WriteAsync(new string(charToUser, charsToWriteThisIteration));
                 remainingBytes -= charsToWriteThisIteration;
             }
         }

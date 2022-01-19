@@ -8,6 +8,7 @@ namespace SpecificationTest.Pages.Components
     {
         Policies,
         Torrents,
-        FileManagement
+        FileManagement,
+        FileLinks
     }
 }

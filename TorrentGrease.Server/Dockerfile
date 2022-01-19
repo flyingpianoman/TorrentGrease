@@ -1,4 +1,8 @@
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS base
+RUN apt update && \
+	apt upgrade -y && \
+	apt install curl -y
+
 WORKDIR /app
 
 EXPOSE 5656

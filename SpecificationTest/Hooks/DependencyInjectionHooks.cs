@@ -17,19 +17,25 @@ namespace SpecificationTest.Hooks
         [BeforeTestRun(Order = 1)]
         public static void InitDIContainer()
         {
-            var services = DIContainer.Default;
-            services.RegisterDockerClient();
-            services.RegisterTorrentClient();
-            services.RegisterWebDriver();
-            services.Register(new TorrentGreaseDBService(services.Get<DockerClient>()));
-            services.Register(new TorrentFileHelper());
-            services.Register(new Dictionary<string, string>(), "TorrentDataFolders");
+            TestLogger.LogElapsedTime(() =>
+            {
+                var services = DIContainer.Default;
+                services.RegisterDockerClient();
+                services.RegisterTorrentClient();
+                services.RegisterWebDriver();
+                services.Register(new TorrentGreaseDBService(services.Get<DockerClient>()));
+                services.Register(new TorrentFileHelper());
+                services.Register(new Dictionary<string, string>(), "TorrentDataFolders");
+            }, nameof(InitDIContainer));
         }
 
         [AfterTestRun]
         public static async ValueTask DisposeDIContainer()
         {
-            await DIContainer.Default.DisposeAsync();
+            await TestLogger.LogElapsedTimeAsync(async () =>
+            {
+                await DIContainer.Default.DisposeAsync();
+            }, nameof(DisposeDIContainer));
         }
     }
 }

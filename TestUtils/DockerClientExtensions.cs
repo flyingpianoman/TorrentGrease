@@ -108,10 +108,10 @@ namespace TestUtils
             await ExecuteSHCommandAsync(dockerClient, containerId, $"mv \"{from}\" \"{to}\"").ConfigureAwait(false);
         }
 
-        public static async Task EmptyDirInContainerAsync(this DockerClient dockerClient,
-            string containerId, string dirPath)
+        public static async Task EmptyDirsInContainerAsync(this DockerClient dockerClient,
+            string containerId, IEnumerable<string> dirPaths)
         {
-            await ExecuteSHCommandAsync(dockerClient, containerId, $"find \"{dirPath}\" -mindepth 1 -delete").ConfigureAwait(false);
+            await ExecuteSHCommandAsync(dockerClient, containerId, $"find {string.Join(' ', dirPaths)} -mindepth 1 -delete").ConfigureAwait(false);
         }
 
         public static async Task CreateFileInContainerAsync(this DockerClient dockerClient,

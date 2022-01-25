@@ -16,7 +16,7 @@ namespace TestUtils.Torrent
         public async ValueTask CreateTextFileAsync(string fileLoc, int bytes, char firstChar = '*')
         {
             using var fs = new FileStream(fileLoc, FileMode.CreateNew);
-            await fs.WriteAsync(UTF8Encoding.UTF8.GetBytes(new char[] { firstChar }));
+            await fs.WriteAsync(Encoding.UTF8.GetBytes(new char[] { firstChar }));
             fs.Seek(bytes - 1, SeekOrigin.Begin);
             fs.WriteByte(0);
             fs.Close();

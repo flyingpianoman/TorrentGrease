@@ -19,29 +19,35 @@ namespace SpecificationTest.Hooks
         [BeforeTestRun(Order = 100)]
         public static void SetupWebDriver()
         {
-            //Create dir for screenshots
-            Directory.CreateDirectory(ScreenShotDir);
+            TestLogger.LogElapsedTime(() =>
+            {
+                //Create dir for screenshots
+                Directory.CreateDirectory(ScreenShotDir);
+            }, nameof(SetupWebDriver));
         }
 
         [AfterScenario]
         public static void SaveScenarioScreenShot(ScenarioContext scenarioContext)
         {
-            if (scenarioContext == null) throw new ArgumentNullException(nameof(scenarioContext));
-
-            var webDriver = DIContainer.Default.Get<IWebDriver>();
-            var ss = ((ITakesScreenshot)webDriver).GetScreenshot();
-            ss.SaveAsFile(Path.Combine(ScreenShotDir, $"{scenarioContext.ScenarioInfo.Title}.png"),
-                ScreenshotImageFormat.Png);
-
-            var logEntries = webDriver.Manage().Logs.GetLog(LogType.Browser);
-            if (logEntries.Any())
+            TestLogger.LogElapsedTime(() =>
             {
-                TestLogger.LogDebug("After scenario browser log entries found:");
-                foreach (var logEntry in logEntries)
+                if (scenarioContext == null) throw new ArgumentNullException(nameof(scenarioContext));
+
+                var webDriver = DIContainer.Default.Get<IWebDriver>();
+                var ss = ((ITakesScreenshot)webDriver).GetScreenshot();
+                ss.SaveAsFile(Path.Combine(ScreenShotDir, $"{scenarioContext.ScenarioInfo.Title}.png"),
+                    ScreenshotImageFormat.Png);
+
+                var logEntries = webDriver.Manage().Logs.GetLog(LogType.Browser);
+                if (logEntries.Any())
                 {
-                    TestLogger.LogDebug($"[{logEntry.Timestamp}][{logEntry.Level}] {logEntry.Message}");
+                    TestLogger.LogDebug("After scenario browser log entries found:");
+                    foreach (var logEntry in logEntries)
+                    {
+                        TestLogger.LogDebug($"[{logEntry.Timestamp}][{logEntry.Level}] {logEntry.Message}");
+                    }
                 }
-            }
+            }, nameof(SaveScenarioScreenShot));
         }
     }
 }

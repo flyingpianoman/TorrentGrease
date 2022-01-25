@@ -40,7 +40,7 @@ namespace SpecificationTest.Steps
         [Given(@"the following torrents are staged")]
         public void GivenTheFollowingTorrentsAreStaged(Table table)
         {
-            InnerAsync().GetAwaiter().GetResult();
+            TestLogger.LogElapsedTime(() => InnerAsync().GetAwaiter().GetResult(), nameof(GivenTheFollowingTorrentsAreStaged));
 
             async Task InnerAsync()
             {
@@ -135,7 +135,7 @@ namespace SpecificationTest.Steps
         [Then(@"I see an overview of the following torrents")]
         public void ThenISeeAnOverviewOfTheFollowingTorrents(Table table)
         {
-            InnerAsync().GetAwaiter().GetResult();
+            TestLogger.LogElapsedTime(() => InnerAsync().GetAwaiter().GetResult(), nameof(ThenISeeAnOverviewOfTheFollowingTorrents));
 
             async Task InnerAsync()
             {

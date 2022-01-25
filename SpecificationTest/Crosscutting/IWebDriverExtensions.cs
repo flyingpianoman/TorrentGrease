@@ -15,12 +15,23 @@ namespace SpecificationTest.Crosscutting
 
         public static void RegisterWebDriver(this DIContainer diContainer)
         {
-            var capabilities = new OpenQA.Selenium.Firefox.FirefoxOptions().ToCapabilities();
+            //    var firefoxOptions = new OpenQA.Selenium.Firefox.FirefoxOptions();
+            //    firefoxOptions.AddArgument("--headless");
+            //    var capabilities = firefoxOptions.ToCapabilities();
+
+
+            var chromeOpts = new OpenQA.Selenium.Chrome.ChromeOptions();
+            chromeOpts.AddArgument("--headless");
+            var capabilities = chromeOpts.ToCapabilities();
             RemoteWebDriver driver = null;
 
             try
             {
-                driver = new RemoteWebDriver(TestSettings.SeleniumHubAddress, capabilities);
+
+                TestLogger.LogElapsedTime(() =>
+                {
+                    driver = new RemoteWebDriver(TestSettings.SeleniumHubAddress, capabilities);
+                }, "new RemoteWebDriver");
                 diContainer.Register<IWebDriver>(driver);
             }
             catch (Exception)

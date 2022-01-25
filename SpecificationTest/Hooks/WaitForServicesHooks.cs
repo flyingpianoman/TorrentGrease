@@ -55,40 +55,48 @@ namespace SpecificationTest.Hooks
 
         private static async Task WaitForTorrentGreaseAsync()
         {
-            using var httpClient = new HttpClient();
-            try
+
+            await TestLogger.LogElapsedTimeAsync(async () =>
             {
-                await _WaitForHealthyPolicy.ExecuteAsync(async () =>
-                    {
-                        var healthUri = new Uri(TestSettings.TorrentGreaseExposedAddress + "/health");
-                        using var resp = await httpClient.GetAsync(healthUri).ConfigureAwait(false);
-                        resp.StatusCode.Should().Be(HttpStatusCode.OK);
-                    }).ConfigureAwait(false);
-            }
-            catch (Polly.Timeout.TimeoutRejectedException e)
-            {
-                throw new ApplicationException("Timed out while waiting on TorrentGrease", e);
-            }
+                using var httpClient = new HttpClient();
+                try
+                {
+                    await _WaitForHealthyPolicy.ExecuteAsync(async () =>
+                        {
+                            var healthUri = new Uri(TestSettings.TorrentGreaseExposedAddress + "/health");
+                            using var resp = await httpClient.GetAsync(healthUri).ConfigureAwait(false);
+                            resp.StatusCode.Should().Be(HttpStatusCode.OK);
+                        }).ConfigureAwait(false);
+                }
+                catch (Polly.Timeout.TimeoutRejectedException e)
+                {
+                    throw new ApplicationException("Timed out while waiting on TorrentGrease", e);
+                }
+            }, nameof(WaitForTorrentGreaseAsync));
         }
 
         private static async Task WaitForSeleniumHubAsync()
         {
-            using var httpClient = new HttpClient();
-            try
+
+            await TestLogger.LogElapsedTimeAsync(async () =>
             {
-                await _WaitForHealthyPolicy.ExecuteAsync(async () =>
-                    {
-                        var healthUri = new Uri(TestSettings.SeleniumHubAddress + "wd/hub/status");
-                        using var resp = await httpClient.GetAsync(healthUri).ConfigureAwait(false);
-                        resp.StatusCode.Should().Be(HttpStatusCode.OK);
-                        var statusJson = JObject.Parse(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
-                        statusJson["value"]["ready"].Value<bool>().Should().BeTrue();
-                    }).ConfigureAwait(false);
-            }
-            catch (Polly.Timeout.TimeoutRejectedException e)
-            {
-                throw new ApplicationException("Timed out while waiting on SeleniumHub", e);
-            }
+                using var httpClient = new HttpClient();
+                try
+                {
+                    await _WaitForHealthyPolicy.ExecuteAsync(async () =>
+                        {
+                            var healthUri = new Uri(TestSettings.SeleniumHubAddress + "wd/hub/status");
+                            using var resp = await httpClient.GetAsync(healthUri).ConfigureAwait(false);
+                            resp.StatusCode.Should().Be(HttpStatusCode.OK);
+                            var statusJson = JObject.Parse(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+                            statusJson["value"]["ready"].Value<bool>().Should().BeTrue();
+                        }).ConfigureAwait(false);
+                }
+                catch (Polly.Timeout.TimeoutRejectedException e)
+                {
+                    throw new ApplicationException("Timed out while waiting on SeleniumHub", e);
+                }
+            }, nameof(WaitForSeleniumHubAsync));
         }
     }
 }

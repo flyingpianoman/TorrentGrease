@@ -37,7 +37,7 @@ namespace SpecificationTest.Steps
         [When(@"I navigate to the torrent overview")]
         public void NavigateToTheTorrentOverview()
         {
-            InnerAsync().GetAwaiter().GetResult();
+            TestLogger.LogElapsedTime(() => InnerAsync().GetAwaiter().GetResult(), nameof(NavigateToTheTorrentOverview));
 
             async Task InnerAsync()
             {

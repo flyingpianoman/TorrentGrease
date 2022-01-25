@@ -54,5 +54,6 @@ Scenario: Find file link candidates, don't show hard links if there are only lin
         | Directory  |
         | /downloads |
     When I scan for possible file links
-    Then I see an empty file link candidates overview #TODO make empty table message
+    Then I see an empty file link candidates overview 
+    #TODO make empty table message
 #todo

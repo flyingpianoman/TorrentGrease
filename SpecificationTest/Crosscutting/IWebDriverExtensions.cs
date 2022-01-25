@@ -60,13 +60,13 @@ namespace SpecificationTest.Crosscutting
             return page;
         }
 
-#pragma warning disable IDE0060 // Remove unused parameter
+#pragma warning disable IDE0060 // parameter is here so that we have the extension method experience
         public static TPage CurrentPageAs<TPage>(this IWebDriver webDriver)
             where TPage : IPage
         {
             return (TPage)_currentPage;
         }
-#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore IDE0060 // parameter is here so that we have the extension method experience
 
         private static async Task<TPage> CreateAndInitPageAsync<TPage>(IWebDriver webDriver) where TPage : IPage
         {

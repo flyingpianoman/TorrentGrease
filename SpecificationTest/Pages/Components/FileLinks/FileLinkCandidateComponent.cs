@@ -26,9 +26,13 @@ namespace SpecificationTest.Pages.Components.FileLinks
             }
         }
 
-        public IEnumerable<string> FilePathsOnCurrentPage => _rootElement.FindElementsByContentName("filepath")
-            .Select(el => el.Text)
-            .ToArray();
+        public async Task<IEnumerable<FileLinkCandidateFileComponent>> GetFilesOnCurrentPageAsync()
+        {
+            return await _rootElement
+                .FindElementsByContentName("candidate-file-row")
+                .Select(el => new FileLinkCandidateFileComponent(el).InitializeAsync())
+                .AwaitAllAsync();
+        }
 
         /// <summary>
         /// Size + unit e.g. '25 kb'

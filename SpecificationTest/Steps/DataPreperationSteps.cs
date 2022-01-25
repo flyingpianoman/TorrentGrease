@@ -175,11 +175,11 @@ namespace SpecificationTest.Steps
         [Given(@"the following data is sent to the torrent client")]
         public void GivenTheFollowingDataIsSentToTheTorrentClient(Table table)
         {
-            var torrentFileHelper = DI.Get<TorrentFileHelper>();
             InnerAsync().GetAwaiter().GetResult();
 
             async Task InnerAsync()
             {
+                var torrentFileHelper = DI.Get<TorrentFileHelper>();
                 var fileDtos = table.CreateSet<TorrentClientFileDto>().ToList();
                 var torrentClientContainerId = await _dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TransmissionContainerName).ConfigureAwait(false);
 
@@ -198,6 +198,24 @@ namespace SpecificationTest.Steps
                     await _dockerClient.UploadTarredFileToContainerAsync(tarStream, torrentClientContainerId, fileDir).ConfigureAwait(false);
 
                     await WaitUntilFileExistsInContainerAsync(torrentClientContainerId, fileDto.FilePath);
+                }
+            }
+        }
+
+        [Given(@"I create a hard link for the following files")]
+        public void GivenICreateAHardLinkForTheFollowingFiles(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var torrentClientContainerId = await _dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TransmissionContainerName).ConfigureAwait(false);
+
+                var filesToHardlink = table.CreateSet<FileToHardlinkDto>().ToList();
+                foreach (var fileToHardlink in filesToHardlink)
+                {
+                    await _dockerClient.CreateHardLinkInContainerAsync(torrentClientContainerId, 
+                        fileToHardlink.FilePath, fileToHardlink.HardLinkTargetPath);
                 }
             }
         }

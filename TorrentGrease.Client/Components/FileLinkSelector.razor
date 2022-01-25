@@ -11,7 +11,7 @@
             <CloseButton IsDisabled="@IsInWaitMode" Clicked="@CloseAsync" />
         </ModalHeader>
         <ModalBody data-content="file-link-candidate-picker">
-            <table class="table" data-content="file-link-candidate-container">
+            <table class="table table-sm" data-content="file-link-candidate-container">
                 <thead>
                     <tr>
                         <th>&nbsp;</th>
@@ -27,23 +27,36 @@
                             var candidate = selectableCandidate.Item;
                         }
                         <tr data-content="link-candidate">
-                            <td>
+                            <td class="align-middle">
                                 <Blazorise.Check data-content="selector" IsDisabled="@(IsInWaitMode)" @bind-Checked="@selectableCandidate.IsSelected" />
                             </td>
                             <td data-content="link-candidate-filepaths-container">
-                                <ul>
-                                    <PagedList @ref="CandidateFilePathLists[index]" TItem="string" AllItems="candidate.FilePaths" PageSize="NrOfFileListsPerCandidateRowPage">
-                                        <ChildContent Context="filePath">
-                                            <li data-content="filepath">@filePath</li>
-                                        </ChildContent>
-                                    </PagedList>
-                                </ul>
+                                <table class="table" data-content="file-link-candidate-filepaths-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-8">Path</th>
+                                            <th class="col-2">Device ID</th>
+                                            <th class="col-2">Inode ID</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <PagedList @ref="CandidateFilePathLists[index]" TItem="FileLinkCandidateFile" AllItems="candidate.FilePaths" PageSize="NrOfFileListsPerCandidateRowPage">
+                                            <ChildContent Context="candidateFile">
+                                                <tr data-content="candidate-file-row">
+                                                    <td data-content="filepath">@candidateFile.FilePath</td>
+                                                    <td data-content="device-id">@candidateFile.DeviceId</td>
+                                                    <td data-content="inode-id">@candidateFile.InodeId</td>
+                                                </tr>
+                                            </ChildContent>
+                                        </PagedList>
+                                    </tbody>
+                                </table>
                                 @if (candidate.FilePaths.Count > NrOfFileListsPerCandidateRowPage)
                                 {
-                                    <PagedListPaginator Size="PagedListPaginatorSize.Small" TItem="string" PagedList="CandidateFilePathLists[index]" />
+                                    <PagedListPaginator Size="PagedListPaginatorSize.Small" TItem="FileLinkCandidateFile" PagedList="CandidateFilePathLists[index]" />
                                 }
                             </td>
-                            <td data-content="filesize">@(FormatFileSize(candidate.FileSizeInBytes))</td>
+                            <td class="align-middle" data-content="filesize">@(FormatFileSize(candidate.FileSizeInBytes))</td>
                         </tr>
                     </PagedList>
                 </tbody>
@@ -72,14 +85,14 @@
 
     IEnumerable<SelectableItem<FileLinkCandidate>> _fileLinkCandidates;
     PagedList<SelectableItem<FileLinkCandidate>> PagedFileLinkCandidateList;
-    PagedList<string>[] CandidateFilePathLists = new PagedList<string>[NrOfCandidatesPerPage];
+    PagedList<FileLinkCandidateFile>[] CandidateFilePathLists = new PagedList<FileLinkCandidateFile>[NrOfCandidatesPerPage];
 
     bool _isBusy = false;
 
     void ResetModal()
     {
         _fileLinkCandidates = FileLinkCandidates
-            .OrderBy(x => x.FilePaths.OrderBy(f => f).First())
+            .OrderBy(x => x.FilePaths.OrderBy(f => f.FilePath).First().FilePath)
             .Select(x => new SelectableItem<FileLinkCandidate>(x) { IsSelected = true })
             .ToArray();
         _isBusy = false;

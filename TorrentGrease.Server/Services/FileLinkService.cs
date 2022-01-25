@@ -25,13 +25,24 @@ namespace TorrentGrease.Server.Services
             throw new System.NotImplementedException();
             //var a = UnixFileSystemInfo.GetFileSystemEntry("/first");
             //a.CreateLink("/second");
+
+
+            //Check if the two files are already hardlink to the same inode
+            //if (file1.Device == file2.Device &&
+            //   file1.Inode == file2.Inode)
+            //{
+            //    _logger.LogTrace("Skpping '{fileToSkip}', it's already sharing the inode of '{fileItSharesWith}'", file2.FullName, file1.FullName);
+            //    skipList.Add(file2Index);
+            //    continue;
+            //}
+
         }
 
-        public Task<IEnumerable<FileLinkCandidate>> ScanForFilesToLinkAsync(ScanForPossibleFileLinksRequest request)
+        public async Task<IEnumerable<FileLinkCandidate>> ScanForFilesToLinkAsync(ScanForPossibleFileLinksRequest request)
         {
             if (request.PathsToScan == null || !request.PathsToScan.Any())
             {
-                return Task.FromResult(Enumerable.Empty<FileLinkCandidate>());
+                return Enumerable.Empty<FileLinkCandidate>();
             }
 
             if (Environment.OSVersion.Platform != PlatformID.Unix)
@@ -83,67 +94,76 @@ namespace TorrentGrease.Server.Services
             _logger.LogInformation($"Compare files of same size to look for file link candidates");
             var fileLinkCandidates = new ConcurrentBag<FileLinkCandidate>();
 
-            Parallel.ForEach(filesBySizeLookup.Values, filesWithSameSize =>
+            await Parallel.ForEachAsync(filesBySizeLookup.Values, async (filesWithSameSize, ct) =>
             {
                 var skipList = new List<int>();
+                var potentialCandidates = new List<FileLinkCandidate>();
 
-                for (int i = 0; i < filesWithSameSize.Count; i++)
+                for (int file1Index = 0; file1Index < filesWithSameSize.Count; file1Index++)
                 {
-                    var file1 = filesWithSameSize[i];
+                    var file1 = filesWithSameSize[file1Index];
 
                     //Skip if this path is already added, or is already a hardlink
-                    if (skipList.Contains(i))
+                    if (skipList.Contains(file1Index))
                     {
                         continue;
                     }
 
                     //Compare current element with all elements after it
                     //this ensures items only get compared once
-                    for (int j = i + 1; j < filesWithSameSize.Count; j++)
+                    for (int file2Index = file1Index + 1; file2Index < filesWithSameSize.Count; file2Index++)
                     {
-                        if (skipList.Contains(j))
+                        if (skipList.Contains(file2Index))
                         {
                             continue;
                         }
 
-                        var file2 = filesWithSameSize[j];
+                        var file2 = filesWithSameSize[file2Index];
 
-                        //Check if the two files are already hardlink to the same inode
-                        if (file1.Device == file2.Device &&
-                           file1.Inode == file2.Inode)
+                        if (await FileContentsAreEqualAsync(file1, file2))
                         {
-                            _logger.LogTrace("Skpping '{fileToSkip}', it's already sharing the inode of '{fileItSharesWith}'", file2.FullName, file1.FullName);
-                            skipList.Add(j);
-                            continue;
-                        }
-
-                        //TODO replace this with Parallel.ForEachAsync after updating to .net 6 and use await
-                        if (FileContentsAreEqualAsync(file1, file2).GetAwaiter().GetResult())
-                        {
-                            var fileLinkCandidate = fileLinkCandidates.FirstOrDefault(c => c.FilePaths.Contains(file1.FullName));
+                            var fileLinkCandidate = potentialCandidates.FirstOrDefault(c => c.FilePaths.Any(fp => fp.FilePath == file1.FullName));
 
                             if (fileLinkCandidate == null)
                             {
                                 fileLinkCandidate = new FileLinkCandidate
                                 {
                                     FileSizeInBytes = file1.Length,
-                                    FilePaths = new List<string> { file1.FullName, file2.FullName }
+                                    FilePaths = new List<FileLinkCandidateFile>
+                                    {
+                                        new FileLinkCandidateFile { FilePath = file1.FullName, DeviceId = file1.Device, InodeId = file1.Inode},
+                                        new FileLinkCandidateFile { FilePath = file2.FullName, DeviceId = file2.Device, InodeId = file2.Inode},
+                                    }
                                 };
-                                fileLinkCandidates.Add(fileLinkCandidate);
+                                potentialCandidates.Add(fileLinkCandidate);
                             }
                             else
                             {
-                                fileLinkCandidate.FilePaths.Add(file2.FullName);
+                                fileLinkCandidate.FilePaths.Add(new FileLinkCandidateFile { FilePath = file2.FullName, DeviceId = file2.Device, InodeId = file2.Inode });
                             }
 
-                            skipList.Add(j);
+                            skipList.Add(file2Index);
                         }
+                    }
+                }
+
+                foreach (var potentialCandidate in potentialCandidates)
+                {
+                    var deviceId = potentialCandidate.FilePaths[0].DeviceId;
+                    var inodeId = potentialCandidate.FilePaths[0].InodeId;
+                    if (potentialCandidate.FilePaths.Skip(1).Any(fp => fp.DeviceId != deviceId || fp.InodeId != inodeId))
+                    {
+                        fileLinkCandidates.Add(potentialCandidate);
+                    }
+                    else
+                    {
+                        _logger.LogDebug("Skpping {fileToSkip} since they already link to the same data", String.Join(", ", potentialCandidate.FilePaths.Select(fp => $"'{fp.FilePath}'")));
                     }
                 }
             });
 
             _logger.LogInformation("Found {nrOfPaths} files which can be reduced to {nrOfFileLinks} file links.", fileLinkCandidates.Sum(c => c.FilePaths.Count), fileLinkCandidates.Count);
-            return Task.FromResult((IEnumerable<FileLinkCandidate>)fileLinkCandidates);
+            return fileLinkCandidates;
         }
 
 

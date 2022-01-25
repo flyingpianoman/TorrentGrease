@@ -64,14 +64,29 @@ namespace SpecificationTest.Steps
                 for (int i = 0; i < expectedCandidates.Count; i++)
                 {
                     var expected = expectedCandidates[i];
-                    var actual = fileRemovalSelector.Candidates[i];
+                    var actualCandidate = fileRemovalSelector.Candidates[i];
 
                     //we can loop through the pages if we get a test case for it
-                    actual.FilePathsOnCurrentPage.Count().Should().Be(expected.FilePaths.Count());
-                    
-                    actual.FilePathsOnCurrentPage.Should().BeEquivalentTo(expected.FilePaths);
-                    actual.FileSize.Should().Be(expected.Size);
+                    var actualCandidateFiles = await actualCandidate.GetFilesOnCurrentPageAsync();
+                    actualCandidateFiles.Count().Should().Be(expected.FilePaths.Count());
+
+                    actualCandidateFiles.Select(cf => cf.FilePath).Should().BeEquivalentTo(expected.FilePaths);
+                    actualCandidate.FileSize.Should().Be(expected.Size);
                 }
+            }
+        }
+
+        [Then(@"I see an empty file link candidates overview")]
+        public void ThenISeeAnEmptyFileLinkCandidatesOverview()
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var page = WebDriver.CurrentPageAs<FileLinksPage>();
+                var fileRemovalSelector = await page.GetFileLinkCandidatesSelectorAsync();
+
+                fileRemovalSelector.Candidates.Count.Should().Be(0);
             }
         }
 

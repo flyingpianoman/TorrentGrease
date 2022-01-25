@@ -11,7 +11,7 @@ namespace TorrentGrease.Shared.ServiceContracts.FileLink
     public class FileLinkCandidate
     {
         [ProtoMember(1)]
-        public List<string> FilePaths { get; set; }
+        public List<FileLinkCandidateFile> FilePaths { get; set; }
         [ProtoMember(2)]
         public long FileSizeInBytes { get; set; }
     }

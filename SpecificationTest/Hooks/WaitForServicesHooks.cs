@@ -78,7 +78,7 @@ namespace SpecificationTest.Hooks
             {
                 await _WaitForHealthyPolicy.ExecuteAsync(async () =>
                     {
-                        var healthUri = new Uri(TestSettings.SeleniumHubAddress + "/status");
+                        var healthUri = new Uri(TestSettings.SeleniumHubAddress + "wd/hub/status");
                         using var resp = await httpClient.GetAsync(healthUri).ConfigureAwait(false);
                         resp.StatusCode.Should().Be(HttpStatusCode.OK);
                         var statusJson = JObject.Parse(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));

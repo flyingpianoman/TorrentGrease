@@ -41,7 +41,10 @@ namespace TestUtils
 
         public async ValueTask DisposeAsync()
         {
-            var services = _services.Values.Where(s => s != null).ToArray();
+            var services = _services.Values
+                .Where(s => s != null && s.Any())
+                .SelectMany(s => s.Values)
+                .ToArray();
 
             foreach (var asyncDisp in services.Where(s => typeof(IAsyncDisposable).IsAssignableFrom(s.GetType())))
             {

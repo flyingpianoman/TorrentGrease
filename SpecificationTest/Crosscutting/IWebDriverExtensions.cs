@@ -16,8 +16,19 @@ namespace SpecificationTest.Crosscutting
         public static void RegisterWebDriver(this DIContainer diContainer)
         {
             var capabilities = new OpenQA.Selenium.Firefox.FirefoxOptions().ToCapabilities();
-            var driver = new RemoteWebDriver(TestSettings.SeleniumHubAddress, capabilities);
-            diContainer.Register<IWebDriver>(driver);
+            RemoteWebDriver driver = null;
+
+            try
+            {
+                driver = new RemoteWebDriver(TestSettings.SeleniumHubAddress, capabilities);
+                diContainer.Register<IWebDriver>(driver);
+            }
+            catch (Exception)
+            {
+                driver?.Close();
+                driver?.Dispose();
+                throw;
+            }
         }
 
         public static async Task<TPage> NavigateToPageAsync<TPage>(this IWebDriver webDriver, Uri url)

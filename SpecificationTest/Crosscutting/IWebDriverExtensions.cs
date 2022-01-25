@@ -22,6 +22,7 @@ namespace SpecificationTest.Crosscutting
 
             var chromeOpts = new OpenQA.Selenium.Chrome.ChromeOptions();
             chromeOpts.AddArgument("--headless");
+            chromeOpts.AddArgument("--no-sandbox");
             var capabilities = chromeOpts.ToCapabilities();
             RemoteWebDriver driver = null;
 

@@ -2,28 +2,24 @@
 using MonoTorrent.BEncoding;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 
 namespace TestUtils.Torrent
 {
     public class TorrentFileHelper
     {
-        public async ValueTask CreateTextFileAsync(string fileLoc, int bytes, char charToUser = '*')
+        public async ValueTask CreateTextFileAsync(string fileLoc, int bytes, char firstChar = '*')
         {
-            using var sw = File.CreateText(fileLoc);
-            var remainingBytes = bytes; //Each char = 1 byte
-
-            while (remainingBytes > 0)
-            {
-                var charsToWriteThisIteration = remainingBytes < 1024
-                    ? remainingBytes
-                    : 1024; //Write 1 KB at a time
-
-                await sw.WriteAsync(new string(charToUser, charsToWriteThisIteration));
-                remainingBytes -= charsToWriteThisIteration;
-            }
+            using var fs = new FileStream(fileLoc, FileMode.CreateNew);
+            await fs.WriteAsync(UTF8Encoding.UTF8.GetBytes(new char[] { firstChar }));
+            fs.Seek(bytes - 1, SeekOrigin.Begin);
+            fs.WriteByte(0);
+            fs.Close();
         }
 
         public ValueTask<ExistingTorrentFile> ReadTorrentAsync(string torrentFileLocation)

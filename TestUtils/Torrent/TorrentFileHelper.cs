@@ -10,7 +10,7 @@ namespace TestUtils.Torrent
 {
     public class TorrentFileHelper
     {
-        public async ValueTask CreateTextFileAsync(string fileLoc, int bytes, char charToUser)
+        public async ValueTask CreateTextFileAsync(string fileLoc, int bytes, char charToUser = '*')
         {
             using var sw = File.CreateText(fileLoc);
             var remainingBytes = bytes; //Each char = 1 byte

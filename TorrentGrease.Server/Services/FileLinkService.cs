@@ -304,10 +304,11 @@ namespace TorrentGrease.Server.Services
         {
             _logger.LogDebug("Comparing {file1} to {file2}", file1.FullName, file2.FullName);
             var sw = Stopwatch.StartNew();
+            var logAfterXSeconds = 3;
 
             try
             {
-                const int bufferSize = sizeof(long); //8 //TODO might try a multiple of 8 to try perf when using less IO trips
+                const int bufferSize = 1024 * 10;
                 var iterations = (int)Math.Ceiling((double)file1.Length / bufferSize);
 
                 using (var fs1 = File.OpenRead(file1.FullName))
@@ -315,15 +316,24 @@ namespace TorrentGrease.Server.Services
                 {
                     var byteBuffer1 = new byte[bufferSize];
                     var byteBuffer2 = new byte[bufferSize];
-                    var memBuffer1 = byteBuffer1.AsMemory();
-                    var memBuffer2 = byteBuffer2.AsMemory();
 
                     for (int i = 0; i < iterations; i++)
                     {
-                        await fs1.ReadAsync(memBuffer1).ConfigureAwait(false);
-                        await fs2.ReadAsync(memBuffer2).ConfigureAwait(false);
+                        if (sw.Elapsed.TotalSeconds >= logAfterXSeconds)
+                        {
+                            var progress = decimal.Round((decimal)i / iterations * 100, 2);
+                            var elapsedTime = sw.Elapsed;
+                            var expectedTotalTime = progress == 0 ? TimeSpan.Zero : TimeSpan.FromMilliseconds(sw.Elapsed.TotalMilliseconds / Convert.ToDouble(progress) * 100);
+                            _logger.LogDebug("Comparing {file1} to {file2}, progress: {prcnt}%. Elapsed {elapsedTime}, expected total time {expectedTotalTime}",
+                                file1.FullName, file2.FullName, progress, elapsedTime, expectedTotalTime);
+                            logAfterXSeconds += 3;
+                        }
 
-                        if (BitConverter.ToInt64(byteBuffer1, 0) != BitConverter.ToInt64(byteBuffer2, 0))
+                        await fs1.ReadAsync(byteBuffer1, 0, bufferSize);
+                        await fs2.ReadAsync(byteBuffer2, 0, bufferSize);
+
+                        // Byte arrays can be converted directly to ReadOnlySpan
+                        if (!((ReadOnlySpan<byte>)byteBuffer1).SequenceEqual((ReadOnlySpan<byte>)byteBuffer2))
                         {
                             return false;
                         }

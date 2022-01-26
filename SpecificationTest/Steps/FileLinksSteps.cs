@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Docker.DotNet;
 using FluentAssertions;
 using SpecificationTest.Crosscutting;
 using SpecificationTest.Pages;
@@ -10,6 +11,7 @@ using SpecificationTest.Pages.Components;
 using SpecificationTest.Steps.Models;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
+using TestUtils;
 
 namespace SpecificationTest.Steps
 {
@@ -40,13 +42,16 @@ namespace SpecificationTest.Steps
             }
         }
 
+        [Given(@"I scan for possible file links")]
         [When(@"I scan for possible file links")]
+        [Then(@"when I scan for possible file links again")]
         public void WhenIScanForPossibleFileLinks()
         {
             var page = WebDriver.CurrentPageAs<FileLinksPage>();
             page.ScanButton.Click();
         }
 
+        [Given(@"I see an overview of the following file link candidates")]
         [Then(@"I see an overview of the following file link candidates")]
         public void ThenISeeAnOverviewOfTheFollowingFiles(Table table)
         {
@@ -57,14 +62,14 @@ namespace SpecificationTest.Steps
                 var expectedCandidates = table.CreateSet<FileLinkCandidateDto>().ToList();
 
                 var page = WebDriver.CurrentPageAs<FileLinksPage>();
-                var fileRemovalSelector = await page.GetFileLinkCandidatesSelectorAsync();
+                var fileLinksSelector = await page.GetFileLinkCandidatesSelectorAsync();
 
-                fileRemovalSelector.Candidates.Count.Should().Be(expectedCandidates.Count);
+                fileLinksSelector.Candidates.Count.Should().Be(expectedCandidates.Count);
 
                 for (int i = 0; i < expectedCandidates.Count; i++)
                 {
                     var expected = expectedCandidates[i];
-                    var actualCandidate = fileRemovalSelector.Candidates[i];
+                    var actualCandidate = fileLinksSelector.Candidates[i];
 
                     //we can loop through the pages if we get a test case for it
                     var actualCandidateFiles = await actualCandidate.GetFilesOnCurrentPageAsync();
@@ -84,9 +89,69 @@ namespace SpecificationTest.Steps
             async Task InnerAsync()
             {
                 var page = WebDriver.CurrentPageAs<FileLinksPage>();
-                var fileRemovalSelector = await page.GetFileLinkCandidatesSelectorAsync();
+                var fileLinksSelector = await page.GetFileLinkCandidatesSelectorAsync();
+                fileLinksSelector.IsNoCandidatesFoundMessageVisible.Should().BeTrue();
+                fileLinksSelector.Candidates.Count.Should().Be(0);
+            }
+        }
 
-                fileRemovalSelector.Candidates.Count.Should().Be(0);
+        /// <summary>
+        /// Works only on single page lists atm
+        /// </summary>
+        [When(@"I ensure that only the candidates containing the following paths are selected")]
+        public void WhenIEnsureThatOnlyTheCandidatesContainingTheFollowingPathsAreSelected(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var filePaths = table.Rows.Select(r => r.Values.First()).ToArray();
+                var page = WebDriver.CurrentPageAs<FileLinksPage>();
+                var fileLinksSelector = await page.GetFileLinkCandidatesSelectorAsync();
+
+                foreach (var candidate in fileLinksSelector.Candidates)
+                {
+                    var candidateFiles = await candidate.GetFilesOnCurrentPageAsync();
+                    candidate.IsSelected = candidateFiles.Any(f => filePaths.Contains(f.FilePath));
+                }
+            }
+        }
+
+        [When(@"I create file links for the selected candidates")]
+        public void WhenICreateFileLinksForTheSelectedCandidates()
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var page = WebDriver.CurrentPageAs<FileLinksPage>();
+                var fileLinksSelector = await page.GetFileLinkCandidatesSelectorAsync();
+                fileLinksSelector.CreateFileLinksButton.Click();
+                fileLinksSelector.WaitToClose();
+            }
+        }
+
+        [Then(@"the following files are all linked to the same device and inode")]
+        public void ThenTheFollowingFilesAreAllLinkedToTheSameDeviceAndInode(Table table)
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                var dockerClient = DI.Get<DockerClient>();
+                var id = await dockerClient.Containers.GetContainerIdByNameAsync(TestSettings.TorrentGreaseContainerName);
+                var filePaths = table.Rows.Select(r => r.Values.First()).ToArray();
+
+                var fileInfos = await filePaths
+                    .Select(async fp => await dockerClient.GetLinuxFileInfoInContainerAsync(id, fp))
+                    .AwaitAllAsync();
+
+                fileInfos.Should().HaveCount(filePaths.Length);
+
+                //Should all have the same inode
+                fileInfos
+                    .DistinctBy(lfi => (lfi.DeviceId, lfi.InodeId))
+                    .Should().HaveCount(1);
             }
         }
 

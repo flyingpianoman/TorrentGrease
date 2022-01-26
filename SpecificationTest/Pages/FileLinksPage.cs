@@ -43,11 +43,11 @@ namespace SpecificationTest.Pages
             _rootElement = _webDriver.WaitForWebElementByContentName("file-links");
             _container = _rootElement.WaitForWebElementByContentName("file-links-container");
 
-            _minFileSizeNr = _container.WaitForAnyWebElementByContentName("min-file-size");
-            var fileSizeUnitWebEl = _container.WaitForAnyWebElementByContentName("min-file-size-unit-type");
+            _minFileSizeNr = _container.WaitForWebElementByContentName("min-file-size");
+            var fileSizeUnitWebEl = _container.WaitForWebElementByContentName("min-file-size-unit-type");
             _minFileSizeUnit = await new RadioComponent(fileSizeUnitWebEl, _webDriver).InitializeAsync();
-            AddDirsButton = _container.WaitForAnyWebElementByContentName("add-dir-button");
-            ScanButton = _container.WaitForAnyWebElementByContentName("scan-button");
+            AddDirsButton = _container.WaitForWebElementByContentName("add-dir-button");
+            ScanButton = _container.WaitForWebElementByContentName("scan-button");
         }
 
         public IList<IWebElement> GetDirs()

@@ -13,6 +13,6 @@ namespace TorrentGrease.Shared.ServiceContracts
     {
         Task<IEnumerable<FileLinkCandidate>> ScanForFilesToLinkAsync(ScanForPossibleFileLinksRequest request);
 
-        ValueTask CreateFileLinksAsync(IEnumerable<FileLinkCandidate> fileLinksToCreate);
+        ValueTask CreateFileLinksAsync(IEnumerable<FileLinkToCreate> fileLinksToCreate);
     }
 }

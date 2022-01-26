@@ -81,23 +81,23 @@ namespace SpecificationTest.Crosscutting
             return searchContext.FindElement(By.CssSelector($"*[data-content='{contentName}']"));
         }
 
-        public static IReadOnlyCollection<IWebElement> FindElementsByContentName(this ISearchContext searchContext, string contentName)
+        public static IReadOnlyCollection<IWebElement> FindElementsByContentName(this ISearchContext searchContext, string contentName, bool mustBeDisplayed = false)
         {
-            return searchContext.FindElements(By.CssSelector($"*[data-content='{contentName}']"));
+            return searchContext.FindElements(By.CssSelector($"*[data-content='{contentName}']")).Where(e => !mustBeDisplayed || e.Displayed).ToArray();
         }
 
-        internal static IWebElement WaitForAnyWebElementByContentName(this ISearchContext searchContext, params string[] elementContentNames)
+        internal static (IWebElement, string) WaitForAnyDisplayedWebElementByContentName(this ISearchContext searchContext, params string[] elementContentNames)
         {
             return PageHelper.WaitForWebElementPolicy
                 .Execute(() =>
                 {
                     foreach (var elementContentName in elementContentNames)
                     {
-                        var elements = searchContext.FindElementsByContentName(elementContentName);
+                        var elements = searchContext.FindElementsByContentName(elementContentName).Where(el => el.Displayed);
                         
                         if(elements.Any())
                         {
-                            return elements.First();
+                            return (elements.First(), elementContentName);
                         }
                     }
 

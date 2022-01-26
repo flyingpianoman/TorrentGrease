@@ -1,7 +1,8 @@
-﻿Feature: File links
+﻿Feature: Find File link candidates
 	In order to save on disk space
 	As a torrent maintainer
-	I want to be able to replace duplicate files with hard links
+	I want to be able to find file duplicates (aka file link candidates)
+    So that I can replace them with file links in another feature
 
 Background:
     Given I navigate to file links
@@ -55,5 +56,6 @@ Scenario: Find file link candidates, don't show hard links if there are only lin
         | /downloads |
     When I scan for possible file links
     Then I see an empty file link candidates overview 
-    #TODO make empty table message
+    
+
 #todo

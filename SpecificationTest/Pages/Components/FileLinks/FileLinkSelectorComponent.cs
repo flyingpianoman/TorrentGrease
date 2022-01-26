@@ -21,12 +21,22 @@ namespace SpecificationTest.Pages.Components.FileLinks
         }
 
         public IReadOnlyList<FileLinkCandidateComponent> Candidates { get; private set; }
+        public bool IsNoCandidatesFoundMessageVisible => _rootElement.FindElementsByContentName("no-file-link-candidates-found-msg", mustBeDisplayed: true).Any();
 
         public IWebElement CreateFileLinksButton => _rootElement.FindElementByContentName("create-file-links-button");
 
         public async Task<FileLinkSelectorComponent> InitializeAsync()
         {
             _rootElement = _parentElement.WaitForWebElementByContentName("file-link-selector-modal");
+
+            var (el, contentName) = _rootElement.WaitForAnyDisplayedWebElementByContentName("file-link-candidate-container", "no-file-link-candidates-found-msg");
+
+            if(contentName == "no-file-link-candidates-found-msg")
+            {
+                Candidates = new List<FileLinkCandidateComponent>(0);
+                return this;
+            }
+
             var candidatesTable = _rootElement.WaitForWebElementByContentName("file-link-candidate-container", mustBeDisplayed: true);
             var candidateRows = candidatesTable.FindElementsByContentName("link-candidate");
 

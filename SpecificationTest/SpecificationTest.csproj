@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <SpecFlowObsoleteCodeBehindFiles Remove="Features\FindFileLinkCandidates - Copy.feature.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\.dockerignore" Link=".dockerignore">
       <DependentUpon>$(DockerDefaultDockerfile)</DependentUpon>
     </None>
@@ -37,8 +41,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Features\FileLinks.feature.cs">
-      <DependentUpon>FileLinks.feature</DependentUpon>
+    <Compile Update="Features\FileLinks\ReplaceDuplicateFilesWithFileLinks.feature.cs">
+      <DependentUpon>ReplaceDuplicateFilesWithFileLinks.feature</DependentUpon>
+    </Compile>
+    <Compile Update="Features\FileLinks\FindFileLinkCandidates.feature.cs">
+      <DependentUpon>FindFileLinkCandidates.feature</DependentUpon>
     </Compile>
     <Compile Update="Features\RemoveOrphanedFiles.feature.cs">
       <DependentUpon>RemoveOrphanedFiles.feature</DependentUpon>
@@ -49,7 +56,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <SpecFlowFeatureFiles Update="Features\FileLinks.feature">
+    <SpecFlowFeatureFiles Update="Features\FileLinks\ReplaceDuplicateFilesWithFileLinks.feature">
+      <Visible>$(UsingMicrosoftNETSdk)</Visible>
+      <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
+    </SpecFlowFeatureFiles>
+    <SpecFlowFeatureFiles Update="Features\FileLinks\FindFileLinkCandidates.feature">
       <Visible>$(UsingMicrosoftNETSdk)</Visible>
       <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
     </SpecFlowFeatureFiles>

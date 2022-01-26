@@ -11,58 +11,65 @@
             <CloseButton IsDisabled="@IsInWaitMode" Clicked="@CloseAsync" />
         </ModalHeader>
         <ModalBody data-content="file-link-candidate-picker">
-            <table class="table table-sm" data-content="file-link-candidate-container">
-                <thead>
-                    <tr>
-                        <th>&nbsp;</th>
-                        <th>Filepaths</th>
-                        <th>Size</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <PagedList @ref="PagedFileLinkCandidateList" TItem="SelectableItem<FileLinkCandidate>" AllItems="_fileLinkCandidates" PageSize="NrOfCandidatesPerPage">
-                        @{
-                            var selectableCandidate = context;
-                            var index = PagedFileLinkCandidateList.CurrentPageItems.TakeWhile(x => x != selectableCandidate).Count();
-                            var candidate = selectableCandidate.Item;
-                        }
-                        <tr data-content="link-candidate">
-                            <td class="align-middle">
-                                <Blazorise.Check data-content="selector" IsDisabled="@(IsInWaitMode)" @bind-Checked="@selectableCandidate.IsSelected" />
-                            </td>
-                            <td data-content="link-candidate-filepaths-container">
-                                <table class="table" data-content="file-link-candidate-filepaths-table">
-                                    <thead>
-                                        <tr>
-                                            <th class="col-8">Path</th>
-                                            <th class="col-2">Device ID</th>
-                                            <th class="col-2">Inode ID</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <PagedList @ref="CandidateFilePathLists[index]" TItem="FileLinkCandidateFile" AllItems="candidate.FilePaths" PageSize="NrOfFileListsPerCandidateRowPage">
-                                            <ChildContent Context="candidateFile">
-                                                <tr class="@FileLinkGroupCssClasses[(candidateFile.DeviceId, candidateFile.InodeId)]" data-content="candidate-file-row">
-                                                    <td data-content="filepath">@candidateFile.FilePath</td>
-                                                    <td data-content="device-id">@candidateFile.DeviceId</td>
-                                                    <td data-content="inode-id">@candidateFile.InodeId</td>
-                                                </tr>
-                                            </ChildContent>
-                                        </PagedList>
-                                    </tbody>
-                                </table>
-                                @if (candidate.FilePaths.Count > NrOfFileListsPerCandidateRowPage)
-                                {
-                                    <PagedListPaginator Size="PagedListPaginatorSize.Small" TItem="FileLinkCandidateFile" PagedList="CandidateFilePathLists[index]" />
-                                }
-                            </td>
-                            <td class="align-middle" data-content="filesize">@(FormatFileSize(candidate.FileSizeInBytes))</td>
-                        </tr>
-                    </PagedList>
-                </tbody>
-            </table>
-            <PagedListPaginator TItem="SelectableItem<FileLinkCandidate>" PagedList="PagedFileLinkCandidateList" />
 
+            @if (_fileLinkCandidates.Any())
+            {
+                <table class="table table-sm" data-content="file-link-candidate-container">
+                    <thead>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Filepaths</th>
+                            <th>Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <PagedList @ref="PagedFileLinkCandidateList" TItem="SelectableItem<FileLinkCandidate>" AllItems="_fileLinkCandidates" PageSize="NrOfCandidatesPerPage">
+                            @{
+                                var selectableCandidate = context;
+                                var index = PagedFileLinkCandidateList.CurrentPageItems.TakeWhile(x => x != selectableCandidate).Count();
+                                var candidate = selectableCandidate.Item;
+                            }
+                            <tr data-content="link-candidate">
+                                <td class="align-middle">
+                                    <Blazorise.Check data-content="selector" IsDisabled="@(IsInWaitMode)" @bind-Checked="@selectableCandidate.IsSelected" />
+                                </td>
+                                <td data-content="link-candidate-filepaths-container">
+                                    <table class="table" data-content="file-link-candidate-filepaths-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="col-8">Path</th>
+                                                <th class="col-2">Device ID</th>
+                                                <th class="col-2">Inode ID</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <PagedList @ref="CandidateFilePathLists[index]" TItem="FileLinkCandidateFile" AllItems="candidate.FilePaths" PageSize="NrOfFileListsPerCandidateRowPage">
+                                                <ChildContent Context="candidateFile">
+                                                    <tr class="@FileLinkGroupCssClasses[(candidateFile.DeviceId, candidateFile.InodeId)]" data-content="candidate-file-row">
+                                                        <td data-content="filepath">@candidateFile.FilePath</td>
+                                                        <td data-content="device-id">@candidateFile.DeviceId</td>
+                                                        <td data-content="inode-id">@candidateFile.InodeId</td>
+                                                    </tr>
+                                                </ChildContent>
+                                            </PagedList>
+                                        </tbody>
+                                    </table>
+                                    @if (candidate.FilePaths.Count > NrOfFileListsPerCandidateRowPage)
+                                    {
+                                        <PagedListPaginator Size="PagedListPaginatorSize.Small" TItem="FileLinkCandidateFile" PagedList="CandidateFilePathLists[index]" />
+                                    }
+                                </td>
+                                <td class="align-middle" data-content="filesize">@(FormatFileSize(candidate.FileSizeInBytes))</td>
+                            </tr>
+                        </PagedList>
+                    </tbody>
+                </table>
+                <PagedListPaginator TItem="SelectableItem<FileLinkCandidate>" PagedList="PagedFileLinkCandidateList" />
+            }
+            else
+            {
+                <span data-content="no-file-link-candidates-found-msg">There were no candidates found</span>
+            }
         </ModalBody>
         <ModalFooter>
             <Button Color="Color.Secondary" IsDisabled="@IsInWaitMode" Clicked="@CloseAsync">Close</Button>
@@ -99,7 +106,7 @@
             .ToArray();
 
         FileLinkGroupCssClasses.Clear();
-        
+
         foreach (var candidate in _fileLinkCandidates.Select(c => c.Item))
         {
             //Group items that have the same underlying inode
@@ -142,13 +149,17 @@
 
     async Task CreateFileLinksAsync()
     {
-        var fileLinksToCreate = _fileLinkCandidates
-            .Where(s => s.IsSelected)
-            .Select(s => s.Item)
-            .ToList();
-
         _isBusy = true;
         StateHasChanged();
+
+        var fileLinksToCreate = _fileLinkCandidates
+            .Where(s => s.IsSelected)
+            .Select(s => new FileLinkToCreate()
+                {
+                    FilePaths = s.Item.FilePaths.Select(fp => fp.FilePath).ToArray()
+                })
+            .ToArray();
+
         await FileLinkService.CreateFileLinksAsync(fileLinksToCreate);
         _isBusy = false;
 

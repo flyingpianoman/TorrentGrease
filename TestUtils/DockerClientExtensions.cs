@@ -133,9 +133,9 @@ namespace TestUtils
             var parts = response.Split('-');
             return new LinuxFileInfo
             {
-                FileSystemId = Int32.Parse(parts[0]),
-                InodeNumber = Int32.Parse(parts[1]),
-                HardLinkCount = Int32.Parse(parts[2]),
+                DeviceId = long.Parse(parts[0]),
+                InodeId = long.Parse(parts[1]),
+                HardLinkCount = int.Parse(parts[2]),
             };
         }
 

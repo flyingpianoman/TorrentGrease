@@ -37,8 +37,8 @@ namespace IntegrationTest.Symlink
             var fileInfo2 = await dockerClient.GetLinuxFileInfoInContainerAsync(id, testLinkFile);
             fileInfo1.HardLinkCount.Should().Be(2);
 
-            fileInfo1.InodeNumber.Should().NotBe(0);
-            fileInfo1.FileSystemId.Should().NotBe(0);
+            fileInfo1.InodeId.Should().NotBe(0);
+            fileInfo1.DeviceId.Should().NotBe(0);
 
             fileInfo1.Should().Be(fileInfo2);
         }

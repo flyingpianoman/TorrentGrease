@@ -19,17 +19,20 @@ namespace SpecificationTest.Hooks
         [BeforeTestRun(Order = 200)]
         public static async Task CreateCleanDBAsync()
         {
-            await TorrentGreaseDBService.CreateCleanDBAsync().ConfigureAwait(false);
+            await TestLogger.LogElapsedTimeAsync(() => TorrentGreaseDBService.CreateCleanDBAsync(), nameof(CreateCleanDBAsync)).ConfigureAwait(false);
         }
 
         [BeforeScenario]
         public static async Task UploadCleanDBToContainerAsync()
         {
-            DIContainer.Default.Get<Dictionary<string, string>>("TorrentDataFolders").Clear();
+            await TestLogger.LogElapsedTimeAsync(async () =>
+            {
+                DIContainer.Default.Get<Dictionary<string, string>>("TorrentDataFolders").Clear();
 
-            var torrentGreaseDBService = DIContainer.Default.Get<TorrentGreaseDBService>();
-            await torrentGreaseDBService.UploadCleanDBToContainerAsync().ConfigureAwait(false);
-            torrentGreaseDBService.DbContext = null; //ensures that a clean prep dbcontext is created each test
+                var torrentGreaseDBService = DIContainer.Default.Get<TorrentGreaseDBService>();
+                await torrentGreaseDBService.UploadCleanDBToContainerAsync().ConfigureAwait(false);
+                torrentGreaseDBService.DbContext = null; //ensures that a clean prep dbcontext is created each test
+            }, nameof(UploadCleanDBToContainerAsync));
         }
     }
 }

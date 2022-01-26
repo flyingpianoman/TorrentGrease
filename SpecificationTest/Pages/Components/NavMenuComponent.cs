@@ -13,6 +13,7 @@ namespace SpecificationTest.Pages.Components
         private const string NavMenuLinkSelector = "#navMenu > ul.nav > li > a";
         private readonly IWebDriver _webDriver;
         public List<NavMenuLinkComponent> NavMenuLinks { get; private set; }
+        public NavMenuLinkComponent ActiveLink => NavMenuLinks.Single(l => l.IsActive);
 
         public NavMenuComponent(IWebDriver webDriver)
         {
@@ -48,5 +49,6 @@ namespace SpecificationTest.Pages.Components
         public NavMenuLinkComponent PoliciesNaveMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.Policies);
         public NavMenuLinkComponent TorrentsNavMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.Torrents);
         public NavMenuLinkComponent FileManagementNavMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.FileManagement);
+        public NavMenuLinkComponent FileLinksNavMenuLink => NavMenuLinks.Single(nav => nav.Target == NavMenuItemTarget.FileLinks);
     }
 }

@@ -13,8 +13,8 @@ using TorrentGrease.Hangfire.Hosting;
 using TorrentGrease.TorrentStatisticsHarvester;
 using TorrentGrease.TorrentClient.Hosting;
 using ProtoBuf.Grpc.Server;
-using TorrentGrease.Server.Grpc;
 using TorrentGrease.TorrentStatisticsHarvester.Hosting;
+using TorrentGrease.Server.CrossCutting;
 
 
 namespace TorrentGrease.Server

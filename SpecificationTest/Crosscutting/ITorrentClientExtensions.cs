@@ -12,6 +12,11 @@ namespace SpecificationTest.Crosscutting
 {
     public static class ITorrentClientExtensions
     {
+        internal static void RegisterTorrentClient(this DIContainer diContainer)
+        {
+            diContainer.Register<ITorrentClient>(CreateTransmissionClient());
+        }
+
         private static TransmissionClient CreateTransmissionClient()
         {
             var torrentClientSettings = new TorrentClientSettings
@@ -23,11 +28,6 @@ namespace SpecificationTest.Crosscutting
             var logger = new LoggerFactory().CreateLogger<TransmissionClient>();
             return new TransmissionClient(TransmissionRcpClientHelper.CreateTransmissionRpcClient(torrentClientSettings),
                 Options.Create(torrentClientSettings), logger);
-        }
-
-        internal static void RegisterTorrentClient(this DIContainer diContainer)
-        {
-            diContainer.Register<ITorrentClient>(CreateTransmissionClient());
         }
     }
 }

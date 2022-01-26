@@ -8,8 +8,8 @@ namespace TestUtils
 {
     public struct LinuxFileInfo
     {
-        public int FileSystemId { get; init; }
-        public int InodeNumber { get; init; }
+        public long DeviceId { get; init; }
+        public long InodeId { get; init; }
         public int HardLinkCount { get; init; }
     }
 }

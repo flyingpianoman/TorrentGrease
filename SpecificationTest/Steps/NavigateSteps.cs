@@ -37,7 +37,7 @@ namespace SpecificationTest.Steps
         [When(@"I navigate to the torrent overview")]
         public void NavigateToTheTorrentOverview()
         {
-            InnerAsync().GetAwaiter().GetResult();
+            TestLogger.LogElapsedTime(() => InnerAsync().GetAwaiter().GetResult(), nameof(NavigateToTheTorrentOverview));
 
             async Task InnerAsync()
             {
@@ -60,6 +60,21 @@ namespace SpecificationTest.Steps
                     .NavigationMenu
                     .FileManagementNavMenuLink
                     .NavigateAsync<FileManagementPage>()
+                    .ConfigureAwait(false);
+            }
+        }
+
+        [Given(@"I navigate to file links")]
+        public void GivenINavigateToFileLinks()
+        {
+            InnerAsync().GetAwaiter().GetResult();
+
+            async Task InnerAsync()
+            {
+                await (await NavigateToRootUrlAsync().ConfigureAwait(false))
+                    .NavigationMenu
+                    .FileLinksNavMenuLink
+                    .NavigateAsync<FileLinksPage>()
                     .ConfigureAwait(false);
             }
         }

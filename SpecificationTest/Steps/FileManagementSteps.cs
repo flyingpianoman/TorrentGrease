@@ -15,13 +15,6 @@ namespace SpecificationTest.Steps
     [Binding]
     class FileManagementSteps : StepsBase
     {
-        [Given(@"I set a minimal filesize of (\d+) (B|KB|MB)")]
-        public void GivenISetAMinimalFilesizeOfKB(int size, string unitType)
-        {
-            var page = WebDriver.CurrentPageAs<FileManagementPage>();
-            page.MinFileSize = size;
-            page.MinFileSizeUnit.ClickRadioOptionByValue(unitType);
-        }
 
         [Given(@"I set the following torrent dir mapping")]
         public void GivenISetTheFollowingTorrentDirMapping(Table table)

@@ -54,9 +54,12 @@ services:
     image: lednerb/opentracker-docker:latest
 
   #for ui testing. see also https://github.com/SeleniumHQ/docker-selenium#debugging
-  selenium-firefox-standalone:
-    image: selenium/standalone-firefox:4.1
-    shm_size: '2gb'
+  selenium-chrome-standalone:
+    image: selenium/standalone-chrome:4.1
+    shm_size: '4gb'
+    privileged: true
+    environment:
+      - START_XVFB=false
     ports:
       - 4444:4444
       - 5900:5900

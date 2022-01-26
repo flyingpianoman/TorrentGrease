@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TorrentGrease.Server.CrossCutting;
 using TorrentGrease.Shared.ServiceContracts;
 using TorrentGrease.Shared.ServiceContracts.FileManagement;
 using TorrentGrease.TorrentClient;
@@ -51,21 +52,10 @@ namespace TorrentGrease.Server.Services
 
             for(var i = 0; i < torrentClientDirs.Length; i++)
             {
-                var torrentClientDir = torrentClientDirs[i];
-                if (!torrentClientDir.EndsWith(Path.DirectorySeparatorChar) &&
-                    !torrentClientDir.EndsWith(Path.AltDirectorySeparatorChar))
-                {
-                    torrentClientDirs[i] += Path.DirectorySeparatorChar;
-                }
+                torrentClientDirs[i] = PathHelper.EnsurePathEndsWithASeperator(torrentClientDirs[i]);
             }
 
-            var torrentGreaseDir = dirToScan.TorrentGreaseDir;
-
-            if (!torrentGreaseDir.EndsWith(Path.DirectorySeparatorChar) &&
-                !torrentGreaseDir.EndsWith(Path.AltDirectorySeparatorChar))
-            {
-                torrentGreaseDir += Path.DirectorySeparatorChar;
-            }
+            var torrentGreaseDir = PathHelper.EnsurePathEndsWithASeperator(dirToScan.TorrentGreaseDir);
 
             var files = Directory.GetFiles(torrentGreaseDir, "*", SearchOption.AllDirectories);
             _logger.LogDebug($"Found {files.Length} files");

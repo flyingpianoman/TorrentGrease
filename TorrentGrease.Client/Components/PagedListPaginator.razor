@@ -7,7 +7,7 @@
 }
 else
 {
-<Pagination Alignment="Alignment.Center">
+<Pagination Class="@SizeClass" Alignment="Alignment.Center">
     <PaginationItem>
         <PaginationLink Clicked="GoToPreviousPage">
             <span aria-hidden="true">«</span>
@@ -43,9 +43,22 @@ else
 }
 
 @code {
+    [Parameter]
+    public PagedListPaginatorSize Size { get; set; } = PagedListPaginatorSize.Medium;
+    public string SizeClass => Size == PagedListPaginatorSize.Small ? "small" : null;
+
+    private PagedList<TItem> _pagedList;
 
     [Parameter]
-    public PagedList<TItem> PagedList { get; set; }
+    public PagedList<TItem> PagedList 
+    { 
+        get => _pagedList; 
+        set
+        {
+            _pagedList = value;
+            StateHasChanged();
+        }
+    }
 
     void GoToPreviousPage()
     {
@@ -61,5 +74,4 @@ else
 
         PagedList.PageIndex = PagedList.PageIndex == PagedList.TotalNrOfPages - 1 ? PagedList.PageIndex : PagedList.PageIndex + 1;
     }
-
 }

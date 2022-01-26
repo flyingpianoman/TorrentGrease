@@ -6,7 +6,7 @@ namespace TestUtils
 {
     public static class TestSettings
     {
-        public static Uri SeleniumHubAddress => new Uri("http://localhost:4444/wd/hub");
+        public static Uri SeleniumHubAddress => new Uri("http://localhost:4444");
         public static Uri TorrentGreaseDockerAddress => new Uri("http://torrent-grease:5656");
         public static Uri TorrentGreaseExposedAddress => new Uri("http://localhost:5656");
 

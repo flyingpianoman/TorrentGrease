@@ -37,8 +37,8 @@ namespace IntegrationTest.Symlink
             var fileInfo2 = await dockerClient.GetLinuxFileInfoInContainerAsync(id, testLinkFile);
             fileInfo1.HardLinkCount.Should().Be(2);
 
-            fileInfo1.InodeNumber.Should().NotBe(0);
-            fileInfo1.FileSystemId.Should().NotBe(0);
+            fileInfo1.InodeId.Should().NotBe(0);
+            fileInfo1.DeviceId.Should().NotBe(0);
 
             fileInfo1.Should().Be(fileInfo2);
         }
@@ -48,18 +48,6 @@ namespace IntegrationTest.Symlink
             await dockerClient.CreateDirectoryStructureInContainerAsync(id, dir);
             await dockerClient.CreateFileInContainerAsync(id, testFile, fileContent);
             await dockerClient.CreateHardLinkInContainerAsync(id, testFile, testLinkFile);
-        }
-
-        private void A()
-        {
-            var process = new Process();
-            //hosted by the application itself to not open a black cmd window
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.CreateNoWindow = true;
-
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
         }
     }
 }

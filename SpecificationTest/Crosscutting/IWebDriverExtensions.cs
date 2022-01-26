@@ -15,9 +15,32 @@ namespace SpecificationTest.Crosscutting
 
         public static void RegisterWebDriver(this DIContainer diContainer)
         {
-            var capabilities = new OpenQA.Selenium.Firefox.FirefoxOptions().ToCapabilities();
-            var driver = new RemoteWebDriver(TestSettings.SeleniumHubAddress, capabilities);
-            diContainer.Register<IWebDriver>(driver);
+            //    var firefoxOptions = new OpenQA.Selenium.Firefox.FirefoxOptions();
+            //    firefoxOptions.AddArgument("--headless");
+            //    var capabilities = firefoxOptions.ToCapabilities();
+
+
+            var chromeOpts = new OpenQA.Selenium.Chrome.ChromeOptions();
+            chromeOpts.AddArgument("--headless");
+            chromeOpts.AddArgument("--no-sandbox");
+            var capabilities = chromeOpts.ToCapabilities();
+            RemoteWebDriver driver = null;
+
+            try
+            {
+
+                TestLogger.LogElapsedTime(() =>
+                {
+                    driver = new RemoteWebDriver(TestSettings.SeleniumHubAddress, capabilities);
+                }, "new RemoteWebDriver");
+                diContainer.Register<IWebDriver>(driver);
+            }
+            catch (Exception)
+            {
+                driver?.Close();
+                driver?.Dispose();
+                throw;
+            }
         }
 
         public static async Task<TPage> NavigateToPageAsync<TPage>(this IWebDriver webDriver, Uri url)
@@ -37,13 +60,13 @@ namespace SpecificationTest.Crosscutting
             return page;
         }
 
-#pragma warning disable IDE0060 // Remove unused parameter
+#pragma warning disable IDE0060 // parameter is here so that we have the extension method experience
         public static TPage CurrentPageAs<TPage>(this IWebDriver webDriver)
             where TPage : IPage
         {
             return (TPage)_currentPage;
         }
-#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore IDE0060 // parameter is here so that we have the extension method experience
 
         private static async Task<TPage> CreateAndInitPageAsync<TPage>(IWebDriver webDriver) where TPage : IPage
         {

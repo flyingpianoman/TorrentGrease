@@ -11,7 +11,7 @@ using SpecificationTest.Pages.Components.PolicyOverview;
 
 namespace SpecificationTest.Pages
 {
-    class FileManagementPage : PageBase
+    class FileManagementPage : PageBase, IPageWithMinFileSize
     {
         private IWebElement _rootElement;
         private IWebElement _fileMngmtContainer;
@@ -42,11 +42,11 @@ namespace SpecificationTest.Pages
             _rootElement = _webDriver.WaitForWebElementByContentName("file-management");
             _fileMngmtContainer = _rootElement.WaitForWebElementByContentName("file-management-container");
 
-            _minFileSizeNr = _fileMngmtContainer.WaitForAnyWebElementByContentName("min-file-size");
-            var fileSizeUnitWebEl = _fileMngmtContainer.WaitForAnyWebElementByContentName("min-file-size-unit-type");
+            _minFileSizeNr = _fileMngmtContainer.WaitForWebElementByContentName("min-file-size");
+            var fileSizeUnitWebEl = _fileMngmtContainer.WaitForWebElementByContentName("min-file-size-unit-type");
             _minFileSizeUnit = await new RadioComponent(fileSizeUnitWebEl, _webDriver).InitializeAsync();
-            AddCompletedTorrentDirMappingButton = _fileMngmtContainer.WaitForAnyWebElementByContentName("add-completed-torrent-dir-mapping-button");
-            ScanButton = _fileMngmtContainer.WaitForAnyWebElementByContentName("scan-button");
+            AddCompletedTorrentDirMappingButton = _fileMngmtContainer.WaitForWebElementByContentName("add-completed-torrent-dir-mapping-button");
+            ScanButton = _fileMngmtContainer.WaitForWebElementByContentName("scan-button");
         }
 
         public async Task<IList<CompletedDirMappingComponent>> GetCompletedDirMappingsAsync()

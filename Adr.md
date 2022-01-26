@@ -1,6 +1,10 @@
 #Architecture decision record
 In this document we'll record all architecture decisions and the rationale behind them. Decisions are sorted by date (oldest a lowest).
 
+## Docker base img
+We choose the Ubuntu base image instead of Alpine because the 'Mono.Unix' doesn't support Alpine. We need Mono.Unix to detect and create file links.
+
+
 ## CQRS and background jobs
 Background jobs will be implemented by Hangfire with a sqlite db.
 

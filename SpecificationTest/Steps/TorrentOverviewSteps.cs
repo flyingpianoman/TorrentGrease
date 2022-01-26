@@ -40,7 +40,7 @@ namespace SpecificationTest.Steps
         [Given(@"the following torrents are staged")]
         public void GivenTheFollowingTorrentsAreStaged(Table table)
         {
-            InnerAsync().GetAwaiter().GetResult();
+            TestLogger.LogElapsedTime(() => InnerAsync().GetAwaiter().GetResult(), nameof(GivenTheFollowingTorrentsAreStaged));
 
             async Task InnerAsync()
             {
@@ -118,7 +118,7 @@ namespace SpecificationTest.Steps
                 }
 
                 var torrentFilePath = Path.Combine(tempDir, torrentFile.FilePath);
-                await torrentFileHelper.CreateTextFileAsync(torrentFilePath, (int)torrentFile.SizeInBytes);
+                await torrentFileHelper.CreateTextFileAsync(torrentFilePath, (int)torrentFile.SizeInBytes, '*');
 
                 torrentFileMappings.Add(new CreateTorrentFileMapping
                 {
@@ -135,7 +135,7 @@ namespace SpecificationTest.Steps
         [Then(@"I see an overview of the following torrents")]
         public void ThenISeeAnOverviewOfTheFollowingTorrents(Table table)
         {
-            InnerAsync().GetAwaiter().GetResult();
+            TestLogger.LogElapsedTime(() => InnerAsync().GetAwaiter().GetResult(), nameof(ThenISeeAnOverviewOfTheFollowingTorrents));
 
             async Task InnerAsync()
             {

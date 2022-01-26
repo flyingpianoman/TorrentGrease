@@ -108,10 +108,10 @@ namespace TestUtils
             await ExecuteSHCommandAsync(dockerClient, containerId, $"mv \"{from}\" \"{to}\"").ConfigureAwait(false);
         }
 
-        public static async Task EmptyDirInContainerAsync(this DockerClient dockerClient,
-            string containerId, string dirPath)
+        public static async Task EmptyDirsInContainerAsync(this DockerClient dockerClient,
+            string containerId, IEnumerable<string> dirPaths)
         {
-            await ExecuteSHCommandAsync(dockerClient, containerId, $"find \"{dirPath}\" -mindepth 1 -delete").ConfigureAwait(false);
+            await ExecuteSHCommandAsync(dockerClient, containerId, $"find {string.Join(' ', dirPaths)} -mindepth 1 -delete").ConfigureAwait(false);
         }
 
         public static async Task CreateFileInContainerAsync(this DockerClient dockerClient,
@@ -133,9 +133,9 @@ namespace TestUtils
             var parts = response.Split('-');
             return new LinuxFileInfo
             {
-                FileSystemId = Int32.Parse(parts[0]),
-                InodeNumber = Int32.Parse(parts[1]),
-                HardLinkCount = Int32.Parse(parts[2]),
+                DeviceId = long.Parse(parts[0]),
+                InodeId = long.Parse(parts[1]),
+                HardLinkCount = int.Parse(parts[2]),
             };
         }
 

@@ -82,13 +82,13 @@
                 minFileSize = MinFileSize;
                 break;
             case "KB":
-                minFileSize = MinFileSize * 1024;
+                minFileSize = (long) MinFileSize * 1024;
                 break;
             case "MB":
-                minFileSize = MinFileSize * 1024 * 1024;
+                minFileSize = (long) MinFileSize * 1024 * 1024;
                 break;
             case "GB":
-                minFileSize = MinFileSize * 1024 * 1024 * 1024;
+                minFileSize = (long) MinFileSize * 1024 * 1024 * 1024;
                 break;
 
             default:

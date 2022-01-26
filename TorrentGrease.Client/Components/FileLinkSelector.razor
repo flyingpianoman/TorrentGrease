@@ -12,7 +12,7 @@
         </ModalHeader>
         <ModalBody data-content="file-link-candidate-picker">
 
-            @if (_fileLinkCandidates.Any())
+            @if (_fileLinkCandidates?.Any() ?? false)
             {
                 <table class="table table-sm" data-content="file-link-candidate-container">
                     <thead>

@@ -138,12 +138,15 @@ namespace TorrentGrease.Server.Services
             return fileLinkCandidates;
         }
 
-        private async Task<IEnumerable<FileLinkCandidate>> FileFileLinkCandidatesAysnc(Dictionary<long, List<UnixFileSystemInfo>> filesBySizeLookup)
+        private async Task<IEnumerable<FileLinkCandidate>> FileFileLinkCandidatesAysnc
+            (Dictionary<long, List<UnixFileSystemInfo>> filesBySizeLookup)
         {
             _logger.LogInformation($"Compare files of same size to look for file link candidates");
             var fileLinkCandidates = new ConcurrentBag<FileLinkCandidate>();
 
-            await Parallel.ForEachAsync(filesBySizeLookup.Values, async (filesWithSameSize, ct) =>
+            await Parallel.ForEachAsync(filesBySizeLookup.Values, 
+                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount > 4? Environment.ProcessorCount : 4 },
+                async (filesWithSameSize, ct) =>
             {
                 var potentialCandidates = await FindPotentialCandidatesForAsync(filesWithSameSize);
                 potentialCandidates = GetCandidatesThatArentFileLinksAlready(potentialCandidates);
@@ -157,7 +160,8 @@ namespace TorrentGrease.Server.Services
             return fileLinkCandidates.ToArray();
         }
 
-        private static async Task<IEnumerable<FileLinkCandidate>> FindPotentialCandidatesForAsync(List<UnixFileSystemInfo> filesWithSameSize)
+        private static async Task<IEnumerable<FileLinkCandidate>> FindPotentialCandidatesForAsync
+            (List<UnixFileSystemInfo> filesWithSameSize)
         {
             var skipList = new List<int>();
             var potentialCandidates = new List<FileLinkCandidate>();
@@ -213,7 +217,8 @@ namespace TorrentGrease.Server.Services
             return potentialCandidates;
         }
 
-        private IEnumerable<FileLinkCandidate> GetCandidatesThatArentFileLinksAlready(IEnumerable<FileLinkCandidate> potentialCandidates)
+        private IEnumerable<FileLinkCandidate> GetCandidatesThatArentFileLinksAlready
+            (IEnumerable<FileLinkCandidate> potentialCandidates)
         {
             return potentialCandidates
                 .Where(potentialCandidate =>
@@ -254,7 +259,7 @@ namespace TorrentGrease.Server.Services
                     }
                     if (UnixFileSystemInfo.GetFileSystemEntry(file).IsSymbolicLink)
                     {
-                        _logger.LogTrace("Skpping '{file}', it's a symlink which we don't support atm", file);
+                        _logger.LogInformation("Skpping '{file}', it's a symlink which we don't support atm", file);
                         continue;
                     }
 

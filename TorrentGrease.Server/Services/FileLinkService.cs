@@ -3,6 +3,7 @@ using Mono.Unix;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -141,8 +142,11 @@ namespace TorrentGrease.Server.Services
         private async Task<IEnumerable<FileLinkCandidate>> FileFileLinkCandidatesAysnc
             (Dictionary<long, List<UnixFileSystemInfo>> filesBySizeLookup)
         {
-            _logger.LogInformation($"Compare files of same size to look for file link candidates");
+            _logger.LogInformation("Compare files of same size to look for file link candidates, found {nrOfSizes} unique file sizes and {nrOfFiles} files",
+                filesBySizeLookup.Count, filesBySizeLookup.Sum(g => g.Value.Count));
+
             var fileLinkCandidates = new ConcurrentBag<FileLinkCandidate>();
+            var nrOfRemainingUniqueSizes = filesBySizeLookup.Count;
 
             await Parallel.ForEachAsync(filesBySizeLookup.Values, 
                 new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount > 4? Environment.ProcessorCount : 4 },
@@ -155,12 +159,14 @@ namespace TorrentGrease.Server.Services
                 {
                     fileLinkCandidates.Add(potentialCandidate);
                 }
+
+                _logger.LogInformation("{nrOfRemainingUniqueSizes} unique sizes remain", --nrOfRemainingUniqueSizes);
             });
 
             return fileLinkCandidates.ToArray();
         }
 
-        private static async Task<IEnumerable<FileLinkCandidate>> FindPotentialCandidatesForAsync
+        private async Task<IEnumerable<FileLinkCandidate>> FindPotentialCandidatesForAsync
             (List<UnixFileSystemInfo> filesWithSameSize)
         {
             var skipList = new List<int>();
@@ -187,12 +193,17 @@ namespace TorrentGrease.Server.Services
 
                     var file2 = filesWithSameSize[file2Index];
 
-                    if (await FileContentsAreEqualAsync(file1, file2))
+                    if (FilesAreLinksToTheSameInode(file1, file2) || await FileContentsAreEqualAsync(file1, file2))
                     {
+                        _logger.LogDebug("{file1} and {file2} are equal", file1.FullName, file2.FullName);
+
                         var fileLinkCandidate = potentialCandidates.FirstOrDefault(c => c.FilePaths.Any(fp => fp.FilePath == file1.FullName));
 
                         if (fileLinkCandidate == null)
                         {
+                            _logger.LogDebug("Added {file} to the the canidates list", file1.FullName);
+                            _logger.LogDebug("Added {file} to the the canidates list", file2.FullName);
+
                             fileLinkCandidate = new FileLinkCandidate
                             {
                                 FileSizeInBytes = file1.Length,
@@ -206,6 +217,7 @@ namespace TorrentGrease.Server.Services
                         }
                         else
                         {
+                            _logger.LogDebug("Added {file} to the the canidates list", file2.FullName);
                             fileLinkCandidate.FilePaths.Add(new FileLinkCandidateFile { FilePath = file2.FullName, DeviceId = file2.Device, InodeId = file2.Inode });
                         }
 
@@ -215,6 +227,12 @@ namespace TorrentGrease.Server.Services
             }
 
             return potentialCandidates;
+        }
+
+        private bool FilesAreLinksToTheSameInode(UnixFileSystemInfo file1, UnixFileSystemInfo file2)
+        {
+            return file1.Device == file2.Device 
+                && file1.Inode == file2.Inode;
         }
 
         private IEnumerable<FileLinkCandidate> GetCandidatesThatArentFileLinksAlready
@@ -229,7 +247,7 @@ namespace TorrentGrease.Server.Services
                     
                     if(allPathsInCandidateAreFileLinks)
                     {
-                        _logger.LogDebug("Skpping {fileToSkip} since they already link to the same data", String.Join(", ", potentialCandidate.FilePaths.Select(fp => $"'{fp.FilePath}'")));
+                        _logger.LogDebug("Skpping {filesToSkip} since they already link to the same data", String.Join(", ", potentialCandidate.FilePaths.Select(fp => $"'{fp.FilePath}'")));
                     }
 
                     return !allPathsInCandidateAreFileLinks;
@@ -282,32 +300,43 @@ namespace TorrentGrease.Server.Services
             return filesBySizeLookup;
         }
 
-        static async Task<bool> FileContentsAreEqualAsync(UnixFileSystemInfo file1, UnixFileSystemInfo file2)
+        private async Task<bool> FileContentsAreEqualAsync(UnixFileSystemInfo file1, UnixFileSystemInfo file2)
         {
-            const int bufferSize = sizeof(long); //8 //TODO might try a multiple of 8 to try perf when using less IO trips
-            var iterations = (int)Math.Ceiling((double)file1.Length / bufferSize);
+            _logger.LogDebug("Comparing {file1} to {file2}", file1.FullName, file2.FullName);
+            var sw = Stopwatch.StartNew();
 
-            using (var fs1 = File.OpenRead(file1.FullName))
-            using (var fs2 = File.OpenRead(file2.FullName))
+            try
             {
-                var byteBuffer1 = new byte[bufferSize];
-                var byteBuffer2 = new byte[bufferSize];
-                var memBuffer1 = byteBuffer1.AsMemory();
-                var memBuffer2 = byteBuffer2.AsMemory();
+                const int bufferSize = sizeof(long); //8 //TODO might try a multiple of 8 to try perf when using less IO trips
+                var iterations = (int)Math.Ceiling((double)file1.Length / bufferSize);
 
-                for (int i = 0; i < iterations; i++)
+                using (var fs1 = File.OpenRead(file1.FullName))
+                using (var fs2 = File.OpenRead(file2.FullName))
                 {
-                    await fs1.ReadAsync(memBuffer1).ConfigureAwait(false);
-                    await fs2.ReadAsync(memBuffer2).ConfigureAwait(false);
+                    var byteBuffer1 = new byte[bufferSize];
+                    var byteBuffer2 = new byte[bufferSize];
+                    var memBuffer1 = byteBuffer1.AsMemory();
+                    var memBuffer2 = byteBuffer2.AsMemory();
 
-                    if (BitConverter.ToInt64(byteBuffer1, 0) != BitConverter.ToInt64(byteBuffer2, 0))
+                    for (int i = 0; i < iterations; i++)
                     {
-                        return false;
+                        await fs1.ReadAsync(memBuffer1).ConfigureAwait(false);
+                        await fs2.ReadAsync(memBuffer2).ConfigureAwait(false);
+
+                        if (BitConverter.ToInt64(byteBuffer1, 0) != BitConverter.ToInt64(byteBuffer2, 0))
+                        {
+                            return false;
+                        }
                     }
                 }
-            }
 
-            return true;
+                return true;
+            }
+            finally
+            {
+                sw.Stop();
+                _logger.LogDebug("Done comparing {file1} to {file2}, took {timeTook}", file1.FullName, file2.FullName, sw.Elapsed);
+            }
         }
     }
 }

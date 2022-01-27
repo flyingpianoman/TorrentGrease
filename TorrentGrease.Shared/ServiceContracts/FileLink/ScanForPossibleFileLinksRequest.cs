@@ -14,6 +14,8 @@ namespace TorrentGrease.Shared.ServiceContracts.FileLink
         public IEnumerable<string> PathsToScan { get; set; }
         [ProtoMember(2)]
         public long MinFileSizeInBytes { get; set; }
-        
+        [ProtoMember(3)]
+        public long FullByteComparisonMaxFileSize { get; set; }
+
     }
 }

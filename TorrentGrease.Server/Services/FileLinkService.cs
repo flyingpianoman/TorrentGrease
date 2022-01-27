@@ -21,11 +21,11 @@ namespace TorrentGrease.Server.Services
             _logger = logger;
         }
 
-        public async ValueTask CreateFileLinksAsync(IEnumerable<FileLinkToCreate> fileLinksToCreate)
+        public ValueTask CreateFileLinksAsync(IEnumerable<FileLinkToCreate> fileLinksToCreate)
         {
             if (fileLinksToCreate == null || !fileLinksToCreate.Any())
             {
-                return;
+                return ValueTask.CompletedTask;
             }
 
             if (Environment.OSVersion.Platform != PlatformID.Unix)
@@ -52,7 +52,7 @@ namespace TorrentGrease.Server.Services
                 {
                     _logger.LogInformation("Processing file link to create between {source} {target}", fileToBaseLinkOff.FullName, fileToLink);
                     var fileToLinkInfo = UnixFileSystemInfo.GetFileSystemEntry(fileToLink);
-                    var shouldSkip = await VerifyIfWeShouldSkipAsync(fileToBaseLinkOff, fileToLinkInfo);
+                    var shouldSkip = VerifyIfWeShouldSkip(fileToBaseLinkOff, fileToLinkInfo);
 
                     if (shouldSkip)
                     {
@@ -70,6 +70,8 @@ namespace TorrentGrease.Server.Services
                     OverwriteOriginalFileWithTmpFileLink(fileToLink, tmpFileLinkName);
                 }
             }
+
+            return ValueTask.CompletedTask;
         }
 
         private void OverwriteOriginalFileWithTmpFileLink(string fileToLink, string tmpFileLinkName)
@@ -90,7 +92,7 @@ namespace TorrentGrease.Server.Services
             _logger.LogInformation("Linked {tmpFileLinkName} to the inode of {fileToBaseLinkOff}", tmpFileLinkName, fileToBaseLinkOff.FullName);
         }
 
-        private async Task<bool> VerifyIfWeShouldSkipAsync(UnixFileSystemInfo firstFileInfo, UnixFileSystemInfo loopingFileInfo)
+        private bool VerifyIfWeShouldSkip(UnixFileSystemInfo firstFileInfo, UnixFileSystemInfo loopingFileInfo)
         {
             if (firstFileInfo.Length != loopingFileInfo.Length)
             {
@@ -111,12 +113,6 @@ namespace TorrentGrease.Server.Services
                 return true;
             }
 
-            if (!await FileContentsAreEqualAsync(firstFileInfo, loopingFileInfo))
-            {
-                _logger.LogInformation("Files to link have different content, skipping: {path1} {path2}", firstFileInfo.FullName, loopingFileInfo.FullName);
-                return true;
-            }
-
             return false;
         }
 
@@ -133,14 +129,14 @@ namespace TorrentGrease.Server.Services
             }
 
             var filesBySizeLookup = CreateFilesBySizeLookupWhereSizeHasAtLeast1Entry(request);
-            var fileLinkCandidates = await FileFileLinkCandidatesAysnc(filesBySizeLookup);
+            var fileLinkCandidates = await FileFileLinkCandidatesAysnc(filesBySizeLookup, request.FullByteComparisonMaxFileSize);
 
             _logger.LogInformation("Found {nrOfPaths} files which can be reduced to {nrOfFileLinks} file links.", fileLinkCandidates.Sum(c => c.FilePaths.Count), fileLinkCandidates.Count());
             return fileLinkCandidates;
         }
 
         private async Task<IEnumerable<FileLinkCandidate>> FileFileLinkCandidatesAysnc
-            (Dictionary<long, List<UnixFileSystemInfo>> filesBySizeLookup)
+            (Dictionary<long, List<UnixFileSystemInfo>> filesBySizeLookup, long fullByteComparisonMaxFileSize)
         {
             _logger.LogInformation("Compare files of same size to look for file link candidates, found {nrOfSizes} unique file sizes and {nrOfFiles} files",
                 filesBySizeLookup.Count, filesBySizeLookup.Sum(g => g.Value.Count));
@@ -149,10 +145,10 @@ namespace TorrentGrease.Server.Services
             var nrOfRemainingUniqueSizes = filesBySizeLookup.Count;
 
             await Parallel.ForEachAsync(filesBySizeLookup.Values, 
-                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount > 4? Environment.ProcessorCount : 4 },
+                new ParallelOptions { MaxDegreeOfParallelism = 2 },
                 async (filesWithSameSize, ct) =>
             {
-                var potentialCandidates = await FindPotentialCandidatesForAsync(filesWithSameSize);
+                var potentialCandidates = await FindPotentialCandidatesForAsync(filesWithSameSize, fullByteComparisonMaxFileSize);
                 potentialCandidates = GetCandidatesThatArentFileLinksAlready(potentialCandidates);
 
                 foreach (var potentialCandidate in potentialCandidates)
@@ -167,7 +163,7 @@ namespace TorrentGrease.Server.Services
         }
 
         private async Task<IEnumerable<FileLinkCandidate>> FindPotentialCandidatesForAsync
-            (List<UnixFileSystemInfo> filesWithSameSize)
+            (List<UnixFileSystemInfo> filesWithSameSize, long fullByteComparisonMaxFileSize)
         {
             var skipList = new List<int>();
             var potentialCandidates = new List<FileLinkCandidate>();
@@ -193,10 +189,10 @@ namespace TorrentGrease.Server.Services
 
                     var file2 = filesWithSameSize[file2Index];
 
-                    if (FilesAreLinksToTheSameInode(file1, file2) || await FileContentsAreEqualAsync(file1, file2))
+                    //Files are hard linked, or they're similar or they're too big to compare in a reasonable time
+                    if (FilesAreLinksToTheSameInode(file1, file2) || 
+                        (file1.Length > fullByteComparisonMaxFileSize || await FileContentsAreEqualAsync(file1, file2)))
                     {
-                        _logger.LogDebug("{file1} and {file2} are equal", file1.FullName, file2.FullName);
-
                         var fileLinkCandidate = potentialCandidates.FirstOrDefault(c => c.FilePaths.Any(fp => fp.FilePath == file1.FullName));
 
                         if (fileLinkCandidate == null)
@@ -229,7 +225,7 @@ namespace TorrentGrease.Server.Services
             return potentialCandidates;
         }
 
-        private bool FilesAreLinksToTheSameInode(UnixFileSystemInfo file1, UnixFileSystemInfo file2)
+        private static bool FilesAreLinksToTheSameInode(UnixFileSystemInfo file1, UnixFileSystemInfo file2)
         {
             return file1.Device == file2.Device 
                 && file1.Inode == file2.Inode;
@@ -329,17 +325,19 @@ namespace TorrentGrease.Server.Services
                             logAfterXSeconds += 3;
                         }
 
-                        await fs1.ReadAsync(byteBuffer1, 0, bufferSize);
-                        await fs2.ReadAsync(byteBuffer2, 0, bufferSize);
+                        await fs1.ReadAsync(byteBuffer1.AsMemory(0, bufferSize));
+                        await fs2.ReadAsync(byteBuffer2.AsMemory(0, bufferSize));
 
                         // Byte arrays can be converted directly to ReadOnlySpan
                         if (!((ReadOnlySpan<byte>)byteBuffer1).SequenceEqual((ReadOnlySpan<byte>)byteBuffer2))
                         {
+                            _logger.LogDebug("{file1} and {file2} are **NOT** equal", file1.FullName, file2.FullName);
                             return false;
                         }
                     }
                 }
-
+                
+                _logger.LogDebug("{file1} and {file2} are equal", file1.FullName, file2.FullName);
                 return true;
             }
             finally

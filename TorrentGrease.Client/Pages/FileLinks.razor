@@ -31,6 +31,22 @@
                     </Inline>
                 </CardBody>
                 <CardBody>
+                    <Inline>
+                        <Field ColumnSize="ColumnSize.IsFull" Horizontal="true">
+                            <FieldLabel Class="mr-1">Do a full binary file comparison for files up to</FieldLabel>
+                            <FieldBody>
+                                <NumericEdit data-content="full-byte-comparison-max-file-size" @bind-Value="FullByteComparisonMaxFileSize" />
+                            </FieldBody>
+                            <RadioGroup data-content="full-byte-comparison-max-file-size-unit-type" @bind-CheckedValue="@FullByteComparisonMaxFileSizeUnitType" TValue="string" Name="FullByteComparisonMaxFileSizeUnitType" Buttons="true">
+                                <Radio TValue="string" Value="@("B")">B</Radio>
+                                <Radio TValue="string" Value="@("KB")">KB</Radio>
+                                <Radio TValue="string" Value="@("MB")">MB</Radio>
+                                <Radio TValue="string" Value="@("GB")">GB</Radio>
+                            </RadioGroup>
+                        </Field>
+                    </Inline>
+                </CardBody>
+                <CardBody>
                     <CardText>
                         <h4>Dirs to scan</h4>
                     </CardText>
@@ -63,6 +79,10 @@
     List<string> DirsToScan { get; } = new List<string>() { string.Empty };
     int MinFileSize = 0;
     string MinFileSizeUnitType = "MB";
+
+    int FullByteComparisonMaxFileSize = 100;
+    string FullByteComparisonMaxFileSizeUnitType = "MB";
+
     TorrentGrease.Client.Components.FileLinkSelector _fileLinkSelector;
     IEnumerable<FileLinkCandidate> _fileLinkCandidates = null;
     bool _isScanning = false;
@@ -73,27 +93,27 @@
         DirsToScan.Add(string.Empty);
     }
 
-    async Task ScanAsync()
+    long SizeAndUnitToBytes(int nrOfUnits, string unitType)
     {
-        long minFileSize = 0;
-        switch (MinFileSizeUnitType)
+        switch (unitType)
         {
             case "B":
-                minFileSize = MinFileSize;
-                break;
+                return nrOfUnits;
             case "KB":
-                minFileSize = (long) MinFileSize * 1024;
-                break;
+                return (long) nrOfUnits * 1024;
             case "MB":
-                minFileSize = (long) MinFileSize * 1024 * 1024;
-                break;
+                return (long) nrOfUnits * 1024 * 1024;
             case "GB":
-                minFileSize = (long) MinFileSize * 1024 * 1024 * 1024;
-                break;
-
+                return (long) nrOfUnits * 1024 * 1024 * 1024;
             default:
                 throw new NotSupportedException();
         }
+    }
+
+    async Task ScanAsync()
+    {
+        var minFileSize = SizeAndUnitToBytes(MinFileSize, MinFileSizeUnitType);
+        var fullByteComparisonMaxFileSize = SizeAndUnitToBytes(FullByteComparisonMaxFileSize, FullByteComparisonMaxFileSizeUnitType);
 
         _isScanning = true;
         _fileLinkCandidates = await FileLinkService.ScanForFilesToLinkAsync(new ScanForPossibleFileLinksRequest
@@ -101,7 +121,8 @@
             PathsToScan = DirsToScan
                 .Where(dir => !string.IsNullOrWhiteSpace(dir) && !string.IsNullOrWhiteSpace(dir)) //filter out empty rows
                 .ToList(),
-            MinFileSizeInBytes = minFileSize
+            MinFileSizeInBytes = minFileSize,
+            FullByteComparisonMaxFileSize = fullByteComparisonMaxFileSize
         });
         StateHasChanged();
         _isScanning = false;

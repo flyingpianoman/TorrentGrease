@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TorrentGrease.Shared.ServiceContracts;
 using TorrentGrease.Shared.ServiceContracts.FileLink;
@@ -251,16 +252,28 @@ namespace TorrentGrease.Server.Services
                 .ToArray();
         }
 
-        private Dictionary<long, List<UnixFileSystemInfo>> CreateFilesBySizeLookupWhereSizeHasAtLeast1Entry(ScanForPossibleFileLinksRequest request)
+        private Dictionary<long, List<UnixFileSystemInfo>> CreateFilesBySizeLookupWhereSizeHasAtLeast1Entry(
+            ScanForPossibleFileLinksRequest request)
         {
             var filesBySizeLookup = new Dictionary<long, List<UnixFileSystemInfo>>();
             var minBytes = request.MinFileSizeInBytes;
+            var fileExtExclusionRegex = string.IsNullOrWhiteSpace(request.FileExtensionExclusionRegex)
+                ? null
+                : new Regex(request.FileExtensionExclusionRegex, RegexOptions.Compiled);
 
             _logger.LogInformation("Scanning {nrOfPathsToScan} paths for files to analyze for possible file links later", request.PathsToScan.Count());
             foreach (var pathToScan in request.PathsToScan)
             {
                 var files = Directory.GetFiles(pathToScan, "*", SearchOption.AllDirectories);
                 _logger.LogInformation("Found {nrOfFiles} files on path '{pathToScan}'", files.Length, pathToScan);
+
+                if(fileExtExclusionRegex != null)
+                {
+                    files = files
+                        .Where(f => !fileExtExclusionRegex.IsMatch(Path.GetExtension(f)))
+                        .ToArray();
+                    _logger.LogInformation("Reduced to {nrOfFiles} files after excluding files based on the extension exclusion regex", pathToScan);
+                }
 
                 foreach (var file in files)
                 {

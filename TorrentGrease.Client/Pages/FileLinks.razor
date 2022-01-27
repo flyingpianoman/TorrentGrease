@@ -17,7 +17,7 @@
                 <CardBody>
                     <Inline>
                         <Field ColumnSize="ColumnSize.IsFull" Horizontal="true">
-                            <FieldLabel Class="mr-1">Minimal file size</FieldLabel>
+                            <FieldLabel Class="mr-3">Minimal file size</FieldLabel>
                             <FieldBody>
                                 <NumericEdit data-content="min-file-size" @bind-Value="MinFileSize" />
                             </FieldBody>
@@ -33,7 +33,7 @@
                 <CardBody>
                     <Inline>
                         <Field ColumnSize="ColumnSize.IsFull" Horizontal="true">
-                            <FieldLabel Class="mr-1">Do a full binary file comparison for files up to</FieldLabel>
+                            <FieldLabel Class="mr-3">Do a full binary file comparison for files up to</FieldLabel>
                             <FieldBody>
                                 <NumericEdit data-content="full-byte-comparison-max-file-size" @bind-Value="FullByteComparisonMaxFileSize" />
                             </FieldBody>
@@ -43,6 +43,16 @@
                                 <Radio TValue="string" Value="@("MB")">MB</Radio>
                                 <Radio TValue="string" Value="@("GB")">GB</Radio>
                             </RadioGroup>
+                        </Field>
+                    </Inline>
+                </CardBody>
+                <CardBody>
+                    <Inline>
+                        <Field ColumnSize="ColumnSize.IsFull" Horizontal="true">
+                            <FieldLabel Class="mr-3">File extension exclusion regex</FieldLabel>
+                            <FieldBody>
+                                <TextEdit data-content="file-extension-exclusion-regex" @bind-Text="FileExtensionExclusionRegex" />
+                            </FieldBody>
                         </Field>
                     </Inline>
                 </CardBody>
@@ -76,6 +86,7 @@
 </div>
 
 @code {
+    string FileExtensionExclusionRegex = @"[rR]\d+";
     List<string> DirsToScan { get; } = new List<string>() { string.Empty };
     int MinFileSize = 0;
     string MinFileSizeUnitType = "MB";
@@ -122,7 +133,8 @@
                 .Where(dir => !string.IsNullOrWhiteSpace(dir) && !string.IsNullOrWhiteSpace(dir)) //filter out empty rows
                 .ToList(),
             MinFileSizeInBytes = minFileSize,
-            FullByteComparisonMaxFileSize = fullByteComparisonMaxFileSize
+            FullByteComparisonMaxFileSize = fullByteComparisonMaxFileSize,
+            FileExtensionExclusionRegex = FileExtensionExclusionRegex
         });
         StateHasChanged();
         _isScanning = false;

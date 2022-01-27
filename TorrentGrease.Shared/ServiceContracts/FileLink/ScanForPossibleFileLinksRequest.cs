@@ -16,6 +16,8 @@ namespace TorrentGrease.Shared.ServiceContracts.FileLink
         public long MinFileSizeInBytes { get; set; }
         [ProtoMember(3)]
         public long FullByteComparisonMaxFileSize { get; set; }
+        [ProtoMember(4)]
+        public string FileExtensionExclusionRegex { get; set; }
 
     }
 }

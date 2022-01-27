@@ -93,7 +93,7 @@ namespace SpecificationTest.Crosscutting
                 {
                     foreach (var elementContentName in elementContentNames)
                     {
-                        var elements = searchContext.FindElementsByContentName(elementContentName).Where(el => el.Displayed);
+                        var elements = searchContext.FindElementsByContentName(elementContentName).Where(el => el.isA el.Displayed);
                         
                         if(elements.Any())
                         {

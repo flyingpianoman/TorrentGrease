@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <SpecFlowObsoleteCodeBehindFiles Remove="Features\FindFileLinkCandidates - Copy.feature.cs" />
+    <SpecFlowObsoleteCodeBehindFiles Remove="Features\TorrentOverview - Copy.feature.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +29,8 @@
     <PackageReference Include="SpecFlow" Version="3.9.40" />
     <PackageReference Include="SpecFlow.MsTest" Version="3.9.40" />
     <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.40" />
+      <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
+      <PackageReference Include="Grpc.Net.Client" Version="2.41.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -53,6 +56,9 @@
     <Compile Update="Features\FixNoDataFound.feature.cs">
       <DependentUpon>FixNoDataFound.feature</DependentUpon>
     </Compile>
+    <Compile Update="Features\CreateOrUpdateTrackerPolicies.feature.cs">
+      <DependentUpon>CreateOrUpdateTrackerPolicies.feature</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -69,6 +75,10 @@
       <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
     </SpecFlowFeatureFiles>
     <SpecFlowFeatureFiles Update="Features\FixNoDataFound.feature">
+      <Visible>$(UsingMicrosoftNETSdk)</Visible>
+      <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
+    </SpecFlowFeatureFiles>
+    <SpecFlowFeatureFiles Update="Features\CreateOrUpdateTrackerPolicies.feature">
       <Visible>$(UsingMicrosoftNETSdk)</Visible>
       <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
     </SpecFlowFeatureFiles>

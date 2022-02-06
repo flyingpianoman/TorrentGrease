@@ -20,6 +20,7 @@ namespace SpecificationTest.Hooks
             TestLogger.LogElapsedTime(() =>
             {
                 var services = DIContainer.Default;
+                services.RegisterGrpcClients();
                 services.RegisterDockerClient();
                 services.RegisterTorrentClient();
                 services.RegisterWebDriver();

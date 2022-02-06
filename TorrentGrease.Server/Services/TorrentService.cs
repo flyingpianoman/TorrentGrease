@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +29,60 @@ namespace TorrentGrease.Server.Services
         public async ValueTask<IEnumerable<Torrent>> GetAllTorrentsAsync()
         {
             return await _torrentClient.GetAllTorrentsAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask<IEnumerable<TrackerUrlCollection>> GetCurrentTrackerUrlCollectionsAsync()
+        {
+            var torrents = await this.GetAllTorrentsAsync().ConfigureAwait(false);
+
+            var uniqueTrackerUrlCollections = torrents
+                .Select(t => t.TrackerUrls)
+                .DistinctBy(tuc => tuc, new StringEnumerableEqualityComparer())
+                .Select(tuc => tuc.Select(x => x.ToLowerInvariant()).OrderBy(x => x).ToList())
+                .DistinctBy(tuc => tuc, new StringEnumerableEqualityComparer())
+                .ToArray();
+
+            var potentialTrackerPolicies = new List<TrackerUrlCollection>();
+            foreach (var trackerUrlCollection in uniqueTrackerUrlCollections)
+            {
+                //See if any of the trackerUrls exist in an entry
+                var matchingPtp = potentialTrackerPolicies.FirstOrDefault(ptp => ptp.TrackerUrls.Any(tu => trackerUrlCollection.Contains(tu)));
+                
+                if (matchingPtp == null)
+                {
+                    potentialTrackerPolicies.Add(new TrackerUrlCollection { TrackerUrls = trackerUrlCollection });
+                    continue;
+                }
+
+                var trackerUrlsToAdd = trackerUrlCollection.Where(u => !matchingPtp.TrackerUrls.Contains(u));
+                matchingPtp.TrackerUrls.AddRange(trackerUrlsToAdd);
+            }
+
+            //Sort the results
+            foreach (var potentialTrackerPolicy in potentialTrackerPolicies)
+            {
+                potentialTrackerPolicy.TrackerUrls.Sort();
+            }
+
+            return potentialTrackerPolicies.OrderBy(p => p.TrackerUrls.First()).ToArray();
+        }
+
+        private class StringEnumerableEqualityComparer : IEqualityComparer<IEnumerable<string>>
+        {
+            public bool Equals(IEnumerable<string>? x, IEnumerable<string>? y)
+            {
+                if(y == null)
+                {
+                    return x == null;
+                }
+
+                return x?.SequenceEqual(y) ?? false;
+            }
+
+            public int GetHashCode([DisallowNull] IEnumerable<string> obj)
+            {
+                return obj.GetHashCode();
+            }
         }
 
         public async Task<List<RelocatableTorrentCandidate>> FindRelocatableTorrentCandidatesAsync(MapTorrentsToDiskRequest request)

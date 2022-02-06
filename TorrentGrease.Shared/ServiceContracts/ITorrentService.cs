@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TorrentGrease.Shared.ServiceContracts.ReaddTorrents;
 using TorrentGrease.Shared.ServiceContracts.RelocateTorrent;
 using TorrentGrease.Shared.ServiceContracts.TorrentRequests;
+using TorrentGrease.Shared.TorrentClient;
 
 namespace TorrentGrease.Shared.ServiceContracts
 {
@@ -17,5 +18,6 @@ namespace TorrentGrease.Shared.ServiceContracts
         Task<List<RelocatableTorrentCandidate>> FindRelocatableTorrentCandidatesAsync(MapTorrentsToDiskRequest request);
         Task RelocateTorrentsAsync(RelocateTorrentsRequest request);
         Task ReaddTorrentsAsync(ReaddTorrentsRequest request);
+        ValueTask<IEnumerable<TrackerUrlCollection>> GetCurrentTrackerUrlCollectionsAsync();
     }
 }

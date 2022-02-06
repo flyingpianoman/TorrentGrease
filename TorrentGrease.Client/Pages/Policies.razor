@@ -1,9 +1,10 @@
 ﻿@page "/"
 @inject IPolicyService PolicyService
+@inject ITorrentService TorrentService
 
 <h1>Policies</h1>
 
-@if (policies == null)
+@if (_policies == null)
 {
     <div class="sk-wave">
         <div class="sk-wave-rect"></div>
@@ -15,10 +16,21 @@
 }
 else
 {
-    <hr />
+    <Accordion>
+        <Collapse Visible="true">
+            <CollapseHeader data-content="actions-header">
+                Actions
+            </CollapseHeader>
+            <CollapseBody>
+                <p class="bs-component mb-0" data-content="action-buttons-container">
+                    <Button data-content="setup-or-update-wizard-button" Color="Color.Primary" IsDisabled="@_isInWaitMode" Clicked="@StartSetupOrUpdatePoliciesWizardAsync">Setup or update wizard</Button>
+                </p>
+            </CollapseBody>
+        </Collapse>
+    </Accordion>
     <div class="container-fluid">
         <div class="row" data-content="policy-card-container">
-            @foreach (var policy in policies)
+            @foreach (var policy in _policies)
             {
                 <div data-content="policy" class="col-auto mb-3" style="width: 18rem;">
                     <Card Class="h-100">
@@ -51,10 +63,21 @@ else
 }
 
 @code {
-    IEnumerable<Policy> policies;
+    IEnumerable<Policy> _policies;
+    int _busyCount = 0;
+    bool _isInWaitMode => _busyCount != 0 || _policies == null;
 
     protected override async Task OnInitializedAsync()
     {
-        policies = await PolicyService.GetAllPoliciesAsync();
+        _policies = await PolicyService.GetAllPoliciesAsync();
+    }
+
+    async Task StartSetupOrUpdatePoliciesWizardAsync()
+    {
+        _busyCount++;
+        StateHasChanged();
+
+        var a = await TorrentService.GetCurrentTrackerUrlCollectionsAsync();
+        _busyCount--;
     }
 }

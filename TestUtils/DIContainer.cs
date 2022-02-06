@@ -29,6 +29,19 @@ namespace TestUtils
             _services[typeof(T)][name] = service;
         }
 
+        public T GetState<T>()
+            where T : new()
+        {
+            if(!_services.ContainsKey(typeof(T)) || !_services[typeof(T)].ContainsKey(string.Empty))
+            {
+                var state = new T();
+                Register(state);
+                return state;
+            }
+
+            return Get<T>();
+        }
+
         public T Get<T>()
         {
             return Get<T>(string.Empty);
